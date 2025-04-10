@@ -1,0 +1,161 @@
+model_info:
+  name: gemma-3-12b-it
+  default_quantization:
+    cuda: Q4_K_M
+    mps: MLX_4
+    cpu: Q4_K_M
+
+quantizations:
+  # bfloat16:
+  #   engine: transformers
+  #   supported_devices: [cuda, cpu]
+  #   model_id: google/gemma-3-12b-it
+  #   model_file: null
+  #   model_size: 26.0
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-f16.gguf
+    model_size: 24.54
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q8_0.gguf
+    model_size: 13.51
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q6_K_L.gguf
+    model_size: 10.90
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q6_K.gguf
+    model_size: 10.66
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q5_K_L.gguf
+    model_size: 9.69
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q5_K_M.gguf
+    model_size: 9.44
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q5_K_S.gguf
+    model_size: 9.23
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q4_K_L.gguf
+    model_size: 8.3
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q4_K_M.gguf
+    model_size: 8.3
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q4_K_S.gguf
+    model_size: 6.46
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q3_K_S.gguf
+    model_size: 6.46
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-IQ3_XS.gguf
+    model_size: 6.21
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q2_K_L.gguf
+    model_size: 6.01
+
+  IQ3_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-IQ3_XXS.gguf
+    model_size: 5.78
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-Q2_K.gguf
+    model_size: 5.77
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-IQ2_M.gguf
+    model_size: 5.31
+
+  IQ2_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-12b-it-GGUF
+    model_file: google_gemma-3-12b-it-IQ2_S.gguf
+    model_size: 5.02
+
+  # BNB_4:
+  #   engine: transformers
+  #   supported_devices: [cuda]
+  #   model_id: unsloth/gemma-3-12b-it-unsloth-bnb-4bit
+  #   model_file: null
+  #   model_size: 14.0
+
+  # AWQ_4:
+  #   engine: transformers
+  #   supported_devices: [cuda]
+  #   model_id: gaunernst/gemma-3-12b-it-int4-awq
+  #   model_file: null
+  #   model_size: 10.0
+
+  MLX_6:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: Lowkey-Loki/gemma-3-12b-it-textonly-mlx-6bit
+    model_file: null
+    model_size: 11.5
+
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: Lowkey-Loki/gemma-3-12b-it-textonly-mlx-4bit
+    model_file: null
+    model_size: 8.0

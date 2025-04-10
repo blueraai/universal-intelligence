@@ -1,0 +1,238 @@
+model_info:
+  name: phi-4
+  default_quantization:
+    cuda: BNB_4
+    mps: MLX_4
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: microsoft/phi-4
+    model_file: null
+    model_size: 32.0
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: unsloth/phi-4-unsloth-bnb-4bit
+    model_file: null
+    model_size: 12.0
+
+  GPTQ_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: jakiAJK/microsoft-phi-4_GPTQ-int4
+    model_file: null
+    model_size: 10.0
+
+  AWQ_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: stelterlab/phi-4-AWQ
+    model_file: null
+    model_size: 10.0
+
+  MLX_8:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/phi-4-8bit
+    model_file: null
+    model_size: 16.0
+
+  MLX_6:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/phi-4-6bit
+    model_file: null
+    model_size: 12.0
+
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/phi-4-4bit
+    model_file: null
+    model_size: 9.0
+
+  MLX_3:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/phi-4-3bit
+    model_file: null
+    model_size: 7.0
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-f16.gguf
+    model_size: 30.3
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q8_0.gguf
+    model_size: 16.6
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q6_K_L.gguf
+    model_size: 13.3
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q6_K.gguf
+    model_size: 13.0
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q5_K_S.gguf
+    model_size: 11.2
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q5_K_M.gguf
+    model_size: 11.6
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q5_K_L.gguf
+    model_size: 11.9
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q4_K_S.gguf
+    model_size: 9.44
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q4_K_M.gguf
+    model_size: 10.05
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q4_K_L.gguf
+    model_size: 10.43
+
+  Q4_1:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q4_1.gguf
+    model_size: 10.27
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q4_0.gguf
+    model_size: 9.41
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q3_K_XL.gguf
+    model_size: 9.38
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q3_K_S.gguf
+    model_size: 7.5
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q3_K_M.gguf
+    model_size: 8.36
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q3_K_L.gguf
+    model_size: 8.93
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q2_K_L.gguf
+    model_size: 7.05
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-Q2_K.gguf
+    model_size: 6.55
+
+  IQ4_NL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ4_NL.gguf
+    model_size: 9.38
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ4_XS.gguf
+    model_size: 8.94
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ3_XS.gguf
+    model_size: 7.25
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ3_M.gguf
+    model_size: 7.91
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ2_M.gguf
+    model_size: 6.11
+
+  IQ2_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ2_S.gguf
+    model_size: 5.73
+
+  IQ2_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/phi-4-GGUF
+    model_file: phi-4-IQ2_XS.gguf
+    model_size: 5.49

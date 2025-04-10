@@ -1,0 +1,8 @@
+# Community Components Dependencies
+torch
+transformers
+huggingface_hub
+psutil
+accelerate
+protobuf
+llama-cpp-python

@@ -1,0 +1,175 @@
+model_info:
+  name: Mistral-Nemo-Instruct-2407
+  default_quantization:
+    cuda: Q4_K_M
+    mps: MLX_3
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: mistralai/Mistral-Nemo-Instruct-2407
+    model_file: null
+    model_size: 26.0
+
+  # AWQ_4:
+  #   engine: transformers
+  #   supported_devices: [cuda]
+  #   model_id: casperhansen/mistral-nemo-instruct-2407-awq
+  #   model_file: null
+  #   model_size: 9.0
+
+  MLX_3:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Mistral-Nemo-Instruct-2407-3bit
+    model_file: null
+    model_size: 6.3
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-f16.gguf
+    model_size: 25.5
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q8_0.gguf
+    model_size: 14.0
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q6_K_L.gguf
+    model_size: 11.4
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q6_K.gguf
+    model_size: 11.1
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q5_K_S.gguf
+    model_size: 9.5
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q5_K_M.gguf
+    model_size: 9.7
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q5_K_L.gguf
+    model_size: 10.1
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q4_K_S.gguf
+    model_size: 8.1
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q4_K_M.gguf
+    model_size: 8.5
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q4_K_L.gguf
+    model_size: 9.0
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q4_0.gguf
+    model_size: 8.1
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q3_K_XL.gguf
+    model_size: 8.2
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q3_K_S.gguf
+    model_size: 6.5
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q3_K_M.gguf
+    model_size: 7.1
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q3_K_L.gguf
+    model_size: 7.6
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q2_K_L.gguf
+    model_size: 6.5
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-Q2_K.gguf
+    model_size: 5.8
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-IQ4_XS.gguf
+    model_size: 7.7
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-IQ3_XS.gguf
+    model_size: 6.3
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-IQ3_M.gguf
+    model_size: 6.7
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Mistral-Nemo-Instruct-2407-GGUF
+    model_file: Mistral-Nemo-Instruct-2407-IQ2_M.gguf
+    model_size: 5.4

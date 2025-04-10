@@ -1,0 +1,196 @@
+model_info:
+  name: OpenR1-Qwen-7B
+  default_quantization:
+    cuda: BNB_4
+    mps: MLX_4
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: open-r1/OpenR1-Qwen-7B
+    model_file: null
+    model_size: 17.0
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-f16.gguf
+    model_size: 16.0
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q8_0.gguf
+    model_size: 9.10
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q6_K_L.gguf
+    model_size: 7.52
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q6_K.gguf
+    model_size: 7.25
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q5_K_S.gguf
+    model_size: 6.32
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q5_K_M.gguf
+    model_size: 6.44
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q5_K_L.gguf
+    model_size: 6.78
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q4_K_S.gguf
+    model_size: 5.46
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q4_K_M.gguf
+    model_size: 5.68
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q4_K_L.gguf
+    model_size: 6.09
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q4_0.gguf
+    model_size: 5.44
+
+  IQ4_NL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-IQ4_NL.gguf
+    model_size: 5.44
+
+  Q4_1:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q4_1.gguf
+    model_size: 5.87
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q3_K_XL.gguf
+    model_size: 5.57
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q3_K_S.gguf
+    model_size: 4.49
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q3_K_M.gguf
+    model_size: 4.81
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q3_K_L.gguf
+    model_size: 5.09
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q2_K_L.gguf
+    model_size: 4.55
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-Q2_K.gguf
+    model_size: 4.02
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-IQ4_XS.gguf
+    model_size: 5.22
+
+  IQ3_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-IQ3_XXS.gguf
+    model_size: 4.11
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-IQ3_XS.gguf
+    model_size: 4.4
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-IQ3_M.gguf
+    model_size: 4.6
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/open-r1_OpenR1-Qwen-7B-GGUF
+    model_file: open-r1_OpenR1-Qwen-7B-IQ3_M.gguf
+    model_size: 3.8
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: onekq-ai/OpenR1-Qwen-7B-bnb-4bit
+    model_file: null
+    model_size: 6.5
+
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/OpenR1-Qwen-7B-4bit
+    model_file: null
+    model_size: 5.5

@@ -1,0 +1,217 @@
+model_info:
+  name: Qwen2.5-7B-Instruct-1M
+  default_quantization:
+    cuda: BNB_4
+    mps: MLX_4
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: Qwen/Qwen2.5-7B-Instruct-1M
+    model_file: null
+    model_size: 17.0
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: unsloth/Qwen2.5-7B-Instruct-1M-unsloth-bnb-4bit
+    model_file: null
+    model_size: 8.5
+
+  AWQ_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: graelo/Qwen2.5-7B-Instruct-1M-AWQ
+    model_file: null
+    model_size: 8.5
+
+  MLX_8:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Qwen2.5-7B-Instruct-1M-8bit
+    model_file: null
+    model_size: 9.0
+
+  MLX_6:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Qwen2.5-7B-Instruct-1M-6bit
+    model_file: null
+    model_size: 7.0
+
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Qwen2.5-7B-Instruct-1M-4bit
+    model_file: null
+    model_size: 6.0
+
+  MLX_3:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Qwen2.5-7B-Instruct-1M-3bit
+    model_file: null
+    model_size: 4.0
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-f16.gguf
+    model_size: 16.2
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q8_0.gguf
+    model_size: 9.1
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q6_K_L.gguf
+    model_size: 7.5
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q6_K.gguf
+    model_size: 7.3
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q5_K_L.gguf
+    model_size: 6.8
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q5_K_M.gguf
+    model_size: 6.4
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q5_K_S.gguf
+    model_size: 6.3
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q4_K_L.gguf
+    model_size: 6.1
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q4_K_M.gguf
+    model_size: 5.7
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q4_K_S.gguf
+    model_size: 5.5
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q4_0.gguf
+    model_size: 5.4
+
+  Q4_1:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q4_1.gguf
+    model_size: 5.9
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q3_K_XL.gguf
+    model_size: 5.6
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q3_K_L.gguf
+    model_size: 5.1
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q3_K_M.gguf
+    model_size: 4.8
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q3_K_S.gguf
+    model_size: 4.5
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q2_K_L.gguf
+    model_size: 4.6
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-Q2_K.gguf
+    model_size: 4.0
+
+  IQ4_NL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-IQ4_NL.gguf
+    model_size: 5.4
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-IQ4_XS.gguf
+    model_size: 5.2
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-IQ3_XS.gguf
+    model_size: 4.4
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-IQ3_M.gguf
+    model_size: 4.6
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen2.5-7B-Instruct-1M-GGUF
+    model_file: Qwen2.5-7B-Instruct-1M-IQ2_M.gguf
+    model_size: 3.8

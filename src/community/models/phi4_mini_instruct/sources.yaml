@@ -1,0 +1,203 @@
+model_info:
+  name: Phi-4-mini-instruct
+  default_quantization:
+    cuda: Q4_K_M
+    mps: MLX_4
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: microsoft/Phi-4-mini-instruct
+    model_file: null
+    model_size: 8.0
+
+  # BNB_4:
+  #   engine: transformers
+  #   supported_devices: [cuda]
+  #   model_id: unsloth/Phi-4-mini-instruct-unsloth-bnb-4bit
+  #   model_file: null
+  #   model_size: 4.2
+
+  MLX_8:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Phi-4-mini-instruct-8bit
+    model_file: null
+    model_size: 5.0
+
+  MLX_6:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Phi-4-mini-instruct-6bit
+    model_file: null
+    model_size: 4.0
+
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Phi-4-mini-instruct-4bit
+    model_file: null
+    model_size: 3.0
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q8_0.gguf
+    model_size: 4.1
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q6_K_L.gguf
+    model_size: 3.3
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q6_K.gguf
+    model_size: 3.2
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q5_K_S.gguf
+    model_size: 2.7
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q5_K_M.gguf
+    model_size: 2.9
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q5_K_L.gguf
+    model_size: 3.0
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q4_K_S.gguf
+    model_size: 2.3
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q4_K_M.gguf
+    model_size: 2.5
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q4_K_L.gguf
+    model_size: 2.6
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q4_0.gguf
+    model_size: 2.3
+
+  Q4_1:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q4_1.gguf
+    model_size: 2.5
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q3_K_XL.gguf
+    model_size: 2.4
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q3_K_S.gguf
+    model_size: 1.9
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q3_K_M.gguf
+    model_size: 2.1
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q3_K_L.gguf
+    model_size: 2.3
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q2_K_L.gguf
+    model_size: 1.8
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-Q2_K.gguf
+    model_size: 1.7
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-IQ4_XS.gguf
+    model_size: 2.2
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-IQ3_XS.gguf
+    model_size: 1.8
+
+  IQ3_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-IQ3_XXS.gguf
+    model_size: 1.7
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-IQ3_M.gguf
+    model_size: 2.0
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-IQ2_M.gguf
+    model_size: 1.5
+
+  IQ4_NL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/microsoft_Phi-4-mini-instruct-GGUF
+    model_file: microsoft_Phi-4-mini-instruct-IQ4_NL.gguf
+    model_size: 2.3
