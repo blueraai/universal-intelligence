@@ -1,0 +1,20 @@
+model_info:
+  name: Falcon3-3B-Instruct
+  default_quantization:
+    cuda: bfloat16
+    mps: MLX_4
+    cpu: bfloat16
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: tiiuae/Falcon3-3B-Instruct
+    model_file: null
+    model_size: 7.0
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/Falcon3-3B-Instruct-4bit
+    model_file: null
+    model_size: 2.8

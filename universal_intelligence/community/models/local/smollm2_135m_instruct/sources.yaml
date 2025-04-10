@@ -1,0 +1,161 @@
+model_info:
+  name: SmolLM2-135M-Instruct
+  default_quantization:
+    cuda: bfloat16
+    mps: MLX_8
+    cpu: bfloat16
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: HuggingFaceTB/SmolLM2-135M-Instruct
+    model_file: null
+    model_size: 0.5
+
+  MLX_8:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: HuggingFaceTB/SmolLM2-135M-Instruct-Q8-mlx
+    model_file: null
+    model_size: 0.3
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-f16.gguf
+    model_size: 0.3
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q8_0.gguf
+    model_size: 0.2
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q6_K_L.gguf
+    model_size: 0.2
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q6_K.gguf
+    model_size: 0.2
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q5_K_S.gguf
+    model_size: 0.2
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q5_K_M.gguf
+    model_size: 0.2
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q5_K_L.gguf
+    model_size: 0.2
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q4_K_S.gguf
+    model_size: 0.2
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q4_K_M.gguf
+    model_size: 0.2
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q4_K_L.gguf
+    model_size: 0.2
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q4_0.gguf
+    model_size: 0.2
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q3_K_XL.gguf
+    model_size: 0.2
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q3_K_S.gguf
+    model_size: 0.2
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q3_K_M.gguf
+    model_size: 0.2
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q3_K_L.gguf
+    model_size: 0.2
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q2_K_L.gguf
+    model_size: 0.2
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-Q2_K.gguf
+    model_size: 0.2
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-IQ4_XS.gguf
+    model_size: 0.2
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-IQ3_XS.gguf
+    model_size: 0.2
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/SmolLM2-135M-Instruct-GGUF
+    model_file: SmolLM2-135M-Instruct-IQ3_M.gguf
+    model_size: 0.2

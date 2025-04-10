@@ -1,0 +1,140 @@
+model_info:
+  name: Mistral-7B-Instruct-v0.3
+  default_quantization:
+    cuda: BNB_4
+    mps: Q4_K_M
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: mistralai/Mistral-7B-Instruct-v0.3
+    model_file: null
+    model_size: 16.0
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: unsloth/mistral-7b-instruct-v0.3-bnb-4bit
+    model_file: null
+    model_size: 5.0
+
+  GPTQ_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: thesven/Mistral-7B-Instruct-v0.3-GPTQ
+    model_file: null
+    model_size: 5.2
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.fp16.gguf
+    model_size: 15.5
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q8_0.gguf
+    model_size: 8.7
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q6_K.gguf
+    model_size: 7.0
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q5_K_S.gguf
+    model_size: 6.0
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q5_K_M.gguf
+    model_size: 6.1
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q4_K_S.gguf
+    model_size: 5.1
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q4_K_M.gguf
+    model_size: 5.4
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q3_K_S.gguf
+    model_size: 4.2
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q3_K_M.gguf
+    model_size: 4.5
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q3_K_L.gguf
+    model_size: 4.8
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.Q2_K.gguf
+    model_size: 3.7
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.IQ4_XS.gguf
+    model_size: 4.9
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.IQ3_XS.gguf
+    model_size: 4.0
+
+  IQ2_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.IQ2_XS.gguf
+    model_size: 3.2
+
+  IQ1_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.IQ1_S.gguf
+    model_size: 2.6
+
+  IQ1_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF
+    model_file: Mistral-7B-Instruct-v0.3.IQ1_M.gguf
+    model_size: 2.8

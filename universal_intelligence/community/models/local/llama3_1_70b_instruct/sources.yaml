@@ -1,0 +1,189 @@
+model_info:
+  name: Llama-3.1-70B-Instruct
+  default_quantization:
+    cuda: BNB_4
+    mps: Q4_K_M
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: meta-llama/Llama-3.1-70B-Instruct
+    model_file: null
+    model_size: 150.0
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: unsloth/Meta-Llama-3.1-70B-Instruct-bnb-4bit
+    model_file: null
+    model_size: 40.0
+
+  # GPTQ_4:
+  #   engine: transformers
+  #   supported_devices: [cuda]
+  #   model_id: sofya-ai/Meta-Llama-3.1-70B-Instruct-int4-auto-gptq
+  #   model_file: null
+  #   model_size: 43.0
+
+  IQ1_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ1_M.gguf
+    model_size: 17.75
+
+  IQ2_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ2_XXS.gguf
+    model_size: 20.10
+
+  IQ2_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ2_XS.gguf
+    model_size: 22.14
+
+  IQ2_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ2_S.gguf
+    model_size: 23.24
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ2_M.gguf
+    model_size: 25.12
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ3_XS.gguf
+    model_size: 30.31
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ3_M.gguf
+    model_size: 32.94
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-IQ4_XS.gguf
+    model_size: 38.90
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q2_K.gguf
+    model_size: 27.38
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q2_K_L.gguf
+    model_size: 28.40
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q3_K_S.gguf
+    model_size: 31.91
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q3_K_M.gguf
+    model_size: 35.27
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q3_K_L.gguf
+    model_size: 38.14
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q3_K_XL.gguf
+    model_size: 39.06
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q4_K_S.gguf
+    model_size: 41.35
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q4_K_M.gguf
+    model_size: 43.52
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q4_K_L.gguf
+    model_size: 44.30
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q5_K_S.gguf
+    model_size: 49.66
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q5_K_M.gguf
+    model_size: 50.95
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q5_K_L.gguf
+    model_size: 51.60
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q6_K.gguf
+    model_size: 58.89
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q6_K_L.gguf
+    model_size: 59.40
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Meta-Llama-3.1-70B-Instruct-GGUF
+    model_file: Meta-Llama-3.1-70B-Instruct-Q8_0.gguf
+    model_size: 75.98

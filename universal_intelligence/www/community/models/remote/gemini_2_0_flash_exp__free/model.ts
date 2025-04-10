@@ -1,0 +1,39 @@
+import { Compatibility, Contract } from '../../../../core/types'
+import { UniversalModelMixin } from '../../__utils__/mixins/openrouter_text_to_text/interface'
+import { generateStandardCompatibility, generateStandardContract } from '../../__utils__/mixins/openrouter_text_to_text/meta'
+import { InferenceConfiguration } from '../../__utils__/mixins/openrouter_text_to_text/types'
+
+const _name: string = "google/gemini-2.0-flash-exp:free"
+const _description: string = "Gemini Flash 2.0 offers a significantly faster time to first token (TTFT) compared to [Gemini Flash 1.5](/google/gemini-flash-1.5), while maintaining quality on par with larger models like [Gemini Pro 1.5](/google/gemini-pro-1.5). It introduces notable enhancements in multimodal understanding, coding capabilities, complex instruction following, and function calling. These advancements come together to deliver more seamless and robust agentic experiences."
+
+const _inferenceConfiguration: InferenceConfiguration = {
+    openrouter: { maxNewTokens: 2500, temperature: 0.1 }
+}
+
+class UniversalModel extends UniversalModelMixin {
+    constructor(payload?) {
+      super({
+        name: _name,
+        inference_configuration: _inferenceConfiguration,
+      }, payload)
+    }
+
+    static contract(): Contract {
+        return generateStandardContract(_name, _description)
+    }
+
+    static compatibility(): Compatibility[] {
+        return generateStandardCompatibility()
+    }
+
+    contract(): Contract {
+      return generateStandardContract(_name, _description)
+    }
+  
+    compatibility(): Compatibility[] {
+      return generateStandardCompatibility()
+    }
+} 
+
+export { UniversalModel }
+export default UniversalModel
