@@ -1,0 +1,219 @@
+model_info:
+  name: gemma-3-1b-it
+  default_quantization:
+    cuda: bfloat16
+    mps: F16
+    cpu: bfloat16
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: google/gemma-3-1b-it
+    model_file: null
+    model_size: 3.0
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: unsloth/gemma-3-1b-it-bnb-4bit
+    model_file: null
+    model_size: 1.5
+
+  # AWQ_4:
+  #   engine: transformers
+  #   supported_devices: [cuda]
+  #   model_id: gaunernst/gemma-3-1b-it-int4-awq
+  #   model_file: null
+  #   model_size: 2.0
+
+  # FIXME: (MLX disabled due to issues with the model's stop token handling)
+
+  # MLX_8:
+  #   engine: mlx-lm
+  #   supported_devices: [mps]
+  #   model_id: mlx-community/gemma-3-1b-it-8bit
+  #   model_file: null
+  #   model_size: 2.5
+
+  # MLX_6:
+  #   engine: mlx-lm
+  #   supported_devices: [mps]
+  #   model_id: mlx-community/gemma-3-1b-it-6bit
+  #   model_file: null
+  #   model_size: 2.0
+
+  # MLX_4:
+  #   engine: mlx-lm
+  #   supported_devices: [mps]
+  #   model_id: mlx-community/gemma-3-1b-it-4bit
+  #   model_file: null
+  #   model_size: 1.5
+
+  F16:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-bf16.gguf
+    model_size: 3.01
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q8_0.gguf
+    model_size: 2.07
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q6_K_L.gguf
+    model_size: 2.01
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q6_K.gguf
+    model_size: 2.01
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q5_K_L.gguf
+    model_size: 1.851
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q5_K_M.gguf
+    model_size: 1.851
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q5_K_S.gguf
+    model_size: 1.836
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q4_K_L.gguf
+    model_size: 1.806
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q4_K_M.gguf
+    model_size: 1.806
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q4_K_S.gguf
+    model_size: 1.781
+
+  Q4_1:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q4_1.gguf
+    model_size: 1.764
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q4_0.gguf
+    model_size: 1.722
+
+  IQ4_NL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-IQ4_NL.gguf
+    model_size: 1.722
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q3_K_XL.gguf
+    model_size: 1.752
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q3_K_L.gguf
+    model_size: 1.752
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q3_K_M.gguf
+    model_size: 1.722
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q3_K_S.gguf
+    model_size: 1.689
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q2_K_L.gguf
+    model_size: 1.69
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-Q2_K.gguf
+    model_size: 1.69
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-IQ4_XS.gguf
+    model_size: 1.714
+
+  IQ3_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-IQ3_XXS.gguf
+    model_size: 1.68
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-IQ3_XS.gguf
+    model_size: 1.69
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-IQ3_M.gguf
+    model_size: 1.697
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/google_gemma-3-1b-it-GGUF
+    model_file: google_gemma-3-1b-it-IQ2_M.gguf
+    model_size: 1.67

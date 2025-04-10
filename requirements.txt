@@ -1,0 +1,9 @@
+# Abstract Classes/Types Dependencies
+# N/A
+
+# For optional dependencies, use the appropriate requirements file:
+# - requirements-community.txt for community components
+# - requirements-mlx.txt for MPS device optimizations (Apple Silicon)
+# - requirements-cuda.txt for CUDA device optimizations (NVIDIA GPUs)
+# - requirements-gemma.txt for Gemma model support
+# - requirements-mpc.txt for MPC tool support

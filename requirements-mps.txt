@@ -1,0 +1,4 @@
+# MPS device dependencies (Apple Silicon)
+mlx
+mlx-lm 
+accelerate

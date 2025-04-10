@@ -1,0 +1,252 @@
+model_info:
+  name: QwQ-32B
+  default_quantization:
+    cuda: BNB_4
+    mps: MLX_4
+    cpu: Q4_K_M
+
+quantizations:
+  bfloat16:
+    engine: transformers
+    supported_devices: [cuda, cpu]
+    model_id: Qwen/QwQ-32B
+    model_file: null
+    model_size: 69.0
+
+  BNB_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: unsloth/QwQ-32B-unsloth-bnb-4bit
+    model_file: null
+    model_size: 24.0
+
+  AWQ_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: Qwen/QwQ-32B-AWQ
+    model_file: null
+    model_size: 21.0
+
+  GPTQ_4:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4
+    model_file: null
+    model_size: 21.0
+
+  GPTQ_8:
+    engine: transformers
+    supported_devices: [cuda]
+    model_id: Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8
+    model_file: null
+    model_size: 36.0
+
+  MLX_8:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/QwQ-32B-8bit
+    model_file: null
+    model_size: 34.0
+
+  MLX_6:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/QwQ-32B-6bit
+    model_file: null
+    model_size: 27.0
+
+  MLX_4:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/QwQ-32B-4bit
+    model_file: null
+    model_size: 19.0
+
+  MLX_3:
+    engine: mlx-lm
+    supported_devices: [mps]
+    model_id: mlx-community/QwQ-32B-3bit
+    model_file: null
+    model_size: 15.0
+
+  Q8_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q8_0.gguf
+    model_size: 35.0
+
+  Q6_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q6_K_L.gguf
+    model_size: 28.0
+
+  Q6_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q6_K.gguf
+    model_size: 27.0
+
+  Q5_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q5_K_L.gguf
+    model_size: 24.0
+
+  Q5_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q5_K_M.gguf
+    model_size: 24.0
+
+  Q5_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q5_K_S.gguf
+    model_size: 23.0
+
+  Q4_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q4_K_L.gguf
+    model_size: 21.0
+
+  Q4_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q4_K_M.gguf
+    model_size: 20.0
+
+  Q4_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q4_K_S.gguf
+    model_size: 19.0
+
+  Q4_1:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q4_1.gguf
+    model_size: 21.0
+
+  Q4_0:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q4_0.gguf
+    model_size: 19.0
+
+  Q3_K_XL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q3_K_XL.gguf
+    model_size: 18.0
+
+  Q3_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q3_K_L.gguf
+    model_size: 18.0
+
+  Q3_K_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q3_K_M.gguf
+    model_size: 16.0
+
+  Q3_K_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q3_K_S.gguf
+    model_size: 15.0
+
+  Q2_K_L:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q2_K_L.gguf
+    model_size: 14.0
+
+  Q2_K:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-Q2_K.gguf
+    model_size: 13.0
+
+  IQ4_NL:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ4_NL.gguf
+    model_size: 19.0
+
+  IQ4_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ4_XS.gguf
+    model_size: 18.0
+
+  IQ3_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ3_XS.gguf
+    model_size: 14.0
+
+  IQ3_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ3_XXS.gguf
+    model_size: 13.0
+
+  IQ3_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ3_M.gguf
+    model_size: 15.0
+
+  IQ2_M:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ2_M.gguf
+    model_size: 12.0
+
+  IQ2_S:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ2_S.gguf
+    model_size: 11.0
+
+  IQ2_XS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ2_XS.gguf
+    model_size: 10.0
+
+  IQ2_XXS:
+    engine: llama.cpp
+    supported_devices: [cuda, mps, cpu]
+    model_id: bartowski/Qwen_QwQ-32B-GGUF
+    model_file: Qwen_QwQ-32B-IQ2_XXS.gguf
+    model_size: 10.0
