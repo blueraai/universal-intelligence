@@ -715,12 +715,12 @@ pip install -r requirements-mcp.txt
 Testing:
 
 ```bash
-# python -m src.community.<component>.<name>.test
+# python -m universal_intelligence.community.<component>.<name>.test
 
 # examples
-python -m src.community.models.default.test
-python -m src.community.tools.default.test
-python -m src.community.agents.default.test
+python -m universal_intelligence.community.models.default.test
+python -m universal_intelligence.community.tools.default.test
+python -m universal_intelligence.community.agents.default.test
 ```
 
 > Please note that running tests may require downloading multiple configurations of the same components, and temporarily use storage space.

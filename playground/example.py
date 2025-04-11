@@ -1,8 +1,8 @@
 from playground.__utils__ import formatted_print
-from src.community.agents.default import UniversalAgent as Agent
-from src.community.models.default import UniversalModel as Model
-from src.community.tools.api_caller import UniversalTool as APITool
-from src.community.tools.simple_printer import UniversalTool as SimplePrinterTool
+from universal_intelligence.community.agents.default import UniversalAgent as Agent
+from universal_intelligence.community.models.default import UniversalModel as Model
+from universal_intelligence.community.tools.api_caller import UniversalTool as APITool
+from universal_intelligence.community.tools.simple_printer import UniversalTool as SimplePrinterTool
 
 # ------------------------------------------------------------------------------------------------
 # 🧠 Simple model

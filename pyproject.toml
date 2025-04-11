@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "universal-intelligence"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     { name = "Bluera Inc.", email = "bluera@bluera.ai" },
 ]
@@ -54,7 +54,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["universal_intelligence"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -79,7 +79,7 @@ ignore = ["B026"]
 max-complexity = 50
 
 [tool.ruff.isort]
-known-first-party = ["src"]
+known-first-party = ["universal_intelligence"]
 
 [tool.black]
 line-length = 300
