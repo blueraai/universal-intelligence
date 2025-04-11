@@ -83,9 +83,11 @@ class UniversalModelMixin(AbstractUniversalModel):
         try:
             whoami()
         except Exception as e:
-            print("\n[Warning] Hugging Face login not detected. Some models may require authentication to download.")
-            print("To login, run: huggingface-cli login")
-            print("For more information, visit: https://huggingface.co/docs/huggingface_hub/quick-start#login\n")
+            message = f"\n[Warning] Hugging Face login not detected. Some models may require authentication to download.\n"
+            message += "To login, run: huggingface-cli login\n"
+            message += "For more information, visit: https://huggingface.co/docs/huggingface_hub/quick-start#login\n"
+            print(message)
+            raise Exception(message)
 
         if not interface_config["name"]:
             raise ValueError("[UniversalModelMixin:__init__:interface_config] Name is not implemented")
