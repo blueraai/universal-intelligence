@@ -21,6 +21,15 @@ This project also provides ready-to-use **community-built components**, implemen
 
 Get familiar with the composable building blocks, using the default **community components**.
 
+```sh
+# Choose relevant install for your device
+pip install "universal-intelligence[community,mps]" # Apple
+pip install "universal-intelligence[community,cuda]" # NVIDIA
+
+# Log into Hugging Face CLI so you can download models
+huggingface-cli login
+```
+
 #### 🧠 Simple model
 
 ```python
