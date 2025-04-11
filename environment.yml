@@ -1,0 +1,15 @@
+name: universal-intelligence
+channels:
+  - defaults
+  - conda-forge # Good practice for broader package availability
+dependencies:
+  - python=3.10 # Explicitly set Python version for the environment
+  - pip         # Include pip for installing packages via pip
+  # Add any other core *Conda* dependencies here if needed
+  - pip:
+      # Install the project itself in editable mode with development tools
+      - -e .[dev]
+      # Note: Install hardware/feature-specific extras separately after env creation
+      # using pip install .[extra], e.g.:
+      # pip install .[community,cuda]
+      # pip install .[community,mps]

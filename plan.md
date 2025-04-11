@@ -1,0 +1,46 @@
+# Plan: Consolidate Dependencies to pyproject.toml
+
+-   [ ] **Task 1:** Create `analysis.md` file.
+    -   Results: Created successfully.
+-   [x] **Task 1:** Create `analysis.md` file.
+    -   Results: Created successfully.
+-   [x] **Task 2:** Create `plan.md` file (this file).
+    -   Results: Created successfully.
+-   [x] **Task 3:** Delete `requirements-*.txt` files.
+    -   Subtask 3.1: Delete `requirements.txt`.
+        -   Results: Deleted successfully.
+    -   Subtask 3.2: Delete `requirements-community.txt`.
+        -   Results: Deleted successfully.
+    -   Subtask 3.3: Delete `requirements-cuda.txt`.
+        -   Results: Deleted successfully.
+    -   Subtask 3.4: Delete `requirements-dev.txt`.
+        -   Results: Deleted successfully.
+    -   Subtask 3.5: Delete `requirements-gemma.txt`.
+        -   Results: Deleted successfully.
+    -   Subtask 3.6: Delete `requirements-mcp.txt`.
+        -   Results: Deleted successfully.
+    -   Subtask 3.7: Delete `requirements-mps.txt`.
+        -   Results: Deleted successfully.
+-   [x] **Task 4:** Update `README.md` documentation.
+    -   Subtask 4.1: Replace `pip install -r requirements-community.txt` with `pip install .[community]`.
+        -   Results: Completed (via user edit).
+    -   Subtask 4.2: Replace `pip install -r requirements-mps.txt` with `pip install .[mps]`.
+        -   Results: Completed (via user edit).
+    -   Subtask 4.3: Replace `pip install -r requirements-cuda.txt` with `pip install .[cuda]`.
+        -   Results: Completed (via user edit).
+    -   Subtask 4.4: Replace `pip install -r requirements-dev.txt` with `pip install .[dev]`.
+        -   Results: Completed (via user edit).
+    -   Subtask 4.5: Replace `pip install -r requirements-gemma.txt` with `pip install .[gemma]`.
+        -   Results: Completed (via user edit).
+    -   Subtask 4.6: Correct second `requirements-gemma.txt` reference (for MCP) to `pip install .[mcp]`.
+        -   Results: Completed (via user edit).
+    -   Subtask 4.7: Update example installation commands like `pip install "universal-intelligence[community,mps]"` to ensure clarity.
+        -   Results: Completed (via user edit).
+-   [x] **Task 5:** Initial Consolidation Review.
+    -   Results: All consolidation tasks executed. Project dependencies consolidated to `pyproject.toml`.
+-   [x] **Task 6:** Review Conda instructions in `README.md` based on user feedback.
+    -   Results: Confirmed `conda create` usage is standard but `environment.yml` is a better approach for reproducibility.
+-   [x] **Task 7:** Create `environment.yml` for Conda development setup.
+    -   Results: Created successfully.
+-   [x] **Task 8:** Update `README.md` to recommend using `environment.yml`.
+    -   Results: Updated successfully.

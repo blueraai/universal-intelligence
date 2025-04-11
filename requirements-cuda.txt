@@ -1,6 +1,0 @@
-# CUDA device dependencies (NVIDIA GPUs)
-auto-gptq
-optimum
-autoawq
-bitsandbytes
-accelerate 

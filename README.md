@@ -117,14 +117,14 @@ model = Model(
     # (example)
     # "processor": {
     #     e.g. Tokenizer https://huggingface.co/docs/transformers/fast_tokenizers
-    #     
+    #
     #     model_max_length: 4096,
     #     model_input_names: ['token_type_ids', 'attention_mask']
     #     ...
     # },
     # "model": {
     #     e.g. AutoModel https://huggingface.co/docs/transformers/models
-    #    
+    #
     #     torch_dtype="auto"
     #     device_map="auto"
     #     ...
@@ -148,8 +148,8 @@ output, logs = model.process(
   configuration={
     # (example)
     # e.g. AutoModel Generate https://huggingface.co/docs/transformers/llm_tutorial
-    # 
-    # max_new_tokens=2000, 
+    #
+    # max_new_tokens=2000,
     # use_cache=True,
     # temperature=1.0
     # ...
@@ -165,7 +165,7 @@ output, logs = model.process(
 from <provider> import UniversalModel as Model
 model = Model()
 
-# Optional 
+# Optional
 model.load() # loads the model in memory (otherwise automatically loaded/unloaded on execution of `.process()`)
 model.loaded() # checks if model is loaded
 model.unload() # unloads the model from memory (otherwise automatically loaded/unloaded on execution of `.process()`)
@@ -173,11 +173,11 @@ model.reset() # resets remembered chat history
 model.configuration() # gets current model configuration
 
 # Class Optional
-Model.contract()  # Contract 
-Model.compatibility()  # Compatibility 
+Model.contract()  # Contract
+Model.compatibility()  # Compatibility
 ```
 
-#### Universal Tool 
+#### Universal Tool
 
 ```python
 from <provider> import UniversalTool as Tool
@@ -192,11 +192,11 @@ tool.example_task(example_argument='hello') # "hello"
 from <provider> import UniversalTool as Tool
 
 # Class Optional
-Tool.contract()  # Contract 
-Tool.requirements()  # Configuration Requirements 
+Tool.contract()  # Contract
+Tool.requirements()  # Configuration Requirements
 ```
 
-#### Universal Agent 
+#### Universal Agent
 
 ```python
 from <provider> import UniversalAgent as Agent
@@ -232,8 +232,8 @@ from <provider.tool> import UniversalTool as Tool # e.g. API, database
 # This is where the magic happens ✨
 # Standardization of all layers make agents composable and generalized.
 # They can now utilize any 3rd party tools or agents on the fly to achieve any tasks.
-# Additionally, the models powering each agent can now be hot-swapped so that 
-# a team of agents shares the same intelligence(s), thus removing hardware overhead, 
+# Additionally, the models powering each agent can now be hot-swapped so that
+# a team of agents shares the same intelligence(s), thus removing hardware overhead,
 # and scaling at virtually no cost.
 agent = Agent(
   universal_model=Model(), # see Universal Model API for customizations
@@ -256,8 +256,8 @@ output, logs = agent.process(
   configuration={
     # (example)
     # e.g. AutoModel Generate https://huggingface.co/docs/transformers/llm_tutorial
-    # 
-    # max_new_tokens=2000, 
+    #
+    # max_new_tokens=2000,
     # use_cache=True,
     # temperature=1.0
     # ...
@@ -267,9 +267,9 @@ output, logs = agent.process(
   extra_tools=[Tool()], # extra tools available for this inference; call `agent.connect()` link during initiation to persist them
   extra_team=[OtherAgent()],  # extra agents available for this inference; call `agent.connect()` link during initiation to persist them
   keep_alive=True # keep model loaded after processing the request
-) 
-# > "In May, you went to the Cinema. Let me check the location for you." 
-# > (tool call: database) 
+)
+# > "In May, you went to the Cinema. Let me check the location for you."
+# > (tool call: database)
 # > "It was in Hollywood. Let me schedule a reminder for next month."
 # > (agent call: scheduler)
 # > "Alright you are all set! Hollywood cinema is now scheduled again in July."
@@ -286,7 +286,7 @@ agent = Agent()
 other_agent = OtherAgent()
 tool = Tool()
 
-# Optional 
+# Optional
 agent.load() # loads the agent's model in memory (otherwise automatically loaded/unloaded on execution of `.process()`)
 agent.loaded() # checks if agent is loaded
 agent.unload() # unloads the agent's model from memory (otherwise automatically loaded/unloaded on execution of `.process()`)
@@ -295,9 +295,9 @@ agent.connect(universal_tools=[tool], universal_agents=[other_agent]) # connects
 agent.disconnect(universal_tools=[tool], universal_agents=[other_agent]) # disconnects tools/agents
 
 # Class Optional
-Agent.contract()  # Contract 
-Agent.requirements()  # Configuration Requirements 
-Agent.compatibility()  # Compatibility 
+Agent.contract()  # Contract
+Agent.requirements()  # Configuration Requirements
+Agent.compatibility()  # Compatibility
 ```
 
 ### API
@@ -492,11 +492,11 @@ pip install "universal-intelligence[community,mps,mcp]" # Apple
 pip install "universal-intelligence[community,cuda,mcp]" # NVIDIA
 ```
 
-> Some of the community components interface with gated models, in which case you may have to accept the model's terms on [Hugging Face](https://huggingface.co/docs/hub/en/models-gated) and log into that approved account. 
-> 
+> Some of the community components interface with gated models, in which case you may have to accept the model's terms on [Hugging Face](https://huggingface.co/docs/hub/en/models-gated) and log into that approved account.
+>
 > You may do so in your terminal using `huggingface-cli login`
-> 
-> or in your code: 
+>
+> or in your code:
 > ```python
 > from huggingface_hub import login
 > login()
@@ -507,7 +507,7 @@ pip install "universal-intelligence[community,cuda,mcp]" # NVIDIA
 You can get familiar with the library using our ready-made playground
 
 ```sh
-python -m playground.example 
+python -m playground.example
 ```
 
 ### Usage
@@ -521,9 +521,9 @@ output, logs = model.process("How are you doing today?")
 # or configure as needed
 
 # model = Model(
-#   engine='transformers', 
+#   engine='transformers',
 #   quantization={
-#     'default': 'BNB_4', 
+#     'default': 'BNB_4',
 #     'min_precision': '4bit', # any of 2bit, 3bit, 4bit (default), 5bit, 6bit, 8bit, 16bit, 32bit
 #     'max_precision': '16bit', # any of 2bit, 3bit, 4bit, 5bit, 6bit, 8bit (default), 16bit, 32bit
 #     'max_memory_allocation': 0.8  # percentage 0 to 1 (default 80%)
@@ -659,7 +659,7 @@ universal-intelligence/
 
 For faster deployment and easier maintenance, we recommend using/enhancing *shared* mixins to bootstrap new `Universal Intelligence` components. Those are made available at `./src/community/<component>/__utils__/mixins`. Mixins let components provide their own configurations and while levering a shared implementation. You can find an example here: [./src/community/models/qwen2_5_7b_instruct/model.py](https://github.com/blueraai/universal-intelligence/blob/main/src/community/models/qwen2_5_7b_instruct/model.py).
 
-> Model weights can be found here: https://huggingface.co 
+> Model weights can be found here: https://huggingface.co
 
 #### Testing
 
@@ -670,38 +670,31 @@ Each `Universal Intelligence` component comes with its own test suite.
 Installation:
 
 ```sh
-# (optional) Create dedicated python environment using miniconda
-conda init zsh
-conda create -n universal-intelligence python=3.10.16 -y
+# 1. Create and activate the Conda environment using the provided file
+# This installs Python 3.10, pip, and the project in editable mode with [dev] extras.
+conda env create -f environment.yml
 conda activate universal-intelligence
 
-# Install base dependencies
-pip install -r requirements.txt
+# 2. (Optional) Install additional extras as needed
+# The environment.yml already includes the base package and [dev] extras.
+# Install other extras like community, hardware optimizations (mps/cuda), etc., using pip:
+# Examples:
+# pip install .[community]
+# pip install .[community,mps]
+# pip install .[community,cuda]
+# pip install .[community,mps,gemma]
+# pip install .[community,cuda,gemma]
+# pip install .[community,mcp]
 
-# Install community components dependencies
-pip install -r requirements-community.txt
-
-# Install optimizations for your currect device
-pip install -r requirements-mps.txt # Apple devices
-pip install -r requirements-cuda.txt # NVIDIA devices
-
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Install commit hook
+# 3. Install commit hook (for development)
 pre-commit install
-
-# (optional) if using Gemma models, install dedicated Gemma specific engines
-pip install -r requirements-gemma.txt
-# (optional) if using the MCP tool, install dedicated MCP specific dependencies
-pip install -r requirements-gemma.txt
 ```
 
-> Some of the community components interface with gated models, in which case you may have to accept the model's terms on [Hugging Face](https://huggingface.co/docs/hub/en/models-gated) and log into that approved account. 
-> 
+> Some of the community components interface with gated models, in which case you may have to accept the model's terms on [Hugging Face](https://huggingface.co/docs/hub/en/models-gated) and log into that approved account.
+>
 > You may do so in your terminal using `huggingface-cli login`
-> 
-> or in your code: 
+>
+> or in your code:
 > ```python
 > from huggingface_hub import login
 > login()

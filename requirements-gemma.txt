@@ -1,3 +1,0 @@
-# Gemma model dependencies
-git+https://github.com/huggingface/transformers@v4.49.0-Gemma-3  # deprecated, use latest transformers version instead
-accelerate 

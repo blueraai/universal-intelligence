@@ -29,3 +29,4 @@ build
 *.tar.xz
 requirements-release.txt
 .ruff_cache
+.history
