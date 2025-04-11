@@ -18,7 +18,7 @@ __unreleased__
 .localcmds
 .localcmds.md
 dist
-dist
+dist_past
 build
 *.egg-info/
 *.dist-info/
@@ -31,3 +31,4 @@ requirements-release.txt
 .ruff_cache
 test_imports.py
 =3.*
+

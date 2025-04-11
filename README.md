@@ -1,8 +1,8 @@
 ![Universal Intelligence](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//universal-intelligence-banner-rsm.png)
 
 <p align="center">
-    <a href="https://github.com/blueraai/universal-intelligence/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/blueraai/universal-intelligence.svg"></a>
-    <a href="https://github.com/blueraai/universal-intelligence/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/blueraai/universal-intelligence.svg?color=blue"></a>
+    <a href="https://github.com/blueraai/universal-intelligence/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/blueraai/universal-intelligence.svg?color=blue"></a>
+    <a href="https://github.com/blueraai/universal-intelligence/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/blueraai/universal-intelligence.svg"></a>
 </p>
 
 ## Overview
