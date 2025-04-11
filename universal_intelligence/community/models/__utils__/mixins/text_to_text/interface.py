@@ -4,7 +4,7 @@ from typing import Any
 
 import psutil
 import torch
-from huggingface_hub import hf_hub_download
+from huggingface_hub import hf_hub_download, whoami
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from .meta import extract_precision_from_descriptor
@@ -79,6 +79,14 @@ class UniversalModelMixin(AbstractUniversalModel):
         configuration: dict | None = None,
     ) -> None:
         """Initialize the model with specified engine and configuration."""
+        # Check Hugging Face login status
+        try:
+            whoami()
+        except Exception as e:
+            print("\n[Warning] Hugging Face login not detected. Some models may require authentication to download.")
+            print("To login, run: huggingface-cli login")
+            print("For more information, visit: https://huggingface.co/docs/huggingface_hub/quick-start#login\n")
+
         if not interface_config["name"]:
             raise ValueError("[UniversalModelMixin:__init__:interface_config] Name is not implemented")
         if not interface_config["sources"]:
