@@ -112,13 +112,16 @@ class UniversalModelMixin(AbstractUniversalModel):
 
         # Detect device type
         device_type = "cpu"  # default
+        _device_warning = f''
         if torch.cuda.is_available():
             device_type = "cuda"
         elif torch.backends.mps.is_available():
             device_type = "mps"
             print(f"[Memory Status] Tensor bytes allocated: {torch.mps.current_allocated_memory()} | Driver bytes reserved: {torch.mps.driver_allocated_memory()}")
+        else:
+            _device_warning += '\n[Warning] No compatible GPU device type detected. Using CPU as default.\n[Warning] If running on a compatible device (mps,cuda), please ensure that the correct driver is installed, and that the "universal_intelligence" package is installed with the correct dependencies by running:\n\npip install "universal_intelligence[community,cuda]"\n(or)\npip install "universal_intelligence[community,mps]"\n\n[Warning] See https://github.com/huggingface/universal_intelligence/ for installation instructions.\n'
 
-        print(f"\n[Device Detection] Using device type: {device_type}")
+        print(f"\n[Device Detection] Using device type: {device_type}{_device_warning}")
 
         # Get device-specific sources
         device_sources = self._sources.get(device_type, self._sources["cpu"])  # fallback to CPU if device not found
