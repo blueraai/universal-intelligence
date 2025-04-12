@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './index.css';
+import PlaygroundPage from './pages/Playground';
 
 // Simplified placeholder page
 const Home = () => (
@@ -100,33 +101,6 @@ const Explorer = () => (
   </div>
 );
 
-// Placeholder Playground page
-const Playground = () => (
-  <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-    <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-      Code Playground
-    </h1>
-    <p style={{ marginBottom: '1rem' }}>
-      This feature is coming soon. The code playground will allow you to run and test
-      Universal Intelligence code directly in your browser.
-    </p>
-    <div style={{
-      backgroundColor: '#141a24',
-      padding: '2rem',
-      borderRadius: '0.5rem',
-      textAlign: 'center'
-    }}>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#2dcddf' }}>
-        Playground Under Development
-      </h2>
-      <p>
-        We're building an interactive code editor where you can experiment with
-        Universal Intelligence examples.
-      </p>
-    </div>
-  </div>
-);
-
 // Main App Component
 function App() {
   return (
@@ -178,7 +152,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/explorer" element={<Explorer />} />
-            <Route path="/playground" element={<Playground />} />
+            <Route path="/playground" element={<PlaygroundPage />} />
           </Routes>
         </main>
 
