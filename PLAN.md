@@ -1,31 +1,10 @@
 # Universal Intelligence Documentation Plan
 
-This document outlines the comprehensive plan for analyzing the `universal-intelligence` repository and creating architectural documentation.
+This document outlines the comprehensive plan for the Universal Intelligence documentation and interactive site.
 
-## Analysis Approach
+## Part 1: Core Documentation (Completed)
 
-I'll systematically analyze the codebase with the following steps:
-
-1. **Initial Review**
-   - Start with `README.md` to understand project goals and overview
-   - Examine project structure and organization
-
-2. **Core Components Analysis**
-   - Review abstract classes in `universal_intelligence/core/`
-   - Map interfaces, contracts, and type definitions
-   - Analyze component relationships and interactions
-
-3. **Community Contributions Analysis**
-   - Examine implementation patterns in models, agents, and tools
-   - Identify extension mechanisms and plugin architecture
-   - Analyze configuration patterns and device optimization strategies
-
-4. **Data Flow & Interaction Patterns**
-   - Map request/response patterns between components
-   - Document initialization and configuration flows
-   - Analyze extensibility and composition patterns
-
-## Documentation Structure
+We've completed the foundational documentation that provides detailed explanations of the architecture:
 
 ```
 docs/
@@ -42,293 +21,556 @@ docs/
 │   └── README.md - Sample usage instructions
 ```
 
-## Visual Diagrams
+The documentation includes detailed mermaid diagrams, code samples, and thorough explanations of all components.
 
-### 1. System Architecture Diagram
+## Part 2: Interactive 3D Documentation Site
 
-```mermaid
-graph LR
-    subgraph A[Universal Intelligence]
-        subgraph Core[Core Components]
-            B[Universal Model]
-            C[Universal Tool]
-            D[Universal Agent]
-        end
+Building on our comprehensive documentation, we're creating an immersive, interactive 3D documentation experience that will revolutionize how users understand the Universal Intelligence framework.
 
-        subgraph Impl[Community Implementations]
-            C --> C1["SimplePrinter<br/>(Universal Tool)"]
-            C --> C2["APICaller<br/>(Universal Tool)"]
-            C --> C3["MCP Tools"]
-            D --> D1["SimpleAgent<br/>(Universal Agent)"]
-            D --> D3["Other Agents<br/>(Agent2Agent Protocol)"]
-        end
+### Conceptual Vision: 3D Universal Intelligence Universe
 
-        D --> B
-        D --> C
-    end
+The site will present Universal Intelligence as an interactive 3D system where users can:
+- Explore the architecture visually in an immersive environment
+- See components and their connections in a spatial context
+- Interact with elements to reveal detailed documentation
+- Run live code examples in an integrated playground
+- Experience guided tours through the system's functionality
 
-    B1[Qwen2.5-7B]
-    B2[Llama3]
-    B3[Other Models...]
+### Technical Architecture
 
-    B --- B1
-    B --- B2
-    B --- B3
+#### Frontend Stack
+- **React** (v18+): Component-based UI architecture
+- **Three.js** & **React Three Fiber**: 3D visualization framework
+- **@react-three/drei**: Higher-level Three.js components
+- **Zustand**: Lightweight state management
+- **Tailwind CSS**: Utility-first styling
+- **MDX**: Enhanced markdown with interactive components
+- **Sandpack** (from CodeSandbox): In-browser code execution environment
+- **react-markdown**: Documentation rendering
+- **Framer Motion**: Animations and transitions
+
+#### Backend Stack (for Code Playground)
+- **Node.js**: Runtime environment
+- **Express**: Web server framework
+- **Socket.io**: Real-time communication
+- **Docker**: Containerization for code execution
+- **Redis**: Session management and caching
+
+### File Structure
+
+```
+ui-docs/
+├── public/                    # Static assets
+│   ├── models/                # 3D models for components
+│   │   ├── agent.glb
+│   │   ├── model.glb
+│   │   ├── tool.glb
+│   │   └── ...
+│   ├── textures/              # Visual textures
+│   └── fonts/                 # Custom fonts
+├── src/
+│   ├── components/
+│   │   ├── 3d/                # Three.js components
+│   │   │   ├── Scene.jsx      # Main 3D scene container
+│   │   │   ├── Agent.jsx      # Agent component visualization
+│   │   │   ├── Model.jsx      # Model component visualization
+│   │   │   ├── Tool.jsx       # Tool component visualization
+│   │   │   ├── Connection.jsx # Component connections
+│   │   │   └── ...
+│   │   ├── ui/                # Interface components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── Modal.jsx
+│   │   │   ├── CodePlayground.jsx
+│   │   │   └── ...
+│   │   └── docs/              # Documentation components
+│   │       ├── ContentPanel.jsx
+│   │       ├── Diagram.jsx
+│   │       ├── CodeBlock.jsx
+│   │       └── ...
+│   ├── content/               # MDX content from our docs
+│   │   ├── overview/
+│   │   ├── architecture/
+│   │   ├── examples/
+│   │   └── tutorials/
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── use3DNavigation.js
+│   │   ├── useCodeExecution.js
+│   │   └── ...
+│   ├── store/                 # State management
+│   │   ├── navigationStore.js
+│   │   ├── documentationStore.js
+│   │   ├── codeStore.js
+│   │   └── ...
+│   ├── utils/                 # Helper functions
+│   │   ├── animations.js
+│   │   ├── threeHelpers.js
+│   │   └── ...
+│   ├── pages/                 # Page components
+│   │   ├── Home.jsx
+│   │   ├── Explorer.jsx
+│   │   ├── Playground.jsx
+│   │   └── ...
+│   ├── App.jsx                # Main application component
+│   └── index.js               # Entry point
+├── server/                    # Backend for code execution
+│   ├── index.js               # Server entry point
+│   ├── socket.js              # Socket.io configuration
+│   ├── sandbox.js             # Sandboxed execution environment
+│   ├── docker/                # Docker configuration
+│   │   ├── Dockerfile
+│   │   └── docker-compose.yml
+│   └── ...
+├── package.json
+└── README.md
 ```
 
-**Component to Code Mapping:**
+### Key Features
 
-| Diagram Component | Implementing Class | Source File |
-|-------------------|-------------------|-------------|
-| Universal Model | AbstractUniversalModel | universal_intelligence/core/universal_model.py |
-| Universal Tool | AbstractUniversalTool | universal_intelligence/core/universal_tool.py |
-| Universal Agent | AbstractUniversalAgent | universal_intelligence/core/universal_agent.py |
-| Qwen2.5-7B | UniversalModel | universal_intelligence/community/models/qwen2_5_7b_instruct/model.py |
-| SimplePrinter | UniversalTool | universal_intelligence/community/tools/simple_printer/tool.py |
-| SimpleAgent | UniversalAgent | universal_intelligence/community/agents/simple_agent/agent.py |
+#### 1. Interactive 3D Architecture Explorer
 
-### 2. Component Interaction Diagram
+```javascript
+// src/components/3d/Scene.jsx (Simplified example)
+function ArchitectureScene() {
+  const { selectedComponent, setSelectedComponent } = useStore();
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Agent
-    participant Model
-    participant Tool
+  return (
+    <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
 
-    User->>Agent: process(input)
-    Agent->>Model: process(input)
-    Model-->>Agent: response
-    Agent->>Tool: perform_task()
-    Tool-->>Agent: result
-    Agent-->>User: final response
+      {/* Core Components Group */}
+      <group position={[0, 0, 0]}>
+        <Model
+          position={[0, 2, 0]}
+          onClick={() => setSelectedComponent('model')}
+          isSelected={selectedComponent === 'model'}
+        />
+        <Tool
+          position={[-2, 0, 0]}
+          onClick={() => setSelectedComponent('tool')}
+          isSelected={selectedComponent === 'tool'}
+        />
+        <Agent
+          position={[2, 0, 0]}
+          onClick={() => setSelectedComponent('agent')}
+          isSelected={selectedComponent === 'agent'}
+        />
+
+        {/* Connection lines between components */}
+        <Connection start={[2, 0, 0]} end={[0, 2, 0]} />
+        <Connection start={[2, 0, 0]} end={[-2, 0, 0]} />
+      </group>
+
+      {/* Community Implementations */}
+      <group position={[0, -4, 0]}>
+        {/* Dynamically generated model implementations */}
+        {models.map((model, index) => (
+          <ModelImplementation
+            key={model.id}
+            model={model}
+            position={[index * 2 - models.length, 0, 0]}
+          />
+        ))}
+      </group>
+
+      <OrbitControls enableZoom={true} enablePan={true} />
+    </Canvas>
+  );
+}
 ```
 
-**Component to Code Mapping:**
+The 3D scene will be fully interactive with:
+- Orbital camera controls for exploring the architecture
+- Clickable components that highlight when selected
+- Animated connections between components
+- Dynamic loading of community implementations
+- Visual effects showing data flow through the system
 
-| Interaction Step | Method | Source File |
-|-------------------|-------------------|-------------|
-| Agent receives input | process() | universal_intelligence/core/universal_agent.py |
-| Agent calls Model | process() | universal_intelligence/core/universal_model.py |
-| Model generates response | Various model implementations | universal_intelligence/community/models/ |
-| Agent calls Tool | Various tool methods | universal_intelligence/community/tools/ |
-| Tool performs task | Tool-specific implementations | universal_intelligence/community/tools/ |
+#### 2. Code Playground with Sandpack Integration
 
-### 3. Plugin Architecture Diagram
+```javascript
+// src/components/ui/CodePlayground.jsx (Simplified example)
+import { Sandpack } from "@codesandbox/sandpack-react";
+import { useCodeStore } from "../../store/codeStore";
 
-```mermaid
-graph TD
-    AbstractModel[AbstractUniversalModel] --> ModelImpl1[Qwen2.5-7B]
-    AbstractModel --> ModelImpl2[Llama3]
-    AbstractModel --> ModelImpl3[Other Models...]
+function CodePlayground() {
+  const { currentExample, output, setOutput, isExecuting, executeCode } = useCodeStore();
 
-    AbstractTool[AbstractUniversalTool] --> ToolImpl1[SimplePrinter]
-    AbstractTool --> ToolImpl2[APICaller]
-    AbstractTool --> ToolImpl3[Other Tools...]
+  return (
+    <div className="code-playground-container">
+      <div className="playground-header">
+        <h3>Interactive Code Example</h3>
+        <select onChange={(e) => loadExample(e.target.value)}>
+          {examples.map(ex => (
+            <option key={ex.id} value={ex.id}>{ex.name}</option>
+          ))}
+        </select>
+        <button
+          onClick={executeCode}
+          disabled={isExecuting}
+        >
+          {isExecuting ? "Running..." : "Run Code"}
+        </button>
+      </div>
 
-    AbstractAgent[AbstractUniversalAgent] --> AgentImpl1[SimpleAgent]
-    AbstractAgent --> AgentImpl2[Other Agents...]
-
-    subgraph Extensibility
-        ModelImpl1 --> EngineA[Transformers]
-        ModelImpl1 --> EngineB[llama.cpp]
-        ModelImpl1 --> EngineC[MLX]
-    end
-```
-
-**Component to Code Mapping:**
-
-| Diagram Component | Implementing Class/File | Source Location |
-|-------------------|-------------------|-------------|
-| AbstractUniversalModel | AbstractUniversalModel | universal_intelligence/core/universal_model.py |
-| AbstractUniversalTool | AbstractUniversalTool | universal_intelligence/core/universal_tool.py |
-| AbstractUniversalAgent | AbstractUniversalAgent | universal_intelligence/core/universal_agent.py |
-| Model Implementations | Various UniversalModel classes | universal_intelligence/community/models/ |
-| Tool Implementations | Various UniversalTool classes | universal_intelligence/community/tools/ |
-| Agent Implementations | Various UniversalAgent classes | universal_intelligence/community/agents/ |
-
-### 4. Model Engine Selection Flow
-
-```mermaid
-flowchart TD
-    A[Initialize Model] --> B{Device Detection}
-    B -->|CUDA Available| C[CUDA Device]
-    B -->|MPS Available| D[MPS Device]
-    B -->|CPU Only| E[CPU Device]
-
-    C --> F{Memory Check}
-    D --> F
-    E --> F
-
-    F -->|Sufficient Memory| G[Use Default Quantization]
-    F -->|Insufficient Memory| H[Find Compatible Quantization]
-
-    G --> I[Load Model with Selected Engine]
-    H --> I
-```
-
-**Component to Code Mapping:**
-
-| Flow Step | Corresponding Code | Source File |
-|-------------------|-------------------|-------------|
-| Device Detection | Device type detection | universal_intelligence/community/models/__utils__/mixins/text_to_text/interface.py |
-| Memory Check | Memory availability check | universal_intelligence/community/models/__utils__/mixins/text_to_text/interface.py |
-| Quantization Selection | Quantization logic | universal_intelligence/community/models/__utils__/mixins/text_to_text/interface.py |
-| Engine Selection | Engine configuration | universal_intelligence/community/models/__utils__/mixins/text_to_text/interface.py |
-
-## Universal Intelligence Sample Examples
-
-Inspired by the Google ADK samples repository, we'll create examples that demonstrate the Universal Intelligence framework's capabilities:
-
-### Basic Agent Example (Simple Model Usage)
-```python
-# docs/samples/basic_agent.py
-from universal_intelligence import Model, Agent
-
-# Initialize a simple model
-model = Model()
-
-# Create an agent powered by the model
-agent = Agent(universal_model=model)
-
-# Process a simple request
-result, logs = agent.process("What is machine learning?")
-print(result)
-```
-
-### Tool-Using Agent Example
-```python
-# docs/samples/tool_using_agent.py
-from universal_intelligence import Model, Tool, Agent
-
-# Initialize model and tool
-model = Model()
-printer_tool = Tool()  # Simple printer tool
-
-# Create an agent with the tool
-agent = Agent(
-    universal_model=model,
-    expand_tools=[printer_tool]
-)
-
-# Process a request that will use the tool
-result, logs = agent.process("Please print 'Hello, World!' to the console")
-print(f"Agent response: {result}")
-print(f"Tool logs: {logs}")
-```
-
-### Multi-Agent System Example
-```python
-# docs/samples/multi_agent_system.py
-from universal_intelligence import Model, Agent
-
-# Initialize a shared model for efficiency
-shared_model = Model()
-
-# Create specialized agents
-primary_agent = Agent(universal_model=shared_model)
-research_agent = Agent(universal_model=shared_model)
-fact_checker_agent = Agent(universal_model=shared_model)
-
-# Connect agents to form a team
-primary_agent.connect(universal_agents=[research_agent, fact_checker_agent])
-
-# Process a complex request using the team
-result, logs = primary_agent.process(
-    "Research the impacts of AI on healthcare and verify the key facts"
-)
-print(result)
-```
-
-### RAG Agent Example
-```python
-# docs/samples/rag_agent.py
-from universal_intelligence import Model, Tool, Agent
-
-# Initialize components
-model = Model()
-api_tool = Tool(configuration={"base_url": "https://api.example.com"})
-
-# Create a RAG-capable agent
-rag_agent = Agent(
-    universal_model=model,
-    expand_tools=[api_tool]
-)
-
-# Process a query that requires retrieval
-documents = [
-    "AI has revolutionized healthcare with early diagnosis systems.",
-    "Machine learning models can predict patient outcomes with increasing accuracy."
-]
-
-result, logs = rag_agent.process(
-    "How has AI impacted healthcare?",
-    context=documents
-)
-print(result)
-```
-
-### Specialized Domain Agent Example
-```python
-# docs/samples/specialized_agent.py
-from universal_intelligence import Model, Tool, Agent
-
-# Initialize with a domain-specific model
-financial_model = Model(
-    configuration={
-        "processor": {
-            "input": {
-                "tokenizer": {
-                    "trust_remote_code": True
-                },
-                "chat_template": {
-                    "add_generation_prompt": True
-                }
+      <div className="editor-output-container">
+        <Sandpack
+          template="python"
+          files={{
+            "/main.py": currentExample.code,
+          }}
+          customSetup={{
+            dependencies: {
+              "universal-intelligence": "latest"
             }
-        }
-    }
-)
+          }}
+          options={{
+            showLineNumbers: true,
+            showInlineErrors: true,
+            editorHeight: 400,
+            editorWidthPercentage: 60,
+          }}
+          theme="dark"
+        />
 
-# Create domain-specific tools
-market_data_tool = Tool(configuration={"api_key": "sample_key"})
+        <div className="output-panel">
+          <h4>Output</h4>
+          <pre>{output}</pre>
+        </div>
+      </div>
 
-# Create specialized agent
-financial_advisor_agent = Agent(
-    universal_model=financial_model,
-    expand_tools=[market_data_tool]
-)
-
-# Process domain-specific request
-result, logs = financial_advisor_agent.process(
-    "What's the outlook for technology stocks this quarter?"
-)
-print(result)
+      <div className="playground-footer">
+        <p>Try modifying the code and click "Run Code" to see the results!</p>
+      </div>
+    </div>
+  );
+}
 ```
 
-## Implementation Timeline and Priorities
+For more complex execution scenarios, we'll implement a backend service:
 
-1. **Initial Setup** (Day 1)
-   - Create docs directory structure
-   - Draft PLAN.md (this document)
+```javascript
+// server/sandbox.js (Simplified example)
+const { exec } = require('child_process');
+const Docker = require('dockerode');
+const docker = new Docker();
 
-2. **Documentation Core** (Days 1-2)
-   - Create 01_overview.md
-   - Create 02_core_architecture.md
-   - Create 03_plugin_architecture.md
+async function executeCodeInContainer(code, socketId) {
+  const container = await docker.createContainer({
+    Image: 'universal-intelligence-sandbox',
+    Cmd: ['python', '-c', code],
+    HostConfig: {
+      Memory: 512 * 1024 * 1024, // 512MB limit
+      MemorySwap: 512 * 1024 * 1024,
+      CpuPeriod: 100000,
+      CpuQuota: 50000, // 50% CPU limit
+      NetworkMode: 'none', // No network access
+    },
+  });
 
-3. **System Architecture** (Day 2)
-   - Create 00_system_architecture.md
-   - Implement all diagrams with code mappings
+  await container.start();
 
-4. **Example Development** (Day 3)
-   - Create all sample examples
-   - Create samples/README.md
+  // Stream output to client
+  const stream = await container.logs({
+    follow: true,
+    stdout: true,
+    stderr: true,
+  });
 
-5. **Review and Refinement** (Day 3)
-   - Verify accuracy of all diagrams and mappings
-   - Ensure comprehensive coverage of system architecture
-   - Test all sample examples
+  stream.on('data', (chunk) => {
+    io.to(socketId).emit('code-output', chunk.toString());
+  });
+
+  // Set timeout for long-running code
+  setTimeout(async () => {
+    try {
+      await container.stop();
+      io.to(socketId).emit('code-output', '\n[Execution timed out]');
+    } catch (e) {
+      // Container might have already completed
+    }
+  }, 30000); // 30 second timeout
+
+  // Clean up when container finishes
+  container.wait(async () => {
+    io.to(socketId).emit('code-execution-complete');
+    await container.remove();
+  });
+}
+```
+
+The code playground will support:
+- Full Python execution environment
+- Universal Intelligence package pre-installed
+- Real-time output streaming
+- Error handling with helpful contextual messages
+- Secure execution in isolated containers
+- Example library with all the sample code
+- Connection to the 3D visualization (highlighting relevant components)
+
+#### 3. Visual Learning Modes
+
+The UI will include multiple ways to learn the system:
+
+```javascript
+// src/pages/Explorer.jsx (Simplified example)
+function Explorer() {
+  const { viewMode, setViewMode } = useNavigationStore();
+
+  return (
+    <div className="explorer-container">
+      <div className="view-mode-selector">
+        <button
+          className={viewMode === 'guided' ? 'active' : ''}
+          onClick={() => setViewMode('guided')}
+        >
+          Guided Tour
+        </button>
+        <button
+          className={viewMode === 'free' ? 'active' : ''}
+          onClick={() => setViewMode('free')}
+        >
+          Free Exploration
+        </button>
+        <button
+          className={viewMode === 'map' ? 'active' : ''}
+          onClick={() => setViewMode('map')}
+        >
+          Concept Map
+        </button>
+      </div>
+
+      {viewMode === 'guided' && <GuidedTour />}
+      {viewMode === 'free' && <FreeExploration />}
+      {viewMode === 'map' && <ConceptMap />}
+    </div>
+  );
+}
+```
+
+#### 4. Dynamic Sequence Visualizer
+
+```javascript
+// src/components/docs/SequenceVisualizer.jsx (Simplified example)
+function SequenceVisualizer({ steps }) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (isPlaying) {
+      const timer = setInterval(() => {
+        setCurrentStep(prev => (prev < steps.length - 1 ? prev + 1 : 0));
+      }, 1500);
+      return () => clearInterval(timer);
+    }
+  }, [isPlaying, steps.length]);
+
+  return (
+    <div className="sequence-visualizer">
+      <div className="sequence-controls">
+        <button onClick={() => setIsPlaying(!isPlaying)}>
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={steps.length - 1}
+          value={currentStep}
+          onChange={(e) => {
+            setCurrentStep(parseInt(e.target.value));
+            setIsPlaying(false);
+          }}
+        />
+        <span>{currentStep + 1} / {steps.length}</span>
+      </div>
+
+      <div className="sequence-diagram">
+        {steps[currentStep].participants.map((participant, i) => (
+          <div key={i} className="participant">
+            <div className="participant-label">{participant}</div>
+            <div className="participant-line" />
+          </div>
+        ))}
+
+        {steps[currentStep].messages.map((msg, i) => (
+          <div
+            key={i}
+            className="message"
+            style={{
+              left: `${msg.from * 150}px`,
+              width: `${(msg.to - msg.from) * 150}px`,
+              top: `${100 + i * 50}px`,
+            }}
+          >
+            <div className="message-line" />
+            <div className="message-label">{msg.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+### Visual Theme and Style Guide
+
+```css
+/* src/styles/theme.css (Simplified example) */
+:root {
+  /* Color Palette */
+  --primary: #4a00e0;
+  --primary-light: #7028e4;
+  --secondary: #2dcddf;
+  --accent: #00ff9d;
+  --background-dark: #0a0e17;
+  --background-light: #141a24;
+  --text-primary: #ffffff;
+  --text-secondary: #b8c7e0;
+
+  /* Typography */
+  --font-main: 'Inter', sans-serif;
+  --font-code: 'Fira Code', monospace;
+  --font-heading: 'Space Grotesk', sans-serif;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --space-xl: 4rem;
+
+  /* Effects */
+  --glow-primary: 0 0 15px rgba(74, 0, 224, 0.6);
+  --glow-secondary: 0 0 15px rgba(45, 205, 223, 0.6);
+  --glow-accent: 0 0 15px rgba(0, 255, 157, 0.6);
+}
+
+/* Component Examples */
+.component-node {
+  background: var(--background-light);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  box-shadow: var(--glow-primary);
+  padding: var(--space-md);
+  transition: all 0.3s ease;
+}
+
+.component-node:hover,
+.component-node.active {
+  box-shadow: var(--glow-primary), 0 0 30px rgba(74, 0, 224, 0.4);
+  transform: scale(1.05);
+}
+
+/* Data flow effects */
+.data-particle {
+  background: var(--accent);
+  height: 4px;
+  width: 4px;
+  border-radius: 50%;
+  position: absolute;
+  animation: flow 2s linear infinite;
+}
+
+@keyframes flow {
+  0% {
+    opacity: 0;
+    transform: translateX(0) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.5);
+  }
+}
+```
+
+### Development and Deployment Infrastructure
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./ui-docs
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ui-docs:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:4000
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - redis
+
+  sandbox:
+    build:
+      context: ./sandbox
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - MAX_CONTAINERS=10
+      - CONTAINER_TIMEOUT=30
+    restart: always
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
+```
+
+## Implementation Plan
+
+### Phase 1: Foundation (1-2 weeks)
+- Set up React + Three.js project structure
+- Convert existing documentation to MDX format
+- Create basic 3D models for core components
+- Implement Sandpack code playground integration
+
+### Phase 2: Core Experience (2-3 weeks)
+- Develop the 3D architecture explorer with basic interactions
+- Implement camera controls and interactive elements
+- Create documentation panels with proper content linking
+- Set up the code execution environment with Docker
+
+### Phase 3: Enhanced Features (2-3 weeks)
+- Build advanced code playground features
+- Implement guided tours and exploration modes
+- Develop sequence visualizer with animation
+- Create concept map views
+
+### Phase 4: Polish and Launch (1-2 weeks)
+- Add animations and transitions
+- Optimize performance
+- Implement responsive design
+- Conduct user testing and refinement
+- Deploy to production
 
 ## Conclusion
 
-This documentation plan provides a comprehensive approach to analyzing and documenting the Universal Intelligence architecture. The resulting documentation will combine clear explanations, visual diagrams with code mappings, and practical examples to illustrate both basic usage and advanced capabilities of the framework.
+This enhanced documentation plan combines traditional technical documentation with cutting-edge interactive visualization to create an unparalleled learning experience for Universal Intelligence. By leveraging 3D visualization, interactive code execution, and intuitive navigation, users will gain a deeper understanding of the architecture and capabilities of the framework.
