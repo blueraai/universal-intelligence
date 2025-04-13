@@ -1,20 +1,235 @@
-import React, { useState, useRef, useEffect } from 'react';
-import CodeEditor from '../components/playground/CodeEditor';
-import OutputDisplay from '../components/playground/OutputDisplay';
+import React, { useState, useEffect } from 'react';
+import {
+  SandpackProvider,
+  SandpackLayout,
+  SandpackCodeEditor,
+  useSandpack
+} from '@codesandbox/sandpack-react';
+import { useWebSocket } from '../hooks/useWebSocket';
 import {
   codeExamples,
   additionalExamples,
-  simulatedExecutionSteps
 } from '../components/playground/CodeExamples';
+
+// Custom theme matching our site
+const universalTheme = {
+  colors: {
+    surface1: '#0a0e17',
+    surface2: '#141a24',
+    surface3: '#292938',
+    clickable: '#4a00e0',
+    base: '#f8f8f2',
+    disabled: '#999',
+    hover: '#6428e0',
+    accent: '#00ff9d',
+    error: '#ff5757',
+    errorSurface: '#2c1616',
+  },
+  syntax: {
+    plain: '#f8f8f2',
+    comment: { color: '#6272a4', fontStyle: 'italic' as const },
+    keyword: '#ff79c6',
+    tag: '#ff79c6',
+    punctuation: '#f8f8f2',
+    definition: '#50fa7b',
+    property: '#66d9ef',
+    static: '#bd93f9',
+    string: '#f1fa8c',
+  },
+  font: {
+    body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    mono: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+    size: '14px',
+    lineHeight: '1.5',
+  }
+};
+
+// Custom component for WebSocket connection management and running code
+const WebSocketRunner: React.FC = () => {
+  const { sandpack } = useSandpack();
+  const { files, activeFile } = sandpack;
+  const [output, setOutput] = useState<string>('');
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+
+  // Initialize WebSocket connection
+  const {
+    sendMessage,
+    lastMessage,
+    isConnected,
+    isConnecting,
+    connect,
+    resetConnection,
+    hasGivenUp
+  } = useWebSocket({
+    url: 'ws://localhost:8765',
+    onOpen: () => {
+      console.log('WebSocket connected');
+    },
+    onClose: () => {
+      console.log('WebSocket disconnected');
+    },
+    onError: (error) => {
+      console.error('WebSocket error:', error);
+    },
+    reconnectAttempts: 3,
+    initialReconnectInterval: 1000,
+    maxReconnectInterval: 5000
+  });
+
+  // Handle messages from the WebSocket server
+  useEffect(() => {
+    if (lastMessage) {
+      if (lastMessage.type === 'result') {
+        // Handle execution result
+        const result = lastMessage;
+
+        let outputText = '';
+        if (result.stdout) {
+          outputText += result.stdout;
+        }
+
+        if (result.stderr) {
+          outputText += `\n${result.stderr}`;
+        }
+
+        if (result.error) {
+          outputText += `\n${result.error.type}: ${result.error.message}`;
+          if (result.error.traceback) {
+            outputText += `\n${result.error.traceback}`;
+          }
+        }
+
+        setOutput(outputText);
+        setIsRunning(false);
+      } else if (lastMessage.type === 'status') {
+        // Handle status updates
+        console.log(`Status: ${lastMessage.status} - ${lastMessage.message}`);
+      }
+    }
+  }, [lastMessage]);
+
+  // Execute code
+  const handleRunCode = () => {
+    if (!isConnected) {
+      setOutput('Not connected to execution server. Attempting to reconnect...');
+      connect();
+      return;
+    }
+
+    setIsRunning(true);
+    const code = files[activeFile].code;
+
+    // Send code to the WebSocket server
+    sendMessage({
+      type: 'execute',
+      code
+    });
+  };
+
+  return (
+    <div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '0.8rem'
+      }}>
+        <div style={{ fontWeight: 'bold', color: '#f8f8f2' }}>Code:</div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            fontSize: '0.8rem',
+            padding: '0.2rem 0.5rem',
+            borderRadius: '4px',
+            backgroundColor: isConnected ? '#1e3a1e' : '#3a1e1e',
+            color: isConnected ? '#72e472' : '#e47272'
+          }}>
+            {isConnecting ? 'Connecting...' : (isConnected ? 'Connected ●' : 'Disconnected ○')}
+          </div>
+
+          {hasGivenUp && (
+            <button
+              onClick={resetConnection}
+              style={{
+                padding: '0.3rem 0.8rem',
+                backgroundColor: '#333',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              Retry Connection
+            </button>
+          )}
+
+          <button
+            onClick={handleRunCode}
+            disabled={isRunning || !isConnected}
+            style={{
+              padding: '0.5rem 1.2rem',
+              backgroundColor: isRunning || !isConnected ? '#666' : '#00ff9d',
+              color: '#111',
+              border: 'none',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              cursor: isRunning || !isConnected ? 'default' : 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            {isRunning ? 'Running...' : 'Run Code'}
+          </button>
+        </div>
+      </div>
+
+      {/* Custom console output display */}
+      <div style={{ marginTop: '1rem' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '0.8rem', color: '#f8f8f2' }}>
+          Output:
+        </div>
+        <div style={{
+          backgroundColor: '#141a24',
+          padding: '1rem',
+          borderRadius: '4px',
+          fontFamily: 'monospace',
+          color: '#f8f8f2',
+          whiteSpace: 'pre-wrap',
+          maxHeight: '300px',
+          overflowY: 'auto',
+          border: '1px solid #333'
+        }}>
+          {isRunning ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{
+                width: '1rem',
+                height: '1rem',
+                borderRadius: '50%',
+                backgroundColor: '#00ff9d',
+                animation: 'blink 1s infinite'
+              }}></div>
+              <span>Running code...</span>
+            </div>
+          ) : hasGivenUp ? (
+            <div style={{ color: '#e47272' }}>
+              Failed to connect to the execution server after multiple attempts.
+              Please check if the server is running and click "Retry Connection".
+            </div>
+          ) : output ? (
+            output
+          ) : (
+            <span style={{ color: '#777' }}>Code execution output will appear here.</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Playground: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('Examples');
   const [selectedExample, setSelectedExample] = useState<string>('Basic Model');
   const [code, setCode] = useState<string>(codeExamples['Basic Model']);
-  const [output, setOutput] = useState<string>('');
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [executionStep, setExecutionStep] = useState<number>(0);
-  const executionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get all examples combined
   const getAllExamples = () => {
@@ -41,58 +256,6 @@ const Playground: React.FC = () => {
     // Get the code for this example
     const exampleCode = allExamples[category][example];
     setCode(exampleCode);
-
-    // Reset output and execution state
-    setOutput('');
-    setIsRunning(false);
-    setExecutionStep(0);
-
-    if (executionTimerRef.current) {
-      clearTimeout(executionTimerRef.current);
-    }
-  };
-
-  // Enhanced simulation with step-by-step execution
-  const handleRunCode = () => {
-    setIsRunning(true);
-    setExecutionStep(0);
-    setOutput('');
-
-    // Clear any existing execution timer
-    if (executionTimerRef.current) {
-      clearTimeout(executionTimerRef.current);
-    }
-
-    // This will simulate a step-by-step execution
-    executeNextStep();
-  };
-
-  const executeNextStep = () => {
-    // Get the appropriate simulated output based on the category, example and step
-    if (simulatedExecutionSteps[selectedCategory]?.[selectedExample]) {
-      const steps = simulatedExecutionSteps[selectedCategory][selectedExample];
-
-      if (executionStep < steps.length) {
-        // Use the pre-defined step output
-        setOutput(steps[executionStep]);
-        setExecutionStep(prev => prev + 1);
-
-        // If we have more steps, schedule the next one
-        if (executionStep + 1 < steps.length) {
-          executionTimerRef.current = setTimeout(executeNextStep, 800);
-        } else {
-          // Execution complete
-          setIsRunning(false);
-        }
-      } else {
-        // No more steps, execution complete
-        setIsRunning(false);
-      }
-    } else {
-      // No steps defined for this example, just show a default message
-      setOutput('Example execution complete.');
-      setIsRunning(false);
-    }
   };
 
   // Add CSS for blinking cursor
@@ -108,15 +271,6 @@ const Playground: React.FC = () => {
 
     return () => {
       document.head.removeChild(style);
-    };
-  }, []);
-
-  // Clean up any timers when component unmounts
-  useEffect(() => {
-    return () => {
-      if (executionTimerRef.current) {
-        clearTimeout(executionTimerRef.current);
-      }
     };
   }, []);
 
@@ -179,43 +333,35 @@ const Playground: React.FC = () => {
         </div>
       </div>
 
-      {/* Code editor section */}
-      <div style={{ marginBottom: '1rem' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.8rem'
-        }}>
-          <div style={{ fontWeight: 'bold', color: '#f8f8f2' }}>Code:</div>
-          <button
-            onClick={handleRunCode}
-            disabled={isRunning}
-            style={{
-              padding: '0.5rem 1.2rem',
-              backgroundColor: isRunning ? '#666' : '#00ff9d',
-              color: '#111',
-              border: 'none',
-              borderRadius: '4px',
-              fontWeight: 'bold',
-              cursor: isRunning ? 'default' : 'pointer',
-              transition: 'background-color 0.2s',
-            }}
-          >
-            {isRunning ? 'Running...' : 'Run Code'}
-          </button>
-        </div>
-
-        <CodeEditor code={code} onChange={setCode} />
-      </div>
-
-      {/* Output section */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '0.8rem', color: '#f8f8f2' }}>
-          Output:
-        </div>
-        <OutputDisplay output={output} isRunning={isRunning} />
-      </div>
+      {/* SandPack editor */}
+      <SandpackProvider
+        template="vanilla"
+        customSetup={{
+          entry: '/main.py',
+        }}
+        theme={universalTheme}
+        files={{
+          '/main.py': {
+            code: code,
+            active: true
+          }
+        }}
+        options={{
+          externalResources: [],
+          recompileMode: "delayed",
+          recompileDelay: 500,
+        }}
+      >
+        <SandpackLayout>
+          <SandpackCodeEditor
+            showLineNumbers={true}
+            showInlineErrors={true}
+            showRunButton={false}
+            style={{ height: '400px' }}
+          />
+          <WebSocketRunner />
+        </SandpackLayout>
+      </SandpackProvider>
 
       {/* Information section */}
       <div style={{
@@ -226,14 +372,13 @@ const Playground: React.FC = () => {
         color: '#f8f8f2'
       }}>
         <h3 style={{ color: '#2dcddf', marginBottom: '0.8rem', fontWeight: 'bold' }}>
-          Note:
+          About this Playground
         </h3>
         <p>
-          This is a demonstration playground. The code is not actually executed on the server.
-          To run Universal Intelligence code on your own machine, please install the framework
-          using pip: <code style={{ backgroundColor: '#292938', padding: '0.1rem 0.3rem', borderRadius: '3px' }}>
-            pip install universal-intelligence
-          </code>
+          This playground executes Universal Intelligence code on a back-end Python server.
+          The code you write runs in a sandboxed environment with the Universal Intelligence
+          framework installed. You can try out different examples or create your own code
+          to experiment with the framework's capabilities.
         </p>
       </div>
     </div>
