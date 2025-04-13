@@ -43,7 +43,7 @@ class AbstractUniversalModel(ABC):
         pass
 
     @abstractmethod
-    def process(self, input: Any | list[Message] | None = None, context: list[Any] | None = None, configuration: dict | None = None, remember: bool = False, keep_alive: bool = False) -> tuple[Any, dict]:
+    def process(self, input: Any | list[Message] | None = None, context: list[Any] | None = None, configuration: dict | None = None, remember: bool = False, keep_alive: bool = False, stream: bool = False) -> tuple[Any, dict]:
         """
         Process input through the model.
 
@@ -53,7 +53,7 @@ class AbstractUniversalModel(ABC):
             configuration: Optional configuration for processing
             remember: Whether to remember the interaction in history
             keep_alive: Whether to keep the model loaded for faster consecutive interactions
-
+            stream: Whether to stream the output
         Returns:
             Tuple of (output, metadata)
         """

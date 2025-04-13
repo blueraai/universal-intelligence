@@ -235,11 +235,12 @@ class UniversalAgent(AbstractUniversalAgent):
 
     _compatibility: ClassVar[list[Compatibility]] = [
         {
-            "engine": "any",
-            "quantization": "any",
+            "engine": "any", # Depends on the model used
+            "quantization": "any", # Depends on the model used
             "devices": ["cuda", "mps", "cpu"],
             "memory": 0.0,  # Depends on the model used
             "dependencies": ["pyyaml"],
+            "precision": 4, # Depends on the model used
         }
     ]
 
@@ -268,7 +269,6 @@ class UniversalAgent(AbstractUniversalAgent):
         self.model = universal_model if universal_model is not None else UniversalModel()
         self.tools = self._default_tools + (expand_tools if expand_tools else [])
         self.team = self._default_team + (expand_team if expand_team else [])
-        self.history = []
 
     def _plan_dependency_calls(
         self,
@@ -473,20 +473,14 @@ Execution Results:
 {results_yaml}
 """
 
+        # TODO: Add streaming support
         response, logs = self.model.process(
             final_prompt,
             context=context,
             configuration=configuration,
             remember=remember,
+            keep_alive=keep_alive,
         )
-
-        if not keep_alive:
-            self.model.unload()
-
-        # Update history if requested
-        if remember:
-            self.history.append({"role": "user", "content": query})
-            self.history.append({"role": "assistant", "content": response})
 
         return response, {
             "model_logs": logs,
@@ -508,7 +502,6 @@ Execution Results:
 
     def reset(self) -> None:
         """Reset the agent's chat history."""
-        self.history = []
         self.model.reset()
 
     def connect(
