@@ -76,15 +76,15 @@ export function useWebSocket({
   const isConnecting = readyState === WebSocket.CONNECTING;
 
   // Reset connection state for retrying after giving up
-  const resetConnection = useCallback(() => {
+  const resetConnection = useCallback(async () => {
     reconnectCount.current = 0;
     reconnectDelay.current = initialReconnectInterval;
     setHasGivenUp(false);
-    connect();
+    await connect();
   }, [initialReconnectInterval]);
 
   // Create a WebSocket connection
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     // Don't try to connect if we've given up
     if (hasGivenUp) {
       return;
@@ -103,21 +103,25 @@ export function useWebSocket({
       socket.current = null;
     }
 
-    // Create a new WebSocket instance
-    try {
-      console.log(`Connecting to WebSocket at ${url}...`);
+      // Create a new WebSocket instance
+      try {
+        console.log(`Connecting to WebSocket at ${url}...`);
 
-      // For debugging, log navigator information if in browser environment
-      if (typeof navigator !== 'undefined') {
-        console.log(`Browser: ${navigator.userAgent}`);
-      }
+        // For debugging, log navigator information if in browser environment
+        if (typeof navigator !== 'undefined') {
+          console.log(`Browser: ${navigator.userAgent}`);
+        }
 
-      // Create WebSocket with protocols to improve compatibility
-      socket.current = new WebSocket(url, ['json']);
+        // Create WebSocket with protocols to improve compatibility
+        // Force a small delay (50ms) before creating the WebSocket to avoid race conditions
+        await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Set binaryType to improve compatibility
-      socket.current.binaryType = 'arraybuffer';
-      setReadyState(WebSocket.CONNECTING);
+        // Create with explicit protocol for browser compatibility
+        socket.current = new WebSocket(url, ['json']);
+
+        // Set binaryType to improve compatibility
+        socket.current.binaryType = 'arraybuffer';
+        setReadyState(WebSocket.CONNECTING);
 
       // Connection opened
       socket.current.onopen = () => {
@@ -222,7 +226,8 @@ export function useWebSocket({
       // Try to reconnect if not open and not already in the process of connecting
       if (!isConnecting && socket.current?.readyState !== WebSocket.CONNECTING) {
         console.log('Attempting to reconnect before sending message...');
-        connect();
+        // Use void to ignore the Promise since this is a sync function
+        void connect();
       }
       return false;
     }

@@ -65,7 +65,7 @@ const WebSocketRunner: React.FC = () => {
   } = useWebSocket({
     url: 'ws://localhost:9765',
     onOpen: () => {
-      console.log('WebSocket connected');
+      console.log('WebSocket connection established');
       setRunError(null);
     },
     onClose: () => {
@@ -77,12 +77,15 @@ const WebSocketRunner: React.FC = () => {
     },
     reconnectAttempts: 3,
     initialReconnectInterval: 1000,
-    maxReconnectInterval: 5000
+    maxReconnectInterval: 5000,
+    autoConnect: true // Explicitly set to auto-connect on component mount
   });
 
   // Handle messages from the WebSocket server
   useEffect(() => {
     if (lastMessage) {
+      console.log('Processing message:', lastMessage);
+
       if (lastMessage.type === 'result') {
         // Handle execution result
         const result = lastMessage;
@@ -113,6 +116,7 @@ const WebSocketRunner: React.FC = () => {
         console.log(`Status: ${lastMessage.status} - ${lastMessage.message}`);
         if (lastMessage.status === 'running') {
           setOutput('Running code...');
+          setIsRunning(true);
         }
       } else if (lastMessage.type === 'connection') {
         console.log(`Connection established: ${lastMessage.message}`);
@@ -125,6 +129,12 @@ const WebSocketRunner: React.FC = () => {
         console.log('Received pong response');
         // Update connection status
         setRunError(null);
+      } else if (lastMessage.type === 'echo') {
+        // Handle echo responses (for debugging)
+        console.log('Received echo:', lastMessage);
+      } else if (lastMessage.type === 'ping') {
+        // Respond to server pings (though our hook already handles this)
+        console.log('Received ping from server');
       }
     }
   }, [lastMessage]);
@@ -155,11 +165,35 @@ const WebSocketRunner: React.FC = () => {
     setOutput('Preparing to run code...');
     const code = files[activeFile].code;
 
-    // Send code to the WebSocket server
-    sendMessage({
-      type: 'execute',
-      code
-    });
+    try {
+      console.log('Sending code execution request:', code.substring(0, 100) + '...');
+
+      // Send code to the WebSocket server
+      sendMessage({
+        type: 'execute',
+        code
+      });
+
+      // The connection state is managed separately - we don't need to check
+      // the success of the send directly, as any errors will be captured in the catch block
+      if (!isConnected) {
+        console.error('Failed to send execution message - connection may be unstable');
+        setOutput('Failed to send code to server. Connection may be unstable.');
+        setRunError('Connection error');
+        setIsRunning(false);
+
+        // Try to reconnect
+        setTimeout(() => {
+          console.log('Attempting to reconnect after send failure...');
+          connect();
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('Error executing code:', err);
+      setOutput(`Error executing code: ${err instanceof Error ? err.message : String(err)}`);
+      setRunError('Execution error');
+      setIsRunning(false);
+    }
   };
 
   // Use OutputDisplay component for consistent styling
