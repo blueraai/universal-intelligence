@@ -112,12 +112,33 @@ async def send_json(websocket, data: Dict[str, Any]) -> bool:
         return False
 
 async def process_request(path, request_headers):
-    """Process HTTP requests for CORS and WebSocket protocol"""
-    # Simple CORS handler for browser preflight requests
-    if path == '/':
-        return None  # Let websockets library handle it
+    """
+    Process HTTP requests - compatible with all websockets versions
+    """
+    # Handle different websockets versions (10.x through 15.x)
+    if hasattr(request_headers, 'headers'):
+        # For websockets v10+ with Request object
+        method = getattr(request_headers, 'method', 'GET')
         
-    # For other HTTP requests, return a simple message
+        if method == "OPTIONS":
+            return 200, CORS_HEADERS, b''
+        
+        # Support for the 'json' subprotocol
+        if path == '/' and 'Upgrade' in request_headers.headers:
+            return None  # Let the websockets library handle WebSocket upgrades
+            
+    elif isinstance(request_headers, dict):
+        # For older websockets versions with dict headers
+        method = request_headers.get(':method', 'GET')
+        
+        if method == "OPTIONS":
+            return 200, CORS_HEADERS, b''
+            
+        # Check for websocket upgrade
+        if path == '/' and 'upgrade' in request_headers.get('connection', '').lower():
+            return None
+    
+    # For non-WebSocket requests, return a simple message
     return 200, CORS_HEADERS, b"WebSocket server is running. Connect with a WebSocket client."
 
 async def websocket_handler(websocket, path=None):

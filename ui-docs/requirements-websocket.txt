@@ -1,0 +1,2 @@
+# WebSocket server dependencies for UI Docs
+websockets>=12.0.0

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connectivity Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f7;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .connected {
+            background-color: #e6f7e6;
+            color: #2c662d;
+            border: 1px solid #aaddaa;
+        }
+        
+        .connecting {
+            background-color: #fff9e6;
+            color: #997500;
+            border: 1px solid #ffd666;
+        }
+        
+        .closed {
+            background-color: #f7e6e6;
+            color: #662c2c;
+            border: 1px solid #ddaaaa;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #0052a3;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+        }
+        
+        .log {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .log-entry.sent {
+            color: #0066cc;
+        }
+        
+        .log-entry.received {
+            color: #2c662d;
+        }
+        
+        .log-entry.error {
+            color: #cc0000;
+        }
+        
+        .log-entry.info {
+            color: #666;
+        }
+        
+        .statistics {
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-box {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebSocket Connectivity Test</h1>
+        
+        <div id="status" class="status closed">
+            Disconnected
+        </div>
+        
+        <div class="statistics">
+            <div class="stat-box">
+                <div class="stat-value" id="msgSent">0</div>
+                <div class="stat-label">Messages Sent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="msgReceived">0</div>
+                <div class="stat-label">Messages Received</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="pingTime">-</div>
+                <div class="stat-label">Last Ping (ms)</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="connectBtn">Connect</button>
+            <button id="disconnectBtn" disabled>Disconnect</button>
+            <button id="pingBtn" disabled>Send Ping</button>
+            <button id="executeBtn" disabled>Execute Code</button>
+            <button id="clearLogBtn">Clear Log</button>
+        </div>
+        
+        <div>
+            <h3>Code to Execute:</h3>
+            <textarea id="codeInput">print("Hello from WebSocket test!")</textarea>
+        </div>
+        
+        <div class="log" id="logOutput"></div>
+    </div>
+    
+    <script>
+        // Configuration
+        const WS_URL = 'ws://localhost:9765';
+        const PROTOCOL = 'json';
+        
+        // State variables
+        let socket = null;
+        let pingTimestamp = 0;
+        let messagesSent = 0;
+        let messagesReceived = 0;
+        let lastPingTime = 0;
+        
+        // Elements
+        const statusEl = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const pingBtn = document.getElementById('pingBtn');
+        const executeBtn = document.getElementById('executeBtn');
+        const clearLogBtn = document.getElementById('clearLogBtn');
+        const logOutput = document.getElementById('logOutput');
+        const codeInput = document.getElementById('codeInput');
+        const msgSentEl = document.getElementById('msgSent');
+        const msgReceivedEl = document.getElementById('msgReceived');
+        const pingTimeEl = document.getElementById('pingTime');
+        
+        // Log functions
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toISOString()}] ${message}`;
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        
+        function logSent(message) {
+            log(`SENT: ${message}`, 'sent');
+            messagesSent++;
+            msgSentEl.textContent = messagesSent;
+        }
+        
+        function logReceived(message) {
+            log(`RECEIVED: ${message}`, 'received');
+            messagesReceived++;
+            msgReceivedEl.textContent = messagesReceived;
+        }
+        
+        function logError(message) {
+            log(`ERROR: ${message}`, 'error');
+        }
+        
+        // Update UI based on connection state
+        function updateUI(state) {
+            if (state === WebSocket.CONNECTING) {
+                statusEl.className = 'status connecting';
+                statusEl.textContent = 'Connecting...';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = true;
+                pingBtn.disabled = true;
+                executeBtn.disabled = true;
+            } else if (state === WebSocket.OPEN) {
+                statusEl.className = 'status connected';
+                statusEl.textContent = 'Connected';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                pingBtn.disabled = false;
+                executeBtn.disabled = false;
+            } else {
+                statusEl.className = 'status closed';
+                statusEl.textContent = 'Disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                pingBtn.disabled = true;
+                executeBtn.disabled = true;
+            }
+        }
+        
+        // Connect to WebSocket server
+        function connect() {
+            if (socket && socket.readyState !== WebSocket.CLOSED) {
+                logError('Socket is already open or connecting');
+                return;
+            }
+            
+            try {
+                updateUI(WebSocket.CONNECTING);
+                log(`Connecting to ${WS_URL} with protocol '${PROTOCOL}'...`);
+                
+                // Create WebSocket with the 'json' protocol
+                socket = new WebSocket(WS_URL, [PROTOCOL]);
+                socket.binaryType = 'arraybuffer';
+                
+                // Connection opened
+                socket.addEventListener('open', (event) => {
+                    log('Connection established');
+                    updateUI(WebSocket.OPEN);
+                });
+                
+                // Listen for messages
+                socket.addEventListener('message', (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        logReceived(JSON.stringify(data, null, 2));
+                        
+                        // Handle pong messages to calculate ping time
+                        if (data.type === 'pong' && data.timestamp) {
+                            const now = Date.now();
+                            lastPingTime = now - data.timestamp;
+                            pingTimeEl.textContent = lastPingTime;
+                        }
+                    } catch (e) {
+                        logError(`Failed to parse message: ${e.message}`);
+                        logReceived(event.data);
+                    }
+                });
+                
+                // Connection closed
+                socket.addEventListener('close', (event) => {
+                    const reason = event.reason ? ` (${event.reason})` : '';
+                    log(`Connection closed: code ${event.code}${reason}`);
+                    updateUI(WebSocket.CLOSED);
+                    socket = null;
+                });
+                
+                // Connection error
+                socket.addEventListener('error', (event) => {
+                    logError('WebSocket error occurred');
+                    console.error('WebSocket error:', event);
+                });
+                
+            } catch (e) {
+                logError(`Error creating WebSocket: ${e.message}`);
+                updateUI(WebSocket.CLOSED);
+            }
+        }
+        
+        // Disconnect from server
+        function disconnect() {
+            if (!socket) {
+                logError('Not connected to a server');
+                return;
+            }
+            
+            try {
+                log('Disconnecting from server...');
+                socket.close(1000, 'User initiated disconnect');
+            } catch (e) {
+                logError(`Error disconnecting: ${e.message}`);
+            }
+        }
+        
+        // Send a ping message
+        function sendPing() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                logError('Cannot send ping: Not connected');
+                return;
+            }
+            
+            try {
+                const timestamp = Date.now();
+                const message = {
+                    type: 'ping',
+                    timestamp: timestamp
+                };
+                
+                const messageStr = JSON.stringify(message);
+                socket.send(messageStr);
+                
+                pingTimestamp = timestamp;
+                logSent(messageStr);
+            } catch (e) {
+                logError(`Error sending ping: ${e.message}`);
+            }
+        }
+        
+        // Execute code
+        function executeCode() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                logError('Cannot execute code: Not connected');
+                return;
+            }
+            
+            const code = codeInput.value.trim();
+            if (!code) {
+                logError('No code to execute');
+                return;
+            }
+            
+            try {
+                const message = {
+                    type: 'execute',
+                    code: code
+                };
+                
+                const messageStr = JSON.stringify(message);
+                socket.send(messageStr);
+                
+                logSent(messageStr);
+            } catch (e) {
+                logError(`Error executing code: ${e.message}`);
+            }
+        }
+        
+        // Clear log
+        function clearLog() {
+            logOutput.innerHTML = '';
+            log('Log cleared');
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        pingBtn.addEventListener('click', sendPing);
+        executeBtn.addEventListener('click', executeCode);
+        clearLogBtn.addEventListener('click', clearLog);
+        
+        // Initialize
+        log('WebSocket Test loaded');
+        log(`Server URL: ${WS_URL}`);
+        log(`Subprotocol: ${PROTOCOL}`);
+    </script>
+</body>
+</html>

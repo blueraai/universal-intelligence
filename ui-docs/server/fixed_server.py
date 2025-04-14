@@ -11,20 +11,24 @@ import io
 import contextlib
 import re
 import time
-from typing import Dict, Any, Optional, Tuple, Union
+from typing import Dict, Any, Optional
 
-# Configure logging with reduced verbosity
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stdout
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger('websocket-server')
-logger.setLevel(logging.INFO)
 
 # Set all websockets loggers to WARNING to reduce noise
-for logger_name in ['websockets.server', 'websockets.protocol', 'websockets.client']:
-    logging.getLogger(logger_name).setLevel(logging.WARNING)
+logging.getLogger('websockets').setLevel(logging.WARNING)
+
+# Security settings
+MAX_EXECUTION_TIME = 10  # seconds
+MAX_OUTPUT_SIZE = 100 * 1024  # 100KB
+
+# Track active connections
+active_connections = set()
 
 # CORS headers
 CORS_HEADERS = {
@@ -33,13 +37,6 @@ CORS_HEADERS = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, Sec-WebSocket-Protocol',
     'Access-Control-Max-Age': '86400',
 }
-
-# Security settings
-MAX_EXECUTION_TIME = 10  # seconds
-MAX_OUTPUT_SIZE = 100 * 1024  # 100KB
-
-# Track active connections
-active_connections = set()
 
 def execute_python_code(code: str) -> Dict[str, Any]:
     """Execute Python code in a restricted environment and capture output"""
@@ -99,127 +96,92 @@ async def execute_with_timeout(code: str, timeout: int = MAX_EXECUTION_TIME) -> 
             }
         }
 
-async def send_json(websocket, data: Dict[str, Any]) -> bool:
-    """Safely send JSON data with error handling"""
-    try:
-        message = json.dumps(data)
-        await websocket.send(message)
-        return True
-    except websockets.exceptions.ConnectionClosed:
-        return False
-    except Exception as e:
-        logger.error(f"Error sending message: {e}")
-        return False
-
-async def process_request(path, request_headers):
-    """Process HTTP requests for CORS and WebSocket protocol"""
-    # Simple CORS handler for browser preflight requests
-    if path == '/':
-        return None  # Let websockets library handle it
-        
-    # For other HTTP requests, return a simple message
-    return 200, CORS_HEADERS, b"WebSocket server is running. Connect with a WebSocket client."
-
-async def websocket_handler(websocket, path=None):
-    """WebSocket connection handler optimized for browser clients"""
-    # Generate client ID for tracking
+async def websocket_handler(websocket):
+    """WebSocket connection handler with code execution capabilities"""
+    # Add to active connections
+    active_connections.add(websocket)
     client_id = id(websocket)
-    remote_addr = getattr(websocket, 'remote_address', 'unknown')
-    client_info = f"{remote_addr}-{client_id}"
+    client_info = f"{client_id}"
     
     logger.info(f"New connection from {client_info}")
     
-    # Add to active connections
-    active_connections.add(websocket)
-    
     try:
-        # Get accepted subprotocols (works in multiple websockets versions)
-        subprotocol = getattr(websocket, 'subprotocol', None)
-        logger.info(f"Using subprotocol: {subprotocol}")
-        
         # Send welcome message immediately
-        await send_json(websocket, {
+        welcome = {
             "type": "connection",
             "status": "connected",
             "message": "Connected to WebSocket server"
-        })
-        
-        # Small delay before initial ping to ensure connection is stable
-        await asyncio.sleep(0.1)
-        
-        # Send an initial ping
-        await send_json(websocket, {
-            "type": "ping",
-            "timestamp": int(time.time() * 1000)
-        })
+        }
+        await websocket.send(json.dumps(welcome))
         
         # Message handling loop
         async for message in websocket:
             try:
-                # Try to parse as JSON
+                # Parse as JSON
                 data = json.loads(message)
                 message_type = data.get('type', '')
+                logger.info(f"Received message: {message_type}")
                 
                 if message_type == 'execute':
                     # Handle code execution
                     code = data.get('code', '')
                     
                     if not code.strip():
-                        await send_json(websocket, {
+                        await websocket.send(json.dumps({
                             "type": "result",
                             "status": "error",
                             "stdout": "",
                             "stderr": "No code provided.",
                             "error": {"type": "ValueError", "message": "No code provided."}
-                        })
+                        }))
                         continue
                     
                     # Send running status
-                    await send_json(websocket, {
+                    await websocket.send(json.dumps({
                         "type": "status",
                         "status": "running",
                         "message": "Executing code..."
-                    })
+                    }))
                     
                     # Execute code and send result
                     result = await execute_with_timeout(code)
                     result["type"] = "result"
                     result["status"] = "error" if result.get("error") else "completed"
                     
-                    await send_json(websocket, result)
+                    await websocket.send(json.dumps(result))
                     
                 elif message_type == 'ping':
                     # Handle ping message
-                    await send_json(websocket, {
+                    await websocket.send(json.dumps({
                         "type": "pong",
                         "timestamp": data.get('timestamp', int(time.time() * 1000))
-                    })
+                    }))
                     
                 else:
                     # Echo other messages
-                    await send_json(websocket, {
+                    await websocket.send(json.dumps({
                         "type": "echo",
                         "received": data,
                         "message": "Unknown message type"
-                    })
+                    }))
                     
             except json.JSONDecodeError:
                 # Handle non-JSON messages
-                await send_json(websocket, {
+                await websocket.send(json.dumps({
                     "type": "error",
                     "message": "Invalid JSON message"
-                })
+                }))
                 
             except Exception as e:
                 # Handle other errors
                 logger.error(f"Error processing message: {e}")
-                await send_json(websocket, {
+                await websocket.send(json.dumps({
                     "type": "error",
                     "message": str(e)
-                })
+                }))
                 
     except websockets.exceptions.ConnectionClosed as e:
-        logger.info(f"Connection closed for {client_info}: code={e.code}, reason={e.reason}")
+        logger.info(f"Connection closed for {client_info}: code={e.code if hasattr(e, 'code') else 'unknown'}")
         
     except Exception as e:
         logger.error(f"Error in handler for {client_info}: {e}")
@@ -258,10 +220,10 @@ async def heartbeat():
             
         await asyncio.sleep(15)  # Send heartbeat every 15 seconds
 
-async def start_server():
-    """Start the WebSocket server with optimal browser compatibility"""
-    port = int(os.environ.get('PORT', 9765))
-    host = os.environ.get('HOST', '0.0.0.0')
+async def main():
+    """Start the WebSocket server"""
+    port = 9765
+    host = "localhost"
     
     logger.info(f"Starting WebSocket server on {host}:{port}")
     logger.info(f"Python version: {sys.version}")
@@ -277,18 +239,9 @@ async def start_server():
             host,
             port,
             # Disable built-in ping mechanism (we use our own)
-            ping_interval=None,
             ping_timeout=None,
-            # Use a short close timeout
-            close_timeout=5,
-            # Support subprotocols
-            subprotocols=['json'],
-            # Disable compression (can cause issues with some clients)
-            compression=None,
-            # Handle preflight requests for CORS
-            process_request=process_request,
-            # Allow larger messages
-            max_size=10_000_000,
+            # Simpler configuration for better compatibility
+            max_size=10_000_000
         )
         
         logger.info(f"WebSocket server running at ws://{host}:{port}")
@@ -308,7 +261,7 @@ async def start_server():
 
 if __name__ == "__main__":
     try:
-        asyncio.run(start_server())
+        asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
     except Exception as e:
