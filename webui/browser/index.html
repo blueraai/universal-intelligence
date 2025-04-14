@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Universal Intelligence Dev UI</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Open Sans', sans-serif;
+      height: 100%;
+      background-color: #f8f9fa;
+    }
+    
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    .header {
+      background-color: #212529;
+      color: white;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .agent-selector {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid #ced4da;
+      background-color: white;
+      margin-left: 12px;
+    }
+    
+    .content {
+      display: flex;
+      height: calc(100vh - 56px);
+    }
+    
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      overflow: hidden;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
+    }
+    
+    .chat-input {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .chat-input textarea {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      resize: none;
+      height: 60px;
+    }
+    
+    .chat-input button {
+      padding: 0 24px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .chat-input button:hover {
+      background-color: #0b5ed7;
+    }
+    
+    .debug-panel {
+      width: 400px;
+      background-color: white;
+      border-left: 1px solid #dee2e6;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    
+    .message {
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    
+    .user-message {
+      background-color: #e9ecef;
+      margin-left: 40px;
+    }
+    
+    .agent-message {
+      background-color: #f1f8ff;
+      margin-right: 40px;
+    }
+    
+    .message-header {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .debug-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .debug-section {
+      margin-bottom: 16px;
+    }
+    
+    .debug-section h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .debug-json {
+      background-color: #f8f9fa;
+      padding: 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #0d6efd;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <div class="header-title">Universal Intelligence Dev UI</div>
+      <div>
+        <label for="agent-select">Agent:</label>
+        <select id="agent-select" class="agent-selector">
+          <option value="">Select an agent</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="content">
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="message agent-message">
+            <div class="message-header">Agent</div>
+            <div>Welcome to Universal Intelligence! Select an agent to start chatting.</div>
+          </div>
+        </div>
+        
+        <div class="chat-input">
+          <textarea id="user-input" placeholder="Type your message..." disabled></textarea>
+          <button id="send-button" disabled>Send</button>
+        </div>
+      </div>
+      
+      <div class="debug-panel">
+        <div class="debug-title">Debug Information</div>
+        
+        <div class="debug-section">
+          <h3>Session Information</h3>
+          <div class="debug-json" id="session-info">No session created yet</div>
+        </div>
+        
+        <div class="debug-section">
+          <h3>Last Event</h3>
+          <div class="debug-json" id="last-event">No events yet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // State
+    let selectedAgent = '';
+    let currentSession = null;
+    let messages = [];
+    
+    // DOM Elements
+    const agentSelect = document.getElementById('agent-select');
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const sessionInfo = document.getElementById('session-info');
+    const lastEvent = document.getElementById('last-event');
+    
+    // Functions
+    async function fetchAgents() {
+      try {
+        const response = await fetch('/list-apps');
+        if (!response.ok) throw new Error('Failed to load agents');
+        
+        const agents = await response.json();
+        agentSelect.innerHTML = '<option value="">Select an agent</option>';
+        
+        agents.forEach(agent => {
+          const option = document.createElement('option');
+          option.value = agent;
+          option.textContent = agent;
+          agentSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading agents:', error);
+        alert('Failed to load agents. Please check the console for details.');
+      }
+    }
+    
+    async function createSession(agentName) {
+      try {
+        const response = await fetch(`/apps/${agentName}/users/test-user/sessions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        });
+        
+        if (!response.ok) throw new Error('Failed to create session');
+        
+        currentSession = await response.json();
+        sessionInfo.textContent = JSON.stringify(currentSession, null, 2);
+        
+        userInput.disabled = false;
+        sendButton.disabled = false;
+        
+        // Clear messages and add welcome message
+        chatMessages.innerHTML = '';
+        addAgentMessage('Hello! How can I help you today?');
+        
+      } catch (error) {
+        console.error('Error creating session:', error);
+        alert('Failed to create session. Please check the console for details.');
+      }
+    }
+    
+    async function sendMessage(text) {
+      if (!currentSession) return;
+      
+      // Add user message to UI
+      addUserMessage(text);
+      
+      // Disable input while processing
+      userInput.disabled = true;
+      sendButton.disabled = true;
+      
+      try {
+        // Create a temporary loading message
+        const loadingMessage = document.createElement('div');
+        loadingMessage.className = 'message agent-message';
+        loadingMessage.innerHTML = `
+          <div class="message-header">Agent</div>
+          <div><span class="loading-spinner"></span>Thinking...</div>
+        `;
+        chatMessages.appendChild(loadingMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Prepare request for streaming
+        const response = await fetch('/run_sse', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            app_name: selectedAgent,
+            user_id: currentSession.user_id,
+            session_id: currentSession.id,
+            new_message: {
+              role: 'user',
+              parts: [{ text }]
+            },
+            streaming: true
+          })
+        });
+        
+        if (!response.ok) throw new Error('Failed to send message');
+        
+        // Remove loading message
+        chatMessages.removeChild(loadingMessage);
+        
+        // Handle streaming response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        
+        // Create a new agent message for the response
+        const agentMessageElem = document.createElement('div');
+        agentMessageElem.className = 'message agent-message';
+        agentMessageElem.innerHTML = `
+          <div class="message-header">Agent</div>
+          <div class="agent-content"></div>
+        `;
+        chatMessages.appendChild(agentMessageElem);
+        const agentContent = agentMessageElem.querySelector('.agent-content');
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          // Decode and process the chunk
+          buffer += decoder.decode(value, { stream: true });
+          
+          // Process any complete SSE events in the buffer
+          const events = buffer.split('\n\n');
+          buffer = events.pop() || ''; // Keep the last incomplete event in the buffer
+          
+          for (const eventText of events) {
+            if (!eventText.trim() || !eventText.startsWith('data:')) continue;
+            
+            const eventData = eventText.replace('data: ', '');
+            try {
+              const event = JSON.parse(eventData);
+              
+              // Update last event in debug panel
+              lastEvent.textContent = JSON.stringify(event, null, 2);
+              
+              // Extract and display text content
+              if (event.content && event.content.parts) {
+                const text = event.content.parts
+                  .filter(part => part.text)
+                  .map(part => part.text)
+                  .join('');
+                
+                agentContent.textContent = text;
+              }
+            } catch (e) {
+              console.error('Error parsing event:', e, eventData);
+            }
+          }
+          
+          // Auto-scroll
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+      } catch (error) {
+        console.error('Error sending message:', error);
+        addAgentMessage('Sorry, there was an error processing your message.');
+      } finally {
+        // Re-enable input
+        userInput.disabled = false;
+        sendButton.disabled = false;
+        userInput.focus();
+      }
+    }
+    
+    function addUserMessage(text) {
+      const messageElem = document.createElement('div');
+      messageElem.className = 'message user-message';
+      messageElem.innerHTML = `
+        <div class="message-header">You</div>
+        <div>${text}</div>
+      `;
+      chatMessages.appendChild(messageElem);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function addAgentMessage(text) {
+      const messageElem = document.createElement('div');
+      messageElem.className = 'message agent-message';
+      messageElem.innerHTML = `
+        <div class="message-header">Agent</div>
+        <div>${text}</div>
+      `;
+      chatMessages.appendChild(messageElem);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Event Listeners
+    agentSelect.addEventListener('change', () => {
+      selectedAgent = agentSelect.value;
+      if (selectedAgent) {
+        createSession(selectedAgent);
+      } else {
+        userInput.disabled = true;
+        sendButton.disabled = true;
+      }
+    });
+    
+    sendButton.addEventListener('click', () => {
+      const text = userInput.value.trim();
+      if (text) {
+        sendMessage(text);
+        userInput.value = '';
+      }
+    });
+    
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendButton.click();
+      }
+    });
+    
+    // Initialize
+    fetchAgents();
+  </script>
+</body>
+</html>
