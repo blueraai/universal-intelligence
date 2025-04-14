@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #output {
+            border: 1px solid #ccc;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button {
+            padding: 8px 15px;
+            margin-right: 10px;
+            background-color: #4a00e0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6428e0;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 8px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="status">Status: Disconnected</div>
+    <div id="output"></div>
+
+    <div>
+        <button id="connect">Connect</button>
+        <button id="disconnect">Disconnect</button>
+        <button id="ping">Send Ping</button>
+    </div>
+
+    <h3>Execute Code</h3>
+    <textarea id="code">print("Hello from WebSocket test!")</textarea>
+    <button id="execute">Execute</button>
+
+    <script>
+        const output = document.getElementById('output');
+        const statusElement = document.getElementById('status');
+        const connectButton = document.getElementById('connect');
+        const disconnectButton = document.getElementById('disconnect');
+        const pingButton = document.getElementById('ping');
+        const executeButton = document.getElementById('execute');
+        const codeTextarea = document.getElementById('code');
+
+        let socket = null;
+        let reconnectTimeout = null;
+        let reconnectCount = 0;
+        const MAX_RECONNECT_ATTEMPTS = 3;
+
+        function log(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = type;
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            if (connected) {
+                statusElement.textContent = 'Status: Connected';
+                statusElement.style.color = 'green';
+            } else {
+                statusElement.textContent = 'Status: Disconnected';
+                statusElement.style.color = 'red';
+            }
+        }
+
+        function connect() {
+            try {
+                if (socket && socket.readyState !== WebSocket.CLOSED) {
+                    log('Already connected or connecting', 'error');
+                    return;
+                }
+
+                log(`Connecting to WebSocket server at ws://localhost:9765...`);
+
+                // Create WebSocket connection
+                socket = new WebSocket('ws://localhost:9765', ['json']);
+                socket.binaryType = 'arraybuffer';
+
+                socket.onopen = function() {
+                    log('WebSocket connection established!', 'success');
+                    updateStatus(true);
+                    reconnectCount = 0;
+
+                    // Clear any reconnect timeout
+                    if (reconnectTimeout) {
+                        clearTimeout(reconnectTimeout);
+                        reconnectTimeout = null;
+                    }
+                };
+
+                socket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`Received: ${JSON.stringify(data)}`, 'success');
+
+                        // Process different message types
+                        if (data.type === 'result' && data.stdout) {
+                            log(`Output: ${data.stdout.trim()}`, 'info');
+                        }
+                    } catch (e) {
+                        log(`Received non-JSON message: ${event.data}`, 'info');
+                    }
+                };
+
+                socket.onclose = function(event) {
+                    const reason = event.reason ? ` - Reason: ${event.reason}` : '';
+                    log(`WebSocket connection closed: Code ${event.code}${reason}`, 'error');
+                    updateStatus(false);
+                    socket = null;
+
+                    // Attempt to reconnect if close was not clean
+                    if (!event.wasClean && reconnectCount < MAX_RECONNECT_ATTEMPTS) {
+                        reconnectCount++;
+                        const timeout = Math.min(1000 * Math.pow(1.5, reconnectCount), 5000);
+                        log(`Reconnecting in ${timeout/1000} seconds... (Attempt ${reconnectCount}/${MAX_RECONNECT_ATTEMPTS})`, 'info');
+
+                        reconnectTimeout = setTimeout(() => {
+                            connect();
+                        }, timeout);
+                    }
+                };
+
+                socket.onerror = function(error) {
+                    log('WebSocket error!', 'error');
+                    console.error('WebSocket error:', error);
+                };
+            } catch (e) {
+                log(`Error creating WebSocket: ${e.message}`, 'error');
+                console.error('Error:', e);
+            }
+        }
+
+        function disconnect() {
+            if (!socket) {
+                log('Not connected', 'error');
+                return;
+            }
+
+            try {
+                log('Closing WebSocket connection...');
+                socket.close(1000, 'User initiated disconnect');
+            } catch (e) {
+                log(`Error closing connection: ${e.message}`, 'error');
+            }
+        }
+
+        function sendPing() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                log('Cannot send ping: Not connected', 'error');
+                return;
+            }
+
+            try {
+                const pingMessage = JSON.stringify({
+                    type: 'ping',
+                    timestamp: Date.now()
+                });
+
+                socket.send(pingMessage);
+                log(`Sent ping: ${pingMessage}`, 'info');
+            } catch (e) {
+                log(`Error sending ping: ${e.message}`, 'error');
+            }
+        }
+
+        function executeCode() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                log('Cannot execute code: Not connected', 'error');
+                return;
+            }
+
+            const code = codeTextarea.value.trim();
+            if (!code) {
+                log('No code to execute', 'error');
+                return;
+            }
+
+            try {
+                const executeMessage = JSON.stringify({
+                    type: 'execute',
+                    code: code
+                });
+
+                socket.send(executeMessage);
+                log(`Sent code execution request`, 'info');
+            } catch (e) {
+                log(`Error sending code: ${e.message}`, 'error');
+            }
+        }
+
+        // Event listeners
+        connectButton.addEventListener('click', connect);
+        disconnectButton.addEventListener('click', disconnect);
+        pingButton.addEventListener('click', sendPing);
+        executeButton.addEventListener('click', executeCode);
+
+        // Connect automatically on page load
+        window.addEventListener('load', () => {
+            // Add a small delay to ensure everything is loaded
+            setTimeout(connect, 500);
+        });
+    </script>
+</body>
+</html>

@@ -92,13 +92,31 @@ export function useWebSocket({
 
     // Close any existing connection
     if (socket.current) {
-      socket.current.close();
+      try {
+        // Clean close of existing connection
+        socket.current.onclose = null; // Remove existing handler
+        socket.current.onerror = null; // Remove existing handler
+        socket.current.close(1000, "Closing for new connection");
+      } catch (e) {
+        console.error("Error closing existing connection:", e);
+      }
+      socket.current = null;
     }
 
     // Create a new WebSocket instance
     try {
       console.log(`Connecting to WebSocket at ${url}...`);
-      socket.current = new WebSocket(url);
+
+      // For debugging, log navigator information if in browser environment
+      if (typeof navigator !== 'undefined') {
+        console.log(`Browser: ${navigator.userAgent}`);
+      }
+
+      // Create WebSocket with protocols to improve compatibility
+      socket.current = new WebSocket(url, ['json']);
+
+      // Set binaryType to improve compatibility
+      socket.current.binaryType = 'arraybuffer';
       setReadyState(WebSocket.CONNECTING);
 
       // Connection opened
@@ -198,10 +216,17 @@ export function useWebSocket({
       const messageStr = JSON.stringify(message);
       console.log(`Sending message: ${messageStr}`);
       socket.current.send(messageStr);
+      return true;
     } else {
       console.error('WebSocket is not connected');
+      // Try to reconnect if not open and not already in the process of connecting
+      if (!isConnecting && socket.current?.readyState !== WebSocket.CONNECTING) {
+        console.log('Attempting to reconnect before sending message...');
+        connect();
+      }
+      return false;
     }
-  }, []);
+  }, [connect, isConnecting]);
 
   // Ping server periodically to keep connection alive
   useEffect(() => {
@@ -223,6 +248,18 @@ export function useWebSocket({
 
     return () => clearInterval(pingInterval);
   }, [isConnected]);
+
+  // Force reconnection when server is restarted or if connection is lost
+  useEffect(() => {
+    if (hasGivenUp) {
+      const timer = setTimeout(() => {
+        console.log('Attempting to reconnect automatically after giving up...');
+        resetConnection();
+      }, 5000); // Try to reconnect every 5 seconds after giving up
+
+      return () => clearTimeout(timer);
+    }
+  }, [hasGivenUp, resetConnection]);
 
   // Connect on mount if autoConnect is true
   useEffect(() => {

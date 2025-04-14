@@ -51,6 +51,7 @@ dev = [
     "ruff>=0.3.0",
     "black>=24.2.0",
     "isort>=5.13.2",
+    "watchdog>=3.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -93,4 +94,4 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
-line_length = 300 
+line_length = 300

@@ -10,6 +10,7 @@ import {
   codeExamples,
   additionalExamples,
 } from '../components/playground/CodeExamples';
+import OutputDisplay from '../components/playground/OutputDisplay';
 
 // Custom theme matching our site
 const universalTheme = {
@@ -44,12 +45,13 @@ const universalTheme = {
   }
 };
 
-// Custom component for WebSocket connection management and running code
+// Enhanced component for WebSocket connection management and running code
 const WebSocketRunner: React.FC = () => {
   const { sandpack } = useSandpack();
   const { files, activeFile } = sandpack;
   const [output, setOutput] = useState<string>('');
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [runError, setRunError] = useState<string | null>(null);
 
   // Initialize WebSocket connection
   const {
@@ -61,15 +63,17 @@ const WebSocketRunner: React.FC = () => {
     resetConnection,
     hasGivenUp
   } = useWebSocket({
-    url: 'ws://localhost:8765',
+    url: 'ws://localhost:9765',
     onOpen: () => {
       console.log('WebSocket connected');
+      setRunError(null);
     },
     onClose: () => {
       console.log('WebSocket disconnected');
     },
     onError: (error) => {
       console.error('WebSocket error:', error);
+      setRunError('Connection error');
     },
     reconnectAttempts: 3,
     initialReconnectInterval: 1000,
@@ -89,34 +93,66 @@ const WebSocketRunner: React.FC = () => {
         }
 
         if (result.stderr) {
-          outputText += `\n${result.stderr}`;
+          outputText += result.stderr ? `\n${result.stderr}` : '';
         }
 
         if (result.error) {
-          outputText += `\n${result.error.type}: ${result.error.message}`;
+          outputText += `\n${result.error.type || 'Error'}: ${result.error.message}`;
           if (result.error.traceback) {
             outputText += `\n${result.error.traceback}`;
           }
+          setRunError(`${result.error.type || 'Error'}: ${result.error.message}`);
+        } else {
+          setRunError(null);
         }
 
-        setOutput(outputText);
+        setOutput(outputText || 'Code executed successfully with no output.');
         setIsRunning(false);
       } else if (lastMessage.type === 'status') {
         // Handle status updates
         console.log(`Status: ${lastMessage.status} - ${lastMessage.message}`);
+        if (lastMessage.status === 'running') {
+          setOutput('Running code...');
+        }
+      } else if (lastMessage.type === 'connection') {
+        console.log(`Connection established: ${lastMessage.message}`);
+        setRunError(null);
+      } else if (lastMessage.type === 'error') {
+        console.error(`Server error: ${lastMessage.message}`);
+        setRunError(`Server error: ${lastMessage.message}`);
+        setIsRunning(false);
+      } else if (lastMessage.type === 'pong') {
+        console.log('Received pong response');
+        // Update connection status
+        setRunError(null);
       }
     }
   }, [lastMessage]);
+
+  // Force reconnection when needed
+  useEffect(() => {
+    if (hasGivenUp) {
+      const timer = setTimeout(() => {
+        console.log('Attempting to reconnect automatically after giving up...');
+        resetConnection();
+      }, 5000); // Try to reconnect every 5 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [hasGivenUp, resetConnection]);
 
   // Execute code
   const handleRunCode = () => {
     if (!isConnected) {
       setOutput('Not connected to execution server. Attempting to reconnect...');
+      setRunError('Not connected to server');
       connect();
       return;
     }
 
     setIsRunning(true);
+    setRunError(null);
+    setOutput('Preparing to run code...');
     const code = files[activeFile].code;
 
     // Send code to the WebSocket server
@@ -126,6 +162,7 @@ const WebSocketRunner: React.FC = () => {
     });
   };
 
+  // Use OutputDisplay component for consistent styling
   return (
     <div>
       <div style={{
@@ -183,44 +220,31 @@ const WebSocketRunner: React.FC = () => {
         </div>
       </div>
 
-      {/* Custom console output display */}
+      {/* Output display section */}
       <div style={{ marginTop: '1rem' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '0.8rem', color: '#f8f8f2' }}>
-          Output:
-        </div>
         <div style={{
-          backgroundColor: '#141a24',
-          padding: '1rem',
-          borderRadius: '4px',
-          fontFamily: 'monospace',
-          color: '#f8f8f2',
-          whiteSpace: 'pre-wrap',
-          maxHeight: '300px',
-          overflowY: 'auto',
-          border: '1px solid #333'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.8rem'
         }}>
-          {isRunning ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{
-                width: '1rem',
-                height: '1rem',
-                borderRadius: '50%',
-                backgroundColor: '#00ff9d',
-                animation: 'blink 1s infinite'
-              }}></div>
-              <span>Running code...</span>
+          <div style={{ fontWeight: 'bold', color: '#f8f8f2' }}>
+            Output:
+          </div>
+          {runError && (
+            <div style={{
+              fontSize: '0.8rem',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '4px',
+              backgroundColor: '#3a1e1e',
+              color: '#e47272'
+            }}>
+              {runError}
             </div>
-          ) : hasGivenUp ? (
-            <div style={{ color: '#e47272' }}>
-              Failed to connect to the execution server after multiple attempts.
-              Please check if the server is running and click "Retry Connection".
-            </div>
-          ) : output ? (
-            output
-          ) : (
-            <span style={{ color: '#777' }}>Code execution output will appear here.</span>
           )}
         </div>
+
+        <OutputDisplay output={output} isRunning={isRunning} />
       </div>
     </div>
   );
@@ -375,11 +399,19 @@ const Playground: React.FC = () => {
           About this Playground
         </h3>
         <p>
-          This playground executes Universal Intelligence code on a back-end Python server.
-          The code you write runs in a sandboxed environment with the Universal Intelligence
-          framework installed. You can try out different examples or create your own code
-          to experiment with the framework's capabilities.
+          This playground executes Universal Intelligence code in real-time using a WebSocket-based
+          Python server. Your code runs in a Python environment with standard libraries available.
+          Try out the provided examples or write your own code to experiment with the framework.
         </p>
+        <div style={{ marginTop: '1rem', padding: '0.5rem', borderLeft: '3px solid #4a00e0', backgroundColor: '#1a1a2e' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            <strong>Note:</strong> Make sure the WebSocket server (server.py) is running locally at
+            <code style={{ backgroundColor: '#292938', padding: '0.1rem 0.3rem', margin: '0 0.3rem', borderRadius: '3px' }}>
+              ws://localhost:9765
+            </code>
+            to execute code. Start it by running <code style={{ backgroundColor: '#292938', padding: '0.1rem 0.3rem', margin: '0 0.3rem', borderRadius: '3px' }}>python server.py</code> in your terminal.
+          </p>
+        </div>
       </div>
     </div>
   );

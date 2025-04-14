@@ -7,12 +7,17 @@ import traceback
 import logging
 import sys
 import os
+import io
+import contextlib
+import re
+import time
+from typing import Dict, Any, Optional, Tuple
 
 # Set up detailed logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stdout  # Ensure logs go to stdout for Docker to capture them
+    stream=sys.stdout
 )
 logger = logging.getLogger('websocket-server')
 logger.setLevel(logging.DEBUG)
@@ -24,6 +29,89 @@ CORS_HEADERS = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',  # 24 hours
 }
+
+# Security settings for code execution
+MAX_EXECUTION_TIME = 10  # Maximum execution time in seconds
+MAX_OUTPUT_SIZE = 100 * 1024  # Maximum output size in bytes (100KB)
+
+# Execute Python code safely
+def execute_python_code(code: str) -> Dict[str, Any]:
+    """
+    Execute Python code in a restricted environment and capture output
+
+    Returns a dict with:
+    - stdout: captured standard output
+    - stderr: captured standard error
+    - error: error info if an exception occurred
+    """
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    # Create a dictionary for local variables
+    local_vars = {}
+    error_info = None
+
+    # Wrap execution to catch any exceptions
+    try:
+        # Capture stdout and stderr
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            # Execute with timeout using asyncio
+            exec(code, {"__builtins__": __builtins__}, local_vars)
+
+    except Exception as e:
+        error_type = type(e).__name__
+        error_msg = str(e)
+        error_traceback = traceback.format_exc()
+
+        # Filter out system-specific paths from traceback for security
+        error_traceback = re.sub(r'File ".*[/\\]', 'File "', error_traceback)
+
+        error_info = {
+            "type": error_type,
+            "message": error_msg,
+            "traceback": error_traceback
+        }
+
+        logger.error(f"Error executing code: {error_type}: {error_msg}")
+
+    # Get output, truncate if too large
+    stdout_output = stdout.getvalue()
+    stderr_output = stderr.getvalue()
+
+    if len(stdout_output) > MAX_OUTPUT_SIZE:
+        stdout_output = stdout_output[:MAX_OUTPUT_SIZE] + "\n... output truncated (too large)"
+
+    if len(stderr_output) > MAX_OUTPUT_SIZE:
+        stderr_output = stderr_output[:MAX_OUTPUT_SIZE] + "\n... error output truncated (too large)"
+
+    return {
+        "stdout": stdout_output,
+        "stderr": stderr_output,
+        "error": error_info
+    }
+
+# Execute code with timeout
+async def execute_with_timeout(code: str, timeout: int = MAX_EXECUTION_TIME) -> Dict[str, Any]:
+    """Execute code with a timeout to prevent infinite loops"""
+    try:
+        # Run the execution in a separate thread
+        loop = asyncio.get_event_loop()
+        result = await asyncio.wait_for(
+            loop.run_in_executor(None, execute_python_code, code),
+            timeout=timeout
+        )
+        return result
+    except asyncio.TimeoutError:
+        logger.warning(f"Code execution timed out after {timeout} seconds")
+        return {
+            "stdout": "",
+            "stderr": f"Execution timed out after {timeout} seconds.",
+            "error": {
+                "type": "TimeoutError",
+                "message": f"Code execution took too long (exceeded {timeout} seconds limit).",
+                "traceback": ""
+            }
+        }
 
 # WebSocket handler for both testing and UI integration
 async def websocket_handler(websocket, path=None):
@@ -45,14 +133,33 @@ async def websocket_handler(websocket, path=None):
 
         logger.info(f"Connection opened from {addr} with path {path_info}, origin: {origin}")
 
-        # Send welcome message as JSON for the UI client
-        welcome_message = json.dumps({
-            "type": "connection",
-            "status": "connected",
-            "message": "Connected to WebSocket server"
-        })
-        await websocket.send(welcome_message)
-        logger.info(f"Sent welcome message: {welcome_message}")
+        try:
+            # Send welcome message as JSON for the UI client
+            welcome_message = json.dumps({
+                "type": "connection",
+                "status": "connected",
+                "message": "Connected to WebSocket server"
+            })
+
+            # Use wait_for to handle potential timeouts
+            await asyncio.wait_for(websocket.send(welcome_message), timeout=2.0)
+            logger.info(f"Sent welcome message: {welcome_message}")
+
+            # Small delay before sending ping to ensure connection is stable
+            await asyncio.sleep(0.1)
+
+            # Send an immediate ping to help keep the connection open
+            ping_message = json.dumps({
+                "type": "ping",
+                "timestamp": int(time.time() * 1000)
+            })
+            await asyncio.wait_for(websocket.send(ping_message), timeout=2.0)
+            logger.info("Sent initial ping to keep connection alive")
+        except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed) as e:
+            logger.error(f"Connection unstable during handshake: {e}")
+            # Continue to message handling loop, let the normal error handlers manage the situation
+        except Exception as e:
+            logger.error(f"Error during connection setup: {e}")
 
         # Wait for messages
         async for message in websocket:
@@ -67,6 +174,17 @@ async def websocket_handler(websocket, path=None):
                 if message_type == 'execute':
                     # Handle code execution request
                     logger.info("Processing code execution request")
+                    code = parsed.get('code', '')
+
+                    if not code.strip():
+                        await websocket.send(json.dumps({
+                            "type": "result",
+                            "status": "error",
+                            "stdout": "",
+                            "stderr": "No code provided.",
+                            "error": {"type": "ValueError", "message": "No code provided."}
+                        }))
+                        continue
 
                     # Send running status
                     await websocket.send(json.dumps({
@@ -75,16 +193,15 @@ async def websocket_handler(websocket, path=None):
                         "message": "Executing code..."
                     }))
 
-                    # Simulate code execution and send result
-                    await asyncio.sleep(0.5)  # Simulate processing time
+                    # Actually execute the code
+                    result = await execute_with_timeout(code)
 
-                    await websocket.send(json.dumps({
-                        "type": "result",
-                        "status": "completed",
-                        "stdout": "Hello from WebSocket Server!\nYour code executed successfully.",
-                        "stderr": "",
-                        "error": None
-                    }))
+                    # Add completion status
+                    result["type"] = "result"
+                    result["status"] = "error" if result.get("error") else "completed"
+
+                    # Send result to client
+                    await websocket.send(json.dumps(result))
                     logger.info("Sent execution result")
 
                 elif message_type == 'ping':
@@ -136,14 +253,14 @@ async def websocket_handler(websocket, path=None):
         logger.error(f"Handler error: {e}")
         logger.error(traceback.format_exc())
 
-# Process HTTP OPTIONS requests for CORS
+# Process HTTP OPTIONS requests for CORS - Updated for compatibility with different websockets versions
 async def process_request(path, request):
     """
     Process HTTP requests to handle CORS preflight requests from browsers.
 
     Parameters:
     - path: The request path
-    - request: The websockets.http11.Request object
+    - request: The websockets Request object (different structure in different versions)
 
     Returns:
     - A tuple (status, headers, body) for non-WebSocket requests
@@ -151,23 +268,32 @@ async def process_request(path, request):
     """
     logger.info(f"Processing request for path: {path}")
 
-    # Get the headers
-    headers = {}
+    # Check if request has a headers attribute (for newer websockets versions)
+    if not hasattr(request, 'headers'):
+        # For older websockets versions (like 14.x), the request might be the headers dictionary itself
+        return None
+
+    # Get request method - different ways depending on websockets version
+    method = getattr(request, 'method', None)
+    if method is None:
+        # Try to get it from headers
+        method = request.headers.get(':method', 'GET')
 
     # For OPTIONS requests (CORS preflight)
-    if request.method == "OPTIONS":
-        logger.info(f"Handling CORS preflight request for {path}")
+    if method == "OPTIONS":
+        logger.info(f"Handling CORS preflight request")
         # Return 200 OK with CORS headers
         return 200, CORS_HEADERS, b''
 
-    # For WebSocket upgrade, add CORS headers to the response
-    if "Upgrade" in request.headers and request.headers["Upgrade"].lower() == "websocket":
-        logger.info(f"WebSocket upgrade request, adding CORS headers")
-        # For WebSocket connections, we'll manually add headers to the response
-        # But let the websockets library handle the actual upgrade
+    # Check for Upgrade header
+    headers = getattr(request, 'headers', {})
+
+    # For WebSocket upgrade, return None to let websockets library handle it
+    if 'Upgrade' in headers and headers['Upgrade'].lower() == 'websocket':
+        logger.info("WebSocket upgrade request")
         return None
 
-    # For other HTTP requests, we'll return a simple response with CORS headers
+    # For other HTTP requests, return a simple response with CORS headers
     return 200, CORS_HEADERS, b"This server handles WebSocket connections only."
 
 async def main():
@@ -177,18 +303,23 @@ async def main():
 
     try:
         # Create server with minimal configuration for maximum compatibility
+        PORT = 9765  # Changed port to avoid conflicts
+        # Configuration optimized for browser compatibility
         server = await websockets.serve(
             websocket_handler,
-            "0.0.0.0",   # Listen on all interfaces
-            8765,        # Port number
-            ping_interval=20,     # Send pings to keep connection alive
-            ping_timeout=30,      # Timeout for pings
-            close_timeout=10,     # Timeout for closing
-            max_size=10_000_000,  # 10MB max message size
+            "0.0.0.0",  # Listen on all interfaces for better compatibility
+            PORT,        # Port number
+            ping_interval=None,  # Disable built-in pings, we'll handle manually in code
+            ping_timeout=None,   # Disable ping timeouts
+            close_timeout=5,     # Shorter timeout for closing
+            max_size=10_000_000, # 10MB max message size
             process_request=process_request,  # Add CORS handling
+            subprotocols=['json'],  # Accept 'json' subprotocol to match client
+            # Compression options
+            compression=None,  # Disable compression for better compatibility
         )
 
-        logger.info("WebSocket server started at ws://0.0.0.0:8765")
+        logger.info(f"WebSocket server started at ws://localhost:{PORT}")
         logger.info(f"Environment: {os.environ.get('PYTHONPATH', 'Not set')}")
 
         # Run forever
