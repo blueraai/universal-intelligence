@@ -164,6 +164,24 @@
       margin-right: 8px;
     }
     
+    .thinking-section {
+      font-size: 14px;
+      color: #6c757d;
+      margin-top: 8px;
+      padding: 8px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      border-left: 3px solid #6c757d;
+    }
+    
+    .thinking-toggle {
+      font-size: 12px;
+      color: #6c757d;
+      cursor: pointer;
+      margin-top: 8px;
+      text-decoration: underline;
+    }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -362,7 +380,18 @@
                   .map(part => part.text)
                   .join('');
                 
-                agentContent.textContent = text;
+                // Split thinking and response if detected
+                const processedText = processBotResponse(text);
+                if (processedText.hasThinking) {
+                  // Display response and add thinking toggle
+                  agentContent.innerHTML = `
+                    <div>${processedText.response}</div>
+                    <div class="thinking-toggle" onclick="toggleThinking(this)">Show thinking process</div>
+                    <div class="thinking-section hidden">${processedText.thinking}</div>
+                  `;
+                } else {
+                  agentContent.textContent = text;
+                }
               }
             } catch (e) {
               console.error('Error parsing event:', e, eventData);
@@ -383,6 +412,47 @@
         userInput.focus();
       }
     }
+    
+    function processBotResponse(text) {
+      // Look for the pattern in the response
+      const thinkingPattern = /^The original query was .+, and there were no dependency calls made in response to this query\. Therefore, the direct response to the query is:\s*(.+)$/s;
+      const match = text.match(thinkingPattern);
+      
+      if (match) {
+        return {
+          hasThinking: true,
+          thinking: text.substring(0, text.indexOf('Therefore, the direct response to the query is:')),
+          response: match[1].trim()
+        };
+      } else {
+        return {
+          hasThinking: false,
+          response: text
+        };
+      }
+    }
+    
+    // Function to toggle thinking section visibility
+    function toggleThinking(element) {
+      const thinkingSection = element.nextElementSibling;
+      const isHidden = thinkingSection.classList.contains('hidden');
+      
+      if (isHidden) {
+        thinkingSection.classList.remove('hidden');
+        element.textContent = 'Hide thinking process';
+      } else {
+        thinkingSection.classList.add('hidden');
+        element.textContent = 'Show thinking process';
+      }
+      
+      // Auto-scroll when showing thinking
+      if (isHidden) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+    
+    // Add this to the global scope so it can be called from inline event handlers
+    window.toggleThinking = toggleThinking;
     
     function addUserMessage(text) {
       const messageElem = document.createElement('div');
