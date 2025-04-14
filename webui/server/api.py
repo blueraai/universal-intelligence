@@ -1,4 +1,3 @@
-
 # Copyright 2025 Bluera
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +22,11 @@ from pathlib import Path
 import sys
 import traceback
 import uuid
-from typing import Any, Dict, List, Optional, Literal
+import base64
+from typing import Any, Dict, List, Optional, Literal, Union
 
 import click
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -38,12 +38,28 @@ from universal_intelligence import Agent, Model, Tool
 logger = logging.getLogger(__name__)
 
 # Define request/response models
+class MessagePart(BaseModel):
+    text: Optional[str] = None
+    image_url: Optional[str] = None
+    function_call: Optional[Dict[str, Any]] = None
+
+class Message(BaseModel):
+    role: str
+    parts: List[MessagePart] = []
+    content: Optional[str] = None  # For backwards compatibility
+
+class FileUpload(BaseModel):
+    name: str
+    content_type: str
+    data: str  # Base64 encoded file data
+
 class AgentRunRequest(BaseModel):
     app_name: str
     user_id: str
     session_id: str
-    new_message: Dict[str, Any]  # Adapt to your message format
+    new_message: Union[Message, Dict[str, Any]]  # Support both structured and unstructured formats
     streaming: bool = False
+    files: List[FileUpload] = []
 
 
 class Session(BaseModel):
@@ -52,6 +68,7 @@ class Session(BaseModel):
     app_name: str
     state: Dict[str, Any] = {}
     events: List[Dict[str, Any]] = []
+    files: Dict[str, Dict[str, Any]] = {}  # Store file info
     
     def get_contents(self):
         # Adapt this to your event structure
@@ -73,6 +90,8 @@ class Event(BaseModel):
     author: str
     content: Dict[str, Any] = None
     timestamp: str = Field(default_factory=get_timestamp)
+    event_type: Optional[str] = None  # Allow specifying event types (message, function_call, error, etc.)
+    files: List[str] = []  # File references if any
     
     class Config:
         arbitrary_types_allowed = True
@@ -224,6 +243,54 @@ def get_fast_api_app(
         else:
             raise HTTPException(status_code=404, detail="Session not found")
 
+    @app.post("/file-upload")
+    async def upload_file(file: UploadFile = File(...), session_id: str = Form(...), app_name: str = Form(...), user_id: str = Form(...)):
+        """Upload a file and associate it with a session."""
+        session_key = f"{app_name}_{user_id}_{session_id}"
+        if session_key not in sessions_store:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Read file content
+        content = await file.read()
+        
+        # Generate file ID
+        file_id = f"file_{uuid.uuid4()}"
+        
+        # Store file info in session
+        sessions_store[session_key].files[file_id] = {
+            "name": file.filename,
+            "content_type": file.content_type,
+            "size": len(content),
+            "uploaded_at": get_timestamp()
+        }
+        
+        # Store file content (in a real implementation, you might want to save to disk/database)
+        # For demo purposes, we'll store in memory but encode as base64
+        encoded_content = base64.b64encode(content).decode("utf-8")
+        sessions_store[session_key].files[file_id]["content"] = encoded_content
+        
+        return {"file_id": file_id, "name": file.filename, "content_type": file.content_type, "size": len(content)}
+
+    @app.get("/files/{app_name}/{user_id}/{session_id}/{file_id}")
+    async def get_file(app_name: str, user_id: str, session_id: str, file_id: str):
+        """Get a file associated with a session."""
+        session_key = f"{app_name}_{user_id}_{session_id}"
+        if session_key not in sessions_store:
+            raise HTTPException(status_code=404, detail="Session not found")
+            
+        if file_id not in sessions_store[session_key].files:
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        file_info = sessions_store[session_key].files[file_id]
+        
+        return {
+            "file_id": file_id,
+            "name": file_info["name"],
+            "content_type": file_info["content_type"],
+            "size": file_info["size"],
+            "content": file_info.get("content", "")
+        }
+
     @app.post("/run", response_model_exclude_none=True)
     async def agent_run(req: AgentRunRequest) -> List[Dict[str, Any]]:
         """Run an agent with a new message and return all events."""
@@ -234,31 +301,92 @@ def get_fast_api_app(
         # Get or load agent
         agent = _get_agent(req.app_name)
         
-        # Process the message through the agent
-        input_text = req.new_message.get("parts", [{}])[0].get("text", "")
-        if not input_text and "content" in req.new_message:
-            input_text = req.new_message.get("content", "")
+        # Process any uploaded files
+        file_refs = []
+        for file_data in req.files:
+            file_id = f"file_{uuid.uuid4()}"
+            sessions_store[session_key].files[file_id] = {
+                "name": file_data.name,
+                "content_type": file_data.content_type,
+                "content": file_data.data,  # Base64 encoded
+                "uploaded_at": get_timestamp()
+            }
+            file_refs.append(file_id)
         
-        # Add user message to session
+        # Extract message text and prepare parts
+        input_text = ""
+        message_parts = []
+        
+        if isinstance(req.new_message, dict):
+            if "parts" in req.new_message and isinstance(req.new_message["parts"], list):
+                for part in req.new_message["parts"]:
+                    if "text" in part:
+                        input_text += part["text"] + "\n"
+                        message_parts.append({"text": part["text"]})
+            elif "content" in req.new_message:
+                input_text = req.new_message["content"]
+                message_parts.append({"text": input_text})
+        elif hasattr(req.new_message, "parts") and req.new_message.parts:
+            for part in req.new_message.parts:
+                if part.text:
+                    input_text += part.text + "\n"
+                    message_parts.append({"text": part.text})
+        elif hasattr(req.new_message, "content") and req.new_message.content:
+            input_text = req.new_message.content
+            message_parts.append({"text": input_text})
+        
+        # Add file references to parts if any
+        for file_id in file_refs:
+            file_info = sessions_store[session_key].files[file_id]
+            if file_info["content_type"].startswith("image/"):
+                message_parts.append({"image_url": f"/files/{req.app_name}/{req.user_id}/{req.session_id}/{file_id}"})
+        
+        # Create user message event
         user_event = Event(
             author="user",
+            event_type="message",
             content={
                 "role": "user",
-                "parts": [{"text": input_text}]
-            }
+                "parts": message_parts
+            },
+            files=file_refs
         )
+        
+        # Add to session
         sessions_store[session_key].events.append(user_event.dict())
         
         try:
+            # Set up context for agent
+            context = []
+            if file_refs:
+                for file_id in file_refs:
+                    file_info = sessions_store[session_key].files[file_id]
+                    if file_info["content_type"].startswith("image/"):
+                        # In a real implementation, you would handle image files properly
+                        context.append(f"[User uploaded an image: {file_info['name']}]")
+            
             # Process the message through the agent
-            response, _ = agent.process(input=input_text)
+            response, logs = agent.process(input=input_text, context=context if context else None)
+            
+            # Parse any function calls from logs
+            function_calls = []
+            if logs and "function_calls" in logs:
+                function_calls = logs["function_calls"]
+            
+            # Create agent response parts
+            agent_parts = [{"text": response}]
+            
+            # Add function calls if any
+            for func_call in function_calls:
+                agent_parts.append({"function_call": func_call})
             
             # Create agent response event
             agent_event = Event(
                 author="agent",
+                event_type="message",
                 content={
                     "role": "assistant",
-                    "parts": [{"text": response}]
+                    "parts": agent_parts
                 }
             )
             
@@ -271,6 +399,7 @@ def get_fast_api_app(
             # Create error event
             error_event = Event(
                 author="agent",
+                event_type="error",
                 content={
                     "role": "assistant",
                     "parts": [{"text": f"Error: {str(e)}"}]
@@ -292,18 +421,55 @@ def get_fast_api_app(
                 # Get agent
                 agent = _get_agent(req.app_name)
                 
-                # Extract message text
-                input_text = req.new_message.get("parts", [{}])[0].get("text", "")
-                if not input_text and "content" in req.new_message:
-                    input_text = req.new_message.get("content", "")
+                # Process any uploaded files
+                file_refs = []
+                for file_data in req.files:
+                    file_id = f"file_{uuid.uuid4()}"
+                    sessions_store[session_key].files[file_id] = {
+                        "name": file_data.name,
+                        "content_type": file_data.content_type,
+                        "content": file_data.data,  # Base64 encoded
+                        "uploaded_at": get_timestamp()
+                    }
+                    file_refs.append(file_id)
+                
+                # Extract message text and prepare parts
+                input_text = ""
+                message_parts = []
+                
+                if isinstance(req.new_message, dict):
+                    if "parts" in req.new_message and isinstance(req.new_message["parts"], list):
+                        for part in req.new_message["parts"]:
+                            if "text" in part:
+                                input_text += part["text"] + "\n"
+                                message_parts.append({"text": part["text"]})
+                    elif "content" in req.new_message:
+                        input_text = req.new_message["content"]
+                        message_parts.append({"text": input_text})
+                elif hasattr(req.new_message, "parts") and req.new_message.parts:
+                    for part in req.new_message.parts:
+                        if part.text:
+                            input_text += part.text + "\n"
+                            message_parts.append({"text": part.text})
+                elif hasattr(req.new_message, "content") and req.new_message.content:
+                    input_text = req.new_message.content
+                    message_parts.append({"text": input_text})
+                
+                # Add file references to parts if any
+                for file_id in file_refs:
+                    file_info = sessions_store[session_key].files[file_id]
+                    if file_info["content_type"].startswith("image/"):
+                        message_parts.append({"image_url": f"/files/{req.app_name}/{req.user_id}/{req.session_id}/{file_id}"})
                 
                 # Create user message event
                 user_event = Event(
                     author="user",
+                    event_type="message",
                     content={
                         "role": "user",
-                        "parts": [{"text": input_text}]
-                    }
+                        "parts": message_parts
+                    },
+                    files=file_refs
                 )
                 
                 # Add to session
@@ -312,15 +478,37 @@ def get_fast_api_app(
                 # Yield user event
                 yield f"data: {user_event.json()}\n\n"
                 
+                # Set up context for agent
+                context = []
+                if file_refs:
+                    for file_id in file_refs:
+                        file_info = sessions_store[session_key].files[file_id]
+                        if file_info["content_type"].startswith("image/"):
+                            # In a real implementation, you would handle image files properly
+                            context.append(f"[User uploaded an image: {file_info['name']}]")
+                
                 # Process message
-                response, logs = agent.process(input=input_text)
+                response, logs = agent.process(input=input_text, context=context if context else None)
+                
+                # Parse any function calls from logs
+                function_calls = []
+                if logs and "function_calls" in logs:
+                    function_calls = logs["function_calls"]
+                
+                # Create agent response parts
+                agent_parts = [{"text": response}]
+                
+                # Add function calls if any
+                for func_call in function_calls:
+                    agent_parts.append({"function_call": func_call})
                 
                 # Create agent response event
                 agent_event = Event(
                     author="agent",
+                    event_type="message",
                     content={
                         "role": "assistant",
-                        "parts": [{"text": response}]
+                        "parts": agent_parts
                     }
                 )
                 
@@ -336,6 +524,7 @@ def get_fast_api_app(
                 # Create error event
                 error_event = Event(
                     author="agent",
+                    event_type="error",
                     content={
                         "role": "assistant",
                         "parts": [{"text": f"Error: {str(e)}"}]
@@ -359,8 +548,8 @@ def get_fast_api_app(
         app_name: str,
         user_id: str,
         session_id: str,
-        modalities: List[Literal["TEXT", "AUDIO"]] = Query(
-            default=["TEXT", "AUDIO"]
+        modalities: List[Literal["TEXT", "AUDIO", "IMAGE"]] = Query(
+            default=["TEXT", "AUDIO", "IMAGE"]
         ),
     ) -> None:
         """Run an agent with bidirectional WebSocket communication."""
@@ -382,6 +571,7 @@ def get_fast_api_app(
                 # Initial welcome message
                 welcome_event = Event(
                     author="agent",
+                    event_type="message",
                     content={
                         "role": "assistant",
                         "parts": [{"text": "Hello! I'm ready to chat."}]
@@ -399,33 +589,85 @@ def get_fast_api_app(
                     # Get message from queue
                     message = await message_queue.get()
                     
+                    # Process message based on contents
+                    input_text = ""
+                    message_parts = []
+                    file_refs = []
+                    
                     # Extract text
-                    input_text = message.get("parts", [{}])[0].get("text", "")
-                    if not input_text and "content" in message:
-                        input_text = message.get("content", "")
+                    if "parts" in message and isinstance(message["parts"], list):
+                        for part in message["parts"]:
+                            if "text" in part:
+                                input_text += part["text"] + "\n"
+                                message_parts.append({"text": part["text"]})
+                            elif "image_data" in part:
+                                # Process image data (base64 encoded)
+                                image_data = part["image_data"]
+                                file_id = f"file_{uuid.uuid4()}"
+                                
+                                # Store in session
+                                sessions_store[session_key].files[file_id] = {
+                                    "name": f"image_{file_id}.png",
+                                    "content_type": "image/png",
+                                    "content": image_data,
+                                    "uploaded_at": get_timestamp()
+                                }
+                                
+                                file_refs.append(file_id)
+                                message_parts.append({"image_url": f"/files/{app_name}/{user_id}/{session_id}/{file_id}"})
+                    elif "content" in message:
+                        input_text = message["content"]
+                        message_parts.append({"text": input_text})
                     
                     # Create user message event
                     user_event = Event(
                         author="user",
+                        event_type="message",
                         content={
                             "role": "user",
-                            "parts": [{"text": input_text}]
-                        }
+                            "parts": message_parts
+                        },
+                        files=file_refs
                     )
                     
                     # Add to session
                     sessions_store[session_key].events.append(user_event.dict())
                     
+                    # Send user event back for confirmation
+                    await websocket.send_text(user_event.json())
+                    
                     try:
+                        # Set up context for agent
+                        context = []
+                        if file_refs:
+                            for file_id in file_refs:
+                                file_info = sessions_store[session_key].files[file_id]
+                                if file_info["content_type"].startswith("image/"):
+                                    # In a real implementation, you would handle image files properly
+                                    context.append(f"[User uploaded an image: {file_info['name']}]")
+                        
                         # Process message
-                        response, logs = agent.process(input=input_text)
+                        response, logs = agent.process(input=input_text, context=context if context else None)
+                        
+                        # Parse any function calls from logs
+                        function_calls = []
+                        if logs and "function_calls" in logs:
+                            function_calls = logs["function_calls"]
+                        
+                        # Create agent response parts
+                        agent_parts = [{"text": response}]
+                        
+                        # Add function calls if any
+                        for func_call in function_calls:
+                            agent_parts.append({"function_call": func_call})
                         
                         # Create agent response event
                         agent_event = Event(
                             author="agent",
+                            event_type="message",
                             content={
                                 "role": "assistant",
-                                "parts": [{"text": response}]
+                                "parts": agent_parts
                             }
                         )
                         
@@ -441,6 +683,7 @@ def get_fast_api_app(
                         # Create error event
                         error_event = Event(
                             author="agent",
+                            event_type="error",
                             content={
                                 "role": "assistant",
                                 "parts": [{"text": f"Error: {str(e)}"}]
@@ -505,6 +748,16 @@ def get_fast_api_app(
             for task in tasks:
                 if not task.done():
                     task.cancel()
+
+    # List all events for a session
+    @app.get("/events/{app_name}/{user_id}/{session_id}")
+    def get_events(app_name: str, user_id: str, session_id: str):
+        """Get all events for a session."""
+        session_key = f"{app_name}_{user_id}_{session_id}"
+        if session_key not in sessions_store:
+            raise HTTPException(status_code=404, detail="Session not found")
+            
+        return sessions_store[session_key].events
 
     def _get_agent(app_name: str) -> Agent:
         """Get or create an agent for the given app."""
