@@ -93,4 +93,4 @@ class UniversalModel(UniversalModelMixin):
 
     @classmethod
     def compatibility(cls) -> list[Compatibility]:
-        return generate_standard_compatibility(cls()._sources)
+        return generate_standard_compatibility(cls()._sources) # FIXME: generating sources should be done outside the class to prevent artificial intentiation of the model

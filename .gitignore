@@ -31,4 +31,6 @@ requirements-release.txt
 .ruff_cache
 test_imports.py
 =3.*
-
+node_modules
+webdist
+distweb
