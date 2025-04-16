@@ -5,6 +5,10 @@
     <a href="https://github.com/blueraai/universal-intelligence/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/blueraai/universal-intelligence.svg"></a>
 </p>
 
+> ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) This page aims to document **Python** protocols and usage (e.g. cloud, desktop).
+>
+> Looking for [**Javascript/Typescript instructions**](https://github.com/blueraai/universal-intelligence/blob/main/README_WEB.md)?
+
 ## Overview
 
 `Universal Intelligence` standardizes, simplifies and modularizes the distribution and usage of artifical intelligence.
@@ -12,6 +16,8 @@
 It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
 
 This project also provides ready-to-use **community-built components**, implementing the `Universal Intelligence` specification.
+
+![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` protocols and components can be used across **all platforms** (cloud, desktop, web, mobile).
 
 > 🧩 AI Components as Building Blocks.
 >
@@ -61,15 +67,24 @@ agent = Agent(
 result, logs = agent.process("Please print 'Hello World' to the console", extra_tools=[Tool()])
 ```
 
+### Playground
+
+A ready-made playground is available to help familiarize yourself with the protocols and components.
+
+```sh
+python -m playground.example 
+```
+
+
 ## Specification
 
 ### Universal Model
 
 A `⚪ Universal Model` is a standardized, self-contained and configurable interface able to run a given model, irrespective of the consumer hardware and without requiring domain expertise.
 
-It embeddeds a model (i.e. hosted, fetched, or local), one or more engines (e.g. [transformers](https://huggingface.co/docs/transformers/index), [lama.cpp](https://llama-cpp-python.readthedocs.io/en/latest/api-reference/), [mlx-lm](https://github.com/ml-explore/mlx-lm)), runtime dependencies for each device type (e.g. CUDA, MPS), and exposes a standard interface.
+It embeddeds a model (i.e. hosted, fetched, or local), one or more engines (e.g. [transformers](https://huggingface.co/docs/transformers/index), [lama.cpp](https://llama-cpp-python.readthedocs.io/en/latest/api-reference/), [mlx-lm](https://github.com/ml-explore/mlx-lm), [web-llm](https://webllm.mlc.ai)), runtime dependencies for each device type (e.g. CUDA, MPS), and exposes a standard interface.
 
-While configurable, every aspect is preset for the user, based on automatic device detection, in order to abstract complexity and provide a simplified and portable interface.
+While configurable, every aspect is preset for the user, based on *automatic device detection and dynamic model precision*, in order to abstract complexity and provide a simplified and portable interface.
 
 > *Providers*: In the intent of preseting a `Universal Model` for non-technical mass adoption, we recommend defaulting to 4 bit quantization.
 
@@ -143,8 +158,8 @@ model = Model(
     # "model": {
     #     e.g. AutoModel https://huggingface.co/docs/transformers/models
     #    
-    #     torch_dtype="auto"
-    #     device_map="auto"
+    #     torch_dtype: "auto"
+    #     device_map: "auto"
     #     ...
     # }
   }
@@ -167,12 +182,13 @@ output, logs = model.process(
     # (example)
     # e.g. AutoModel Generate https://huggingface.co/docs/transformers/llm_tutorial
     # 
-    # max_new_tokens=2000, 
-    # use_cache=True,
-    # temperature=1.0
+    # max_new_tokens: 2000, 
+    # use_cache: True,
+    # temperature: 1.0
     # ...
   },
   remember=True, # remember this interaction
+  stream=False, # stream output asynchronously
   keep_alive=True # keep model loaded after processing the request
 ) # 'In May, you went to the Cinema.'
 ```
@@ -275,9 +291,9 @@ output, logs = agent.process(
     # (example)
     # e.g. AutoModel Generate https://huggingface.co/docs/transformers/llm_tutorial
     # 
-    # max_new_tokens=2000, 
-    # use_cache=True,
-    # temperature=1.0
+    # max_new_tokens: 2000, 
+    # use_cache: True,
+    # temperature: 1.0
     # ...
   },
   remember=True, # remember this interaction
@@ -327,7 +343,7 @@ A self-contained environment for running AI models with standardized interfaces.
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
 | `__init__` | • `engine: str \| List[str] = None`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `quantization: str \| List[str] \| QuantizationSettings = None`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'min_precision': '4bit', 'max_precision': '8bit'}*)<br>• `max_memory_allocation: float = None`: Maximum allowed memory allocation in percentage<br>• `configuration: Dict = None`: Configuration for model and processor settings | `None` | Initialize a Universal Model |
-| `process` | • `input: Any \| List[Message]`: Input or input messages<br>• `context: List[Any] = None`: Context items (multimodal supported)<br>• `configuration: Dict = None`: Runtime configuration<br>• `remember: bool = False`: Whether to remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `keep_alive: bool = None`: Keep model loaded for faster consecutive interactions | `Tuple[Any, Dict]` | Process input through the model and return output and logs. The output is typically the model's response and the logs contain processing metadata |
+| `process` | • `input: Any \| List[Message]`: Input or input messages<br>• `context: List[Any] = None`: Context items (multimodal supported)<br>• `configuration: Dict = None`: Runtime configuration<br>• `remember: bool = False`: Whether to remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `stream: bool = False`: Stream output asynchronously<br>• `keep_alive: bool = None`: Keep model loaded for faster consecutive interactions | `Tuple[Any, Dict]` | Process input through the model and return output and logs. The output is typically the model's response and the logs contain processing metadata |
 | `load` | None | `None` | Load model into memory |
 | `loaded` | None | `bool` | Check if model is currently loaded in memory |
 | `unload` | None | `None` | Unload model from memory |
@@ -652,6 +668,7 @@ You are welcome to contribute to community components. Please find some introduc
 ```txt
 universal-intelligence/
 ├── playground/           # Playground code directory
+│   ├── web/              # Example web playground
 │   └── example.py               # Example playground
 ├── universal_intelligence/      # Source code directory
 │   ├── core/             # Core library for the Universal Intelligence specification
@@ -659,15 +676,26 @@ universal-intelligence/
 │   │   ├── universal_agent.py   # Universal Agent base implementation
 │   │   ├── universal_tool.py    # Universal Tool base implementation
 │   │   └── utils/              # Utility functions and helpers
-│   └── community/       # Community components
-│       ├── models/     # Community-contributed models
-│       ├── agents/     # Community-contributed agents
-│       └── tools/      # Community-contributed tools
-├── requirements*.txt      # Project dependencies
-├── *.{yaml,toml}          # Project configuration
+│   ├── community/       # Community components
+│   │   ├── models/        # Community-contributed models
+│   │   ├── agents/        # Community-contributed agents
+│   │   └── tools/         # Community-contributed tools
+│   └── www/         # Web Implementation
+│       ├── core/               # Core library for the Universal Intelligence web specification
+│       │   ├── universalModel.ts   # Universal Model web base implementation
+│       │   ├── universalAgent.ts   # Universal Agent web base implementation
+│       │   ├── universalTool.ts    # Universal Tool web base implementation
+│       │   └── types.ts             # Universal Intelligence web types
+│       └── community/       # Web community components
+│           ├── models/         # Web community-contributed models
+│           ├── agents/         # Web community-contributed agents
+│           └── tools/          # Web community-contributed tools
+├── requirements*.txt             # Project dependencies
+├── *.{yaml,toml,json,*rc,ts}     # Project configuration
 ├── CODE_OF_CONDUCT.md     # Community rules information
 ├── SECURITY.md            # Vulnerability report information
 ├── LICENSE             # License information
+├── README_WEB.md       # Project web documentation
 └── README.md           # Project documentation
 ```
 
@@ -765,11 +793,18 @@ Tool test examples:
 
 Linting will run as part of the pre-commit hook, however you may also run it manully using `pre-commit run --all-files`
 
+## Cross-Platform Support
+
+![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` protocols and components can be used across **all platforms** (cloud, desktop, web, mobile).
+
+- ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) [How to use natively with `python` (cloud, desktop)](https://github.com/blueraai/universal-intelligence/blob/main/README.md)
+- ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) [How to use on the web, or in web-native apps, with `javascript/typescript` (cloud, desktop, web, mobile)](https://github.com/blueraai/universal-intelligence/blob/main/README_WEB.md)
+
 ## Thanks
 
 Thanks for our friends at [Hugging Face](https://huggingface.co) for making open source AI a reality. ✨
 
-This project is powered by these fantastic engines: [transformers](https://github.com/huggingface/transformersllama), [llama.cpp](https://github.com/ggml-org/llama.cpp), [mlx-lm](https://github.com/ml-explore/mlx-lm).
+This project is powered by these fantastic engines: [transformers](https://github.com/huggingface/transformersllama), [llama.cpp](https://github.com/ggml-org/llama.cpp), [mlx-lm](https://github.com/ml-explore/mlx-lm), [web-llm](https://github.com/mlc-ai/web-llm).
 
 ## Support
 
