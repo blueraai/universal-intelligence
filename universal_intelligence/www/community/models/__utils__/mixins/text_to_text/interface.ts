@@ -360,7 +360,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
   async reset(): Promise<void> {
     // Wait for model to be ready
     await this.ready()
-    if (this._engine !== 'webllm') {
+    if (this._engine === 'webllm') {
       try {
         this._model?.resetChat(this._modelConfiguration[this._engine].model_id)
       } catch (error) {
@@ -482,7 +482,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     const preUnloadMemory = await this._getAvailableMemory('webgpu')
     console.log(`[Memory Pre-Unload] Available memory: ${preUnloadMemory.toFixed(2)}GB`)
 
-    if (this._engine !== 'webllm') {
+    if (this._engine === 'webllm') {
       try {
         await this._model?.unload()
       } catch (error) {
