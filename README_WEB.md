@@ -127,7 +127,7 @@ In simple terms:
 #### Universal Model
 
 ```js
-import UniversalModel as Model from "<provider>"
+import Model from "<provider>"
 
 const model = new Model()
 const [result, logs] = await model.process("Hello, how are you?") // 'Feeling great! How about you?'
@@ -146,7 +146,7 @@ Those are defined by and specific to the *universal model provider*.
 ###### Optional Parameters
 
 ```js
-import UniversalModel as Model from "<provider>"
+import Model from "<provider>"
 
 const model = new Model({
   engine: 'webllm', // (or) ordered by priority ['transformers', 'llama.cpp']
@@ -204,7 +204,7 @@ const [result, logs] = await model.process(
 ###### Optional Methods
 
 ```js
-import UniversalModel as Model from "<provider>"
+import Model from "<provider>"
 const model = Model()
 
 // Optional 
@@ -222,7 +222,7 @@ Model.compatibility()  // Compatibility
 #### Universal Tool 
 
 ```js
-import UniversalTool as Tool from "<provider>"
+import Tool from "<provider>"
 
 const tool = Tool(configuration={ "any": "configuration" })
 const [result, logs] = tool.exampleTask(example_argument='hello') // "hello" (or async)
@@ -231,7 +231,7 @@ const [result, logs] = tool.exampleTask(example_argument='hello') // "hello" (or
 ###### Optional Methods
 
 ```js
-import UniversalTool as Tool from "<provider>"
+import Tool from "<provider>"
 
 // Class Optional
 Tool.contract()  // Contract 
@@ -241,7 +241,7 @@ Tool.requirements()  // Configuration Requirements
 #### Universal Agent 
 
 ```js
-import UniversalAgent as Agent from "<provider>"
+import Agent from "<provider>"
 
 const agent = new Agent(
   // {
@@ -266,10 +266,10 @@ Those are defined by and specific to the *universal model provider*.
 ###### Optional Parameters
 
 ```js
-import UniversalAgent as Agent from "<provider>"
-import UniversalAgent as OtherAgent from "<other_provider>"
-import UniversalModel as Model from "<provider>"
-import UniversalTool as Tool from "<provider>"
+import Agent from "<provider>"
+import OtherAgent from "<other_provider>"
+import Model from "<provider>"
+import Tool from "<provider>"
 
 // This is where the magic happens ✨
 // Standardization of all layers make agents composable and generalized.
@@ -322,10 +322,10 @@ const [result, logs] = await agent.process(
 ###### Optional Methods
 
 ```js
-import UniversalAgent as Agent from "<provider>"
-import UniversalAgent as OtherAgent from "<other_provider>"
-import UniversalModel as Model from "<provider>"
-import UniversalTool as Tool from "<provider>" # e.g. API, database
+import Agent from "<provider>"
+import OtherAgent from "<other_provider>"
+import Model from "<provider>"
+import Tool from "<provider>" // e.g. API, database
 const agent = Agent()
 const otherAgent = OtherAgent()
 const tool = Tool()
