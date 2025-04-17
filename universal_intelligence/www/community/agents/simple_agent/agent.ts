@@ -275,14 +275,14 @@ export default class UniversalAgent extends AbstractUniversalAgent {
 
   constructor(
     payload?: {
-      universalModel?: AbstractUniversalModel,
+      model?: AbstractUniversalModel,
       expandTools?: AbstractUniversalTool[],
       expandTeam?: AbstractUniversalAgent[],
     } | undefined
   ) {
-    const { universalModel, expandTools, expandTeam } = payload || {}
+    const { model, expandTools, expandTeam } = payload || {}
     super(payload)
-    this.model = universalModel ? universalModel : new UniversalModel()
+    this.model = model ? model : new UniversalModel()
     this.tools = UniversalAgent._defaultTools.concat(expandTools ? expandTools : [])
     this.team = UniversalAgent._defaultTeam.concat(expandTeam ? expandTeam : [])
   }
