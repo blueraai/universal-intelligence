@@ -41,12 +41,12 @@ export abstract class AbstractUniversalAgent {
 
   /**
    * Initialize a Universal Agent.
-   * @param payload.universalModel - The model powering this agent
+   * @param payload.model - The model powering this agent
    * @param payload.expandTools - List of tools to connect to the agent
    * @param payload.expandTeam - List of other agents to connect to this agent
    */
   constructor(payload: {
-    universalModel?: AbstractUniversalModel,
+    model?: AbstractUniversalModel,
     expandTools?: AbstractUniversalTool[],
     expandTeam?: AbstractUniversalAgent[]
   } | undefined) {

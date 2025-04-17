@@ -60,7 +60,7 @@ result, logs = tool.print_text("This needs to be printed")
 from universal_intelligence import Model, Tool, Agent, OtherAgent
 
 agent = Agent(
-  # universal_model=Model(),        # customize or share 🧠 across [🤖,🤖,🤖,..]
+  # model=Model(),        # customize or share 🧠 across [🤖,🤖,🤖,..]
   # expand_tools=[Tool()],          # expand 🔧 set
   # expand_team=[OtherAgent()]      # expand 🤖 team
 )
@@ -238,7 +238,7 @@ from <provider> import UniversalAgent as Agent
 agent = Agent(
   # (optionally composable)
   #
-  # universal_model=Model(),
+  # model=Model(),
   # expand_tools=[Tool()],
   # expand_team=[OtherAgent()]
 )
@@ -270,7 +270,7 @@ from <provider.tool> import UniversalTool as Tool # e.g. API, database
 # a team of agents shares the same intelligence(s), thus removing hardware overhead, 
 # and scaling at virtually no cost.
 agent = Agent(
-  universal_model=Model(), # see Universal Model API for customizations
+  model=Model(), # see Universal Model API for customizations
   expand_tools=[Tool()], # see Universal Tool API for customizations
   expand_team=[OtherAgent()]  # see Universal Agent API for customizations
 )
@@ -372,7 +372,7 @@ An AI agent powered by Universal Models and Tools with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `__init__` | • `universal_model: UniversalModel = None`: Model powering this agent<br>• `expand_tools: List[UniversalTool] = None`: Tools to connect<br>• `expand_team: List[UniversalAgent] = None`: Other agents to connect | `None` | Initialize a Universal Agent |
+| `__init__` | • `model: UniversalModel = None`: Model powering this agent<br>• `expand_tools: List[UniversalTool] = None`: Tools to connect<br>• `expand_team: List[UniversalAgent] = None`: Other agents to connect | `None` | Initialize a Universal Agent |
 | `process` | • `input: Any \| List[Message]`: Input or input messages<br>• `context: List[Any] = None`: Context items (multimodal)<br>• `configuration: Dict = None`: Runtime configuration<br>• `remember: bool = False`: Remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `stream: bool = False`: Stream output asynchronously<br>• `extra_tools: List[UniversalTool] = None`: Additional tools<br>• `extra_team: List[UniversalAgent] = None`: Additional agents<br>• `keep_alive: bool = None`: Keep underlaying model loaded for faster consecutive interactions | `Tuple[Any, Dict]` | Process input through the agent and return output and logs. The output is typically the agent's response and the logs contain processing metadata including tool/agent calls |
 | `load` | None | `None` | Load agent's model into memory |
 | `loaded` | None | `bool` | Check if the agent's model is currently loaded in memory |

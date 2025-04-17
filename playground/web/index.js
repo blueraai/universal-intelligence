@@ -29,7 +29,7 @@ console.warn("🤖 Simple Agent \n\n", agentResult, agentLogs);
 // ------------------------------------------------------------------------------------------------
 // 🤖 Simple agent calling API (shared 🧠 + 🔧)
 const apiTool = new APICaller();
-const otherAgent = new Agent({ universalModel: model, expandTools: [apiTool] });
+const otherAgent = new Agent({ model: model, expandTools: [apiTool] });
 const [otherAgentResult, otherAgentLogs] = await otherAgent.process("Please fetch the latest space news articles by calling the following API endpoint: GET https://api.spaceflightnewsapi.net/v4/articles");
 
 console.warn("🤖 API Agent \n\n", otherAgentResult, otherAgentLogs);

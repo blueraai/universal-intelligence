@@ -261,12 +261,12 @@ class UniversalAgent(AbstractUniversalAgent):
 
     def __init__(
         self,
-        universal_model: AbstractUniversalModel | None = None,
+        model: AbstractUniversalModel | None = None,
         expand_tools: list[AbstractUniversalTool] | None = None,
         expand_team: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """Initialize the example agent with a model and optional tools/team members."""
-        self.model = universal_model if universal_model is not None else UniversalModel()
+        self.model = model if model is not None else UniversalModel()
         self.tools = self._default_tools + (expand_tools if expand_tools else [])
         self.team = self._default_team + (expand_team if expand_team else [])
 
