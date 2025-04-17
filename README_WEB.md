@@ -61,7 +61,7 @@ import { Model, Tool, Agent, OtherAgent } from "universalintelligence"
 
 const agent = new Agent(
   // {
-  //    universalModel: Model(),        // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    model: Model(),        // customize or share 🧠 across [🤖,🤖,🤖,..]
   //    expandTools: [Tool()],          // expand 🔧 set
   //    expandTeam: [OtherAgent()]      // expand 🤖 team
   // }
@@ -245,7 +245,7 @@ import Agent from "<provider>"
 
 const agent = new Agent(
   // {
-  //    universalModel: Model(),        // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    model: Model(),        // customize or share 🧠 across [🤖,🤖,🤖,..]
   //    expandTools: [Tool()],          // expand 🔧 set
   //    expandTeam: [OtherAgent()]      // expand 🤖 team
   // }
@@ -278,7 +278,7 @@ import Tool from "<provider>"
 // a team of agents shares the same intelligence(s), thus removing hardware overhead, 
 // and scaling at virtually no cost.
 const agent = new Agent({
-  universal_model=Model(), // see Universal Model API for customizations
+  model=Model(), // see Universal Model API for customizations
   expand_tools=[Tool()], // see Universal Tool API for customizations
   expand_team=[OtherAgent()]  // see Universal Agent API for customizations
 })
@@ -383,7 +383,7 @@ An AI agent powered by Universal Models and Tools with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `constructor` | • `payload.universalModel?: AbstractUniversalModel`: Model powering this agent<br>• `payload.expandTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.expandTeam?: AbstractUniversalAgent[]`: Other agents to connect | `void` | Initialize a Universal Agent |
+| `constructor` | • `payload.model?: AbstractUniversalModel`: Model powering this agent<br>• `payload.expandTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.expandTeam?: AbstractUniversalAgent[]`: Other agents to connect | `void` | Initialize a Universal Agent |
 | `process` | • `input: any \| Message[]`: Input or input messages<br>• `payload.context?: any[]`: Context items (multimodal)<br>• `payload.configuration?: Record<string, any>`: Runtime configuration<br>• `payload.remember?: boolean`: Remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `payload.stream?: boolean`: Stream output asynchronously<br>• `payload.extraTools?: AbstractUniversalTool[]`: Additional tools<br>• `payload.extraTeam?: AbstractUniversalAgent[]`: Additional agents<br>• `payload.keepAlive?: boolean`: Keep underlaying model loaded for faster consecutive interactions | `Promise<[any \| null, Record<string, any>]>` | Process input through the agent and return output and logs. The output is typically the agent's response and the logs contain processing metadata including tool/agent calls |
 | `load` | None | `Promise<void>` | Load agent's model into memory |
 | `loaded` | None | `Promise<boolean>` | Check if the agent's model is currently loaded in memory |

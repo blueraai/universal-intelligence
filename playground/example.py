@@ -28,7 +28,7 @@ formatted_print("Simple Agent", result, logs)
 # ------------------------------------------------------------------------------------------------
 # 🤖 Simple agent calling API (shared 🧠 + 🔧)
 tool = APITool()
-agent = Agent(universal_model=model)
+agent = Agent(model=model)
 result, logs = agent.process("Please fetch the latest space news articles by calling the following API endpoint: GET https://api.spaceflightnewsapi.net/v4/articles", extra_tools=[tool])
 
 formatted_print("API Agent", result, logs)
