@@ -1,8 +1,9 @@
 ![Universal Intelligence](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//universal-intelligence-banner-rsm.png)
 
 <p align="center">
-    <a href="https://github.com/blueraai/universal-intelligence/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/blueraai/universal-intelligence.svg?color=blue"></a>
-    <a href="https://github.com/blueraai/universal-intelligence/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/blueraai/universal-intelligence.svg"></a>
+    <a href="https://github.com/blueraai/universal-intelligence/releases"><img alt="GitHub Release" src="https://img.shields.io/github/release/blueraai/universal-intelligence.svg?color=1c4afe"></a>
+    <a href="https://github.com/blueraai/universal-intelligence/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/blueraai/universal-intelligence.svg?color=00bf48"></a>
+    <a href="https://discord.gg/7g9SrEc5yT"><img alt="Discord" src="https://img.shields.io/badge/Join-Discord-7289DA?logo=discord&logoColor=white&color=4911ff"></a>
 </p>
 
 > ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) This page aims to document **Javascript/Typescript** protocols and usage (e.g. cloud, desktop, web, mobile).
@@ -686,7 +687,7 @@ For faster deployment and easier maintenance, we recommend using/enhancing *shar
 
 Thanks for our friends at [Hugging Face](https://huggingface.co) for making open source AI a reality. ✨
 
-This project is powered by these fantastic engines: [transformers](https://github.com/huggingface/transformersllama), [llama.cpp](https://github.com/ggml-org/llama.cpp), [mlx-lm](https://github.com/ml-explore/mlx-lm), [web-llm](https://github.com/mlc-ai/web-llm).
+This project is powered by these fantastic engines: [transformers](https://github.com/huggingface/transformers), [llama.cpp](https://github.com/ggml-org/llama.cpp), [mlx-lm](https://github.com/ml-explore/mlx-lm), [web-llm](https://github.com/mlc-ai/web-llm).
 
 ## Support
 
