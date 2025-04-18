@@ -61,7 +61,7 @@ import { Model, Tool, Agent, OtherAgent } from "universalintelligence"
 
 const agent = new Agent(
   // {
-  //    model: Model(),        // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    model: Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
   //    expandTools: [Tool()],          // expand 🔧 set
   //    expandTeam: [OtherAgent()]      // expand 🤖 team
   // }
@@ -245,7 +245,7 @@ import Agent from "<provider>"
 
 const agent = new Agent(
   // {
-  //    model: Model(),        // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    model: Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
   //    expandTools: [Tool()],          // expand 🔧 set
   //    expandTeam: [OtherAgent()]      // expand 🤖 team
   // }

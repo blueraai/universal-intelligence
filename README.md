@@ -60,7 +60,7 @@ result, logs = tool.print_text("This needs to be printed")
 from universal_intelligence import Model, Tool, Agent, OtherAgent
 
 agent = Agent(
-  # model=Model(),        # customize or share 🧠 across [🤖,🤖,🤖,..]
+  # model=Model(),                  # customize or share 🧠 across [🤖,🤖,🤖,..]
   # expand_tools=[Tool()],          # expand 🔧 set
   # expand_team=[OtherAgent()]      # expand 🤖 team
 )
