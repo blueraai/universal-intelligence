@@ -12,7 +12,11 @@
 
 ## Overview
 
-`Universal Intelligence` standardizes, simplifies and modularizes the distribution and usage of artifical intelligence.
+`Universal Intelligence` (aka `UIN`) standardizes, simplifies and modularizes the usage and distribution of artifical intelligence.
+
+It aims to be a **framework-less agentic protocol**, removing the need for proprietary frameworks (eg. Langchain, Google ADK, Autogen, CrewAI) to build *simple, portable and composable intelligent applications*. 
+
+It does so by standardizing the fondamental building blocks used to make an intelligent application (models, tools, agents), which agentic frameworks typically (re)define and build upon.
 
 It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
 
@@ -23,6 +27,15 @@ This project also provides ready-to-use **community-built components**, implemen
 > 🧩 AI Components as Building Blocks.
 >
 > [Bluera Inc.](https://bluera.ai)
+
+## Agentic Framework vs. Agentic Protocol
+
+> How do they compare?
+
+Agent frameworks (like Langchain, Google ADK, Autogen, CrewAI), each orchestrate their own versions of so-called building blocks. Some of them implement the building blocks themselves, others have them built by the community. 
+  
+UIN hopes to standardize those building blocks and remove the need for a framework to run/orchestrate them. It also adds a few cool features to these blocks like portability. 
+For example, UIN models are designed to automatically detect the current hardware (cuda, mps, webgpu), its available memory, and run the appropriate quantization and engine for it (eg. transformers, llama.cpp, mlx, web-llm). It allows developers not to have to implement different stacks to support different devices when running models locally, and (maybe more importantly) not to have to know or care about hardware compatibility, so long as they don't try to run a rocket on a gameboy 🙂
 
 ## Get Started
 
