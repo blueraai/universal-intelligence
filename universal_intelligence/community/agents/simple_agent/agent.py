@@ -2,6 +2,7 @@ from typing import Any, ClassVar
 
 import yaml
 
+from ....community.__utils__.logger import Color, Logger, LogLevel
 from ....community.models.default import UniversalModel
 from ....core.universal_agent import AbstractUniversalAgent
 from ....core.universal_model import AbstractUniversalModel
@@ -235,12 +236,12 @@ class UniversalAgent(AbstractUniversalAgent):
 
     _compatibility: ClassVar[list[Compatibility]] = [
         {
-            "engine": "any", # Depends on the model used
-            "quantization": "any", # Depends on the model used
+            "engine": "any",  # Depends on the model used
+            "quantization": "any",  # Depends on the model used
             "devices": ["cuda", "mps", "cpu"],
             "memory": 0.0,  # Depends on the model used
             "dependencies": ["pyyaml"],
-            "precision": 4, # Depends on the model used
+            "precision": 4,  # Depends on the model used
         }
     ]
 
@@ -264,11 +265,31 @@ class UniversalAgent(AbstractUniversalAgent):
         model: AbstractUniversalModel | None = None,
         expand_tools: list[AbstractUniversalTool] | None = None,
         expand_team: list["AbstractUniversalAgent"] | None = None,
+        verbose: bool | str = "DEFAULT",
+        configuration: dict | None = None,
     ) -> None:
         """Initialize the example agent with a model and optional tools/team members."""
-        self.model = model if model is not None else UniversalModel()
-        self.tools = self._default_tools + (expand_tools if expand_tools else [])
-        self.team = self._default_team + (expand_team if expand_team else [])
+        self._log_level = LogLevel.NONE
+        if verbose:
+            if isinstance(verbose, bool):
+                self._log_level = LogLevel.DEFAULT if verbose else LogLevel.NONE
+            elif isinstance(verbose, str) and verbose.upper() in LogLevel.__members__:
+                self._log_level = LogLevel[verbose.upper()]
+            else:
+                raise ValueError(f"Invalid verbose value: {verbose} (must be bool or str)")
+
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Initializing agent.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+
+            logger.print(prefix="Agent", message="Setting model..", color=Color.GRAY)
+            self.model = model if model is not None else UniversalModel(verbose=verbose if self._log_level == LogLevel.DEBUG else 'NONE')
+            logger.print(prefix="Agent", message="Setting tools..", color=Color.GRAY)
+            self.tools = self._default_tools + (expand_tools if expand_tools else [])
+            logger.print(prefix="Agent", message="Setting team..", color=Color.GRAY)
+            self.team = self._default_team + (expand_team if expand_team else [])
+            logger.print(prefix="Agent", message="Configuring..", color=Color.GRAY)
+            self._configuration = configuration if configuration else {}
+            logger.print(prefix="Agent", message="Initialization complete\n", color=Color.GREEN)
 
     def _plan_dependency_calls(
         self,
@@ -327,21 +348,22 @@ FIRST, determine if the query actually requires using any avalaible tools:
 When tools ARE needed:
 - Use the EXACT names and arguments as specified in the tool contracts
 - Tool name must match contract's "name" field
-- Method name must match contract's "methods" list
+- Method name must match contract's "methods" list and only include the method name, not the class name
 - Argument names must match the method's "arguments" list
+- The method's "arguments" list always is an array presenting the key/value pairs for the method's first argument, which always is an object
 
 DO NOT invent or use tools that are not listed in the capabilities below.
 DO NOT answer the query.
 DO NOT explain your reasoning.
 ONLY return the list of tools to use in order along with their arguments, in a YAML format.
+Make sure to prefix the dependency_type with `-` to indicate it's a list item.
 
 For example, to print text using the Example Tool:
----
 - dependency_type: tool
   dependency_name: Example Tool  # Exact name from contract
-  method_name: example_method       # Exact method name
+  method_name: example_method    # Exact method name
   arguments:
-    text: "example text"      # Exact argument name
+    text: "example text"        # Exact argument name
 
 User Query: {query}
 
@@ -433,14 +455,7 @@ Available Capabilities:
                     else:
                         result, _ = method(**arguments)
 
-                    results.append(
-                        {
-                            "dependency_type": dependency_type,
-                            "dependency_name": dependency_name,
-                            "method_name": method_name,
-                            "result": result
-                        }
-                    )
+                    results.append({"dependency_type": dependency_type, "dependency_name": dependency_name, "method_name": method_name, "result": result})
                 except (AttributeError, TypeError):
                     continue  # Skip failed calls
 
@@ -450,59 +465,87 @@ Available Capabilities:
         self, input: str | list[Message], context: list[Any] | None = None, configuration: dict | None = None, remember: bool = False, stream: bool = False, extra_tools: list[AbstractUniversalTool] | None = None, extra_team: list["AbstractUniversalAgent"] | None = None, keep_alive: bool = False
     ) -> tuple[Any, dict]:
         """Process input through the agent using available tools and team members."""
-        # Convert input to string if it's a message list
-        query = input if isinstance(input, str) else input[-1]["content"]
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Invoking agent.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+            # Convert input to string if it's a message list
+            query = input if isinstance(input, str) else input[-1]["content"]
 
-        # Plan dependency calls with extra tools and agents
-        planned_calls = self._plan_dependency_calls(query, extra_tools, extra_team)
+            # Plan dependency calls with extra tools and agents
+            logger.print(prefix="Agent", message="Planning dependency calls..", color=Color.CYAN)
+            planned_calls = self._plan_dependency_calls(query, extra_tools, extra_team)
+            logger.print(prefix="Agent", message="Planning dependency calls..", color=Color.GRAY, replace_last_line=True)
+            logger.print(prefix="Agent", message="Dependency calls planned", color=Color.GREEN)
 
-        # Execute planned calls with extra tools and agents
-        call_results = self._execute_dependency_calls(planned_calls, extra_tools, extra_team)
+            # Execute planned calls with extra tools and agents
+            logger.print(prefix="Agent", message="Executing dependency calls..", color=Color.CYAN)
+            call_results = self._execute_dependency_calls(planned_calls, extra_tools, extra_team)
+            logger.print(prefix="Agent", message="Executing dependency calls..", color=Color.GRAY, replace_last_line=True)
+            logger.print(prefix="Agent", message="Dependency calls executed", color=Color.GREEN)
 
-        # Format results as YAML for the model
-        results_yaml = yaml.dump({"original_query": query, "dependency_calls": call_results}, sort_keys=False)
+            logger.print(prefix="Agent", message="Generating output..", color=Color.CYAN)
 
-        # Have model generate final response using call results
-        final_prompt = f"""Given the original query and results from dependency calls, generate a final response.
-If dependency calls were made, explain what actions were taken and their results.
-If no dependency calls were made, provide a direct response to the query.
+            # Format results as YAML for the model
+            results_yaml = yaml.dump({"original_query": query, "dependency_calls": call_results}, sort_keys=False)
 
-For example, if a print tool was used, confirm what was printed to the console.
+            # Have model generate final response using call results
+            final_prompt = f"""Given the original query and results from dependency calls, generate a final response.
+    If dependency calls were made, explain what actions were taken and their results.
+    If no dependency calls were made, provide a direct response to the query.
 
-Execution Results:
-{results_yaml}
-"""
+    For example, if a print tool was used, confirm what was printed to the console.
 
-        # TODO: Add streaming support
-        response, logs = self.model.process(
-            final_prompt,
-            context=context,
-            configuration=configuration,
-            remember=remember,
-            keep_alive=keep_alive,
-        )
+    Execution Results:
+    {results_yaml}
+    """
 
-        return response, {
-            "model_logs": logs,
-            "dependency_calls": call_results,
-            "stream": stream,
-        }
+            # TODO: Add streaming support
+            response, logs = self.model.process(
+                final_prompt,
+                context=context,
+                configuration=configuration,
+                remember=remember,
+                keep_alive=keep_alive,
+            )
+
+            logger.print(prefix="Agent", message="Generating output..", color=Color.GRAY, replace_last_line=True)
+            logger.print(prefix="Agent", message="Output generated\n", color=Color.GREEN)
+
+            return response, {
+                "model_logs": logs,
+                "dependency_calls": call_results,
+                "stream": stream,
+            }
 
     def load(self) -> None:
         """Load the agent's model into memory."""
-        self.model.load()
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Loading agent.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+            logger.print(prefix="Agent", message="Loading model..", color=Color.CYAN)
+            self.model.load()
+            logger.print(prefix="Agent", message="Loading model..", color=Color.GRAY, replace_last_line=True)
+            logger.print(prefix="Agent", message="Model loaded\n", color=Color.GREEN)
 
     def loaded(self) -> bool:
         """Check if the agent's model is loaded"""
-        return self.model.loaded()
+        with Logger(self._log_level):
+            return self.model.loaded()
 
     def unload(self) -> None:
         """Unload the agent's model from memory."""
-        self.model.unload()
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Unloading agent.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+            logger.print(prefix="Agent", message="Unloading model..", color=Color.CYAN)
+            self.model.unload()
+            logger.print(prefix="Agent", message="Unloading model..", color=Color.GRAY, replace_last_line=True)
+            logger.print(prefix="Agent", message="Model unloaded\n", color=Color.GREEN)
 
     def reset(self) -> None:
         """Reset the agent's chat history."""
-        self.model.reset()
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Resetting agent history.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+            logger.print(prefix="Agent", message="Resetting history..", color=Color.GRAY)
+            self.model.reset()
+            logger.print(prefix="Agent", message="History reset\n", color=Color.GREEN)
 
     def connect(
         self,
@@ -510,10 +553,15 @@ Execution Results:
         universal_agents: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """Connect additional tools and agents."""
-        if universal_tools:
-            self.tools.extend(universal_tools)
-        if universal_agents:
-            self.team.extend(universal_agents)
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Connecting additional tools and agents.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+            if universal_tools:
+                logger.print(prefix="Agent", message="Connecting tools..", color=Color.GRAY)
+                self.tools.extend(universal_tools)
+            if universal_agents:
+                logger.print(prefix="Agent", message="Connecting agents..", color=Color.GRAY)
+                self.team.extend(universal_agents)
+            logger.print(prefix="Agent", message="Tools and agents connected\n", color=Color.GREEN)
 
     def disconnect(
         self,
@@ -521,7 +569,12 @@ Execution Results:
         universal_agents: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """Disconnect tools and agents."""
-        if universal_tools:
-            self.tools = [t for t in self.tools if t not in universal_tools]
-        if universal_agents:
-            self.team = [a for a in self.team if a not in universal_agents]
+        with Logger(self._log_level) as logger:
+            logger.print(message=f'* Disconnecting additional tools and agents.. ({self._contract["name"]}) *\n', color=Color.WHITE)
+            if universal_tools:
+                logger.print(prefix="Agent", message="Disconnecting tools..", color=Color.GRAY)
+                self.tools = [t for t in self.tools if t not in universal_tools]
+            if universal_agents:
+                logger.print(prefix="Agent", message="Disconnecting agents..", color=Color.GRAY)
+                self.team = [a for a in self.team if a not in universal_agents]
+            logger.print(prefix="Agent", message="Tools and agents disconnected\n", color=Color.GREEN)

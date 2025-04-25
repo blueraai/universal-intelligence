@@ -80,7 +80,7 @@ const agent = new Agent(
   //    expandTeam: [OtherAgent()]      // expand 🤖 team
   // }
 )
-const [otherAgentResult, otherAgentLogs] = await agent.process("Please print 'Hello World' to the console", { extraTools: [Tool()] })
+const [result, logs] = await agent.process("Please print 'Hello World' to the console", { extraTools: [Tool()] })
 ```
 
 ### Playground
@@ -182,7 +182,8 @@ const model = new Model({
     //     device_map="auto"
     //     ...
     // }
-  }
+  },
+  verbose: true // (or) string describing the log level
 })
 
 
@@ -238,8 +239,10 @@ Model.compatibility()  // Compatibility
 ```js
 import Tool from "<provider>"
 
-const tool = Tool(configuration={ "any": "configuration" })
-const [result, logs] = tool.exampleTask(example_argument='hello') // "hello" (or async)
+const tool = Tool(
+  // { "any": "configuration" }
+)
+const [result, logs] = tool.exampleTask(data) // (or async)
 ```
 
 ###### Optional Methods
@@ -292,9 +295,13 @@ import Tool from "<provider>"
 // a team of agents shares the same intelligence(s), thus removing hardware overhead, 
 // and scaling at virtually no cost.
 const agent = new Agent({
-  model=Model(), // see Universal Model API for customizations
-  expand_tools=[Tool()], // see Universal Tool API for customizations
-  expand_team=[OtherAgent()]  // see Universal Agent API for customizations
+  model: Model(), // see Universal Model API for customizations
+  expand_tools: [Tool()], // see Universal Tool API for customizations
+  expand_team:[OtherAgent()],  // see Universal Agent API for customizations
+  configuration: {
+    // agent configuration (eg. guardrails, behavior, tracing)
+  },
+  verbose: true // or string describing log level
 })
 
 const [result, logs] = await agent.process(
@@ -366,7 +373,7 @@ A self-contained environment for running AI models with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `constructor` | • `payload.engine?: string \| string[]`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `payload.quantization?: string \| string[] \| QuantizationSettings`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'minPrecision': '4bit', 'maxPrecision': '8bit'}*)<br>• `payload.maxMemoryAllocation?: number`: Maximum allowed memory allocation in percentage<br>• `payload.configuration?: Record<string, any>`: Configuration for model and processor settings | `void` | Initialize a Universal Model |
+| `constructor` | • `payload.engine?: string \| string[]`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `payload.quantization?: string \| string[] \| QuantizationSettings`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'minPrecision': '4bit', 'maxPrecision': '8bit'}*)<br>• `payload.maxMemoryAllocation?: number`: Maximum allowed memory allocation in percentage<br>• `payload.configuration?: Record<string, any>`: Configuration for model and processor settings<br>• `payload.verbose: boolean \| string = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `void` | Initialize a Universal Model |
 | `process` | • `input: any \| Message[]`: Input or input messages<br>• `payload.context?: any[]`: Context items (multimodal supported)<br>• `payload.configuration?: Record<string, any>`: Runtime configuration<br>• `payload.remember?: boolean`: Whether to remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `payload.keepAlive?: boolean`: Keep model loaded for faster consecutive interactions<br>• `payload.stream?: boolean`: Stream output asynchronously | `Promise<[any \| null, Record<string, any>]>` | Process input through the model and return output and logs. The output is typically the model's response and the logs contain processing metadata |
 | `load` | None | `Promise<void>` | Load model into memory |
 | `loaded` | None | `Promise<boolean>` | Check if model is currently loaded in memory |
@@ -397,7 +404,7 @@ An AI agent powered by Universal Models and Tools with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `constructor` | • `payload.model?: AbstractUniversalModel`: Model powering this agent<br>• `payload.expandTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.expandTeam?: AbstractUniversalAgent[]`: Other agents to connect | `void` | Initialize a Universal Agent |
+| `constructor` | • `payload.model?: AbstractUniversalModel`: Model powering this agent<br>• `payload.expandTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.expandTeam?: AbstractUniversalAgent[]`: Other agents to connect<br>• `payload.configuration?: Record<string, any>`: Agent configuration (eg. guardrails, behavior, tracing)<br>• `payload.verbose: boolean \| string = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `void` | Initialize a Universal Agent |
 | `process` | • `input: any \| Message[]`: Input or input messages<br>• `payload.context?: any[]`: Context items (multimodal)<br>• `payload.configuration?: Record<string, any>`: Runtime configuration<br>• `payload.remember?: boolean`: Remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `payload.stream?: boolean`: Stream output asynchronously<br>• `payload.extraTools?: AbstractUniversalTool[]`: Additional tools<br>• `payload.extraTeam?: AbstractUniversalAgent[]`: Additional agents<br>• `payload.keepAlive?: boolean`: Keep underlaying model loaded for faster consecutive interactions | `Promise<[any \| null, Record<string, any>]>` | Process input through the agent and return output and logs. The output is typically the agent's response and the logs contain processing metadata including tool/agent calls |
 | `load` | None | `Promise<void>` | Load agent's model into memory |
 | `loaded` | None | `Promise<boolean>` | Check if the agent's model is currently loaded in memory |
@@ -576,7 +583,8 @@ const [result, logs] = await model.process("How are you doing today?")
 //     // top_p: 0.5,
 //     // repetition_penalty: 1.1,
 //     // num_return_sequences: 1,
-//   }
+//   },
+//   verbose: 'DEBUG' # one of true, false, 'NONE', 'DEFAULT', 'DEBUG'
 // })
 
 

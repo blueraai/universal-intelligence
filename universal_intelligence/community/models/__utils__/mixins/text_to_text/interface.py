@@ -7,10 +7,11 @@ import torch
 from huggingface_hub import hf_hub_download, whoami
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from .meta import extract_precision_from_descriptor
-from .types import ChatTemplate, InferenceConfiguration, ModelConfiguration, ProcessorConfiguration, QuantizationSettings, Sources
+from ......community.__utils__.logger import Color, Logger, LogLevel
 from ......core.universal_model import AbstractUniversalModel
 from ......core.utils.types import Message
+from .meta import extract_precision_from_descriptor
+from .types import ChatTemplate, InferenceConfiguration, ModelConfiguration, ProcessorConfiguration, QuantizationSettings, Sources
 
 # Set CUDA memory allocation configuration to use expandable segments
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
@@ -77,215 +78,272 @@ class UniversalModelMixin(AbstractUniversalModel):
         quantization: str | list[str] | QuantizationSettings | None = None,
         max_memory_allocation: float | None = None,
         configuration: dict | None = None,
+        verbose: bool | str = "DEFAULT",
     ) -> None:
         """Initialize the model with specified engine and configuration."""
-        # Check Hugging Face login status
-        try:
-            whoami()
-        except Exception as e:
-            message = f"\n[Warning] Hugging Face login not detected. Some models may require authentication to download.\n"
-            message += "To login, run: huggingface-cli login\n"
-            message += "For more information, visit: https://huggingface.co/docs/huggingface_hub/quick-start#login\n"
-            print(message)
-            raise Exception(message)
-
-        if not interface_config["name"]:
-            raise ValueError("[UniversalModelMixin:__init__:interface_config] Name is not implemented")
-        if not interface_config["sources"]:
-            raise ValueError("[UniversalModelMixin:__init__:interface_config] Sources are not implemented")
-        if not interface_config["model_configuration"]:
-            raise ValueError("[UniversalModelMixin:__init__:interface_config] Model configuration is not implemented")
-        if not interface_config["inference_configuration"]:
-            raise ValueError("[UniversalModelMixin:__init__:interface_config] Inference configuration is not implemented")
-        if not interface_config["processor_configuration"]:
-            raise ValueError("[UniversalModelMixin:__init__:interface_config] Processor configuration is not implemented")
-        if not interface_config["chat_template"]:
-            raise ValueError("[UniversalModelMixin:__init__:interface_config] Chat template is not implemented")
-
-        # Define the interface configuration
-        self._name: str = interface_config["name"]
-        self._sources: Sources = interface_config["sources"]
-        self._model_configuration: ModelConfiguration = interface_config["model_configuration"]
-        self._inference_configuration: InferenceConfiguration = interface_config["inference_configuration"]
-        self._processor_configuration: ProcessorConfiguration = interface_config["processor_configuration"]
-        self._chat_template: ChatTemplate = interface_config["chat_template"]
-
-        # Detect device type
-        device_type = "cpu"  # default
-        _device_warning = f''
-        if torch.cuda.is_available():
-            device_type = "cuda"
-        elif torch.backends.mps.is_available():
-            device_type = "mps"
-            print(f"[Memory Status] Tensor bytes allocated: {torch.mps.current_allocated_memory()} | Driver bytes reserved: {torch.mps.driver_allocated_memory()}")
-        else:
-            _device_warning += '\n[Warning] No compatible GPU device type detected. Using CPU as default.\n[Warning] If running on a compatible device (mps,cuda), please ensure that the correct driver is installed, and that the "universal_intelligence" package is installed with the correct dependencies by running:\n\npip install "universal_intelligence[community,cuda]"\n(or)\npip install "universal_intelligence[community,mps]"\n\n[Warning] See https://github.com/huggingface/universal_intelligence/ for installation instructions.\n'
-
-        print(f"\n[Device Detection] Using device type: {device_type}{_device_warning}")
-
-        # Get device-specific sources
-        device_sources = self._sources.get(device_type, self._sources["cpu"])  # fallback to CPU if device not found
-        print(f"[Device Sources] Available sources for {device_type}: {list(device_sources.keys())}")
-
-        # Set maximum memory allocation (default: 85% of available memory)
-        self.usable_memory = 0.85
-        if max_memory_allocation:
-            if 0 <= max_memory_allocation <= 1:
-                self.usable_memory = max_memory_allocation
-                print(f"[Memory Allocation] Using custom max memory allocation: {self.usable_memory * 100}%")
+        self._log_level = LogLevel.NONE
+        if verbose:
+            if isinstance(verbose, bool):
+                self._log_level = LogLevel.DEFAULT if verbose else LogLevel.NONE
+            elif isinstance(verbose, str) and verbose.upper() in LogLevel.__members__:
+                self._log_level = LogLevel[verbose.upper()]
             else:
-                raise ValueError(f"Invalid max_memory value: {max_memory_allocation} (percentage must be between 0 and 1 inclusive)")
+                raise ValueError(f"Invalid verbose value: {verbose} (must be bool or str)")
 
-        # Set quantization based on device-specific defaults or user input
-        self.quantization = quantization
-        if self.quantization is None:
-            print("\n[Quantization Selection] No quantization specified, using automatic selection")
-            # Default case - use current logic but cap minimum precision to 4 bit
-            default_quant = next(quant for quant, source in device_sources.items() if source.get("is_default", False))
-            required_memory = device_sources[default_quant].get("memory", float("inf"))
-            available_memory = self._get_available_memory(device_type) * self.usable_memory
+        with Logger(self._log_level) as logger:  # TODO: dynamic log level everywhere
+            # logger.art("star", Color.WHITE)
 
-            print(f"[Memory Check] Default quantization '{default_quant}' requires {required_memory:.1f}GB, available: {available_memory:.1f}GB")
+            if not interface_config["name"]:
+                raise ValueError("[UniversalModelMixin:__init__:interface_config] Name is not implemented")
+            if not interface_config["sources"]:
+                raise ValueError("[UniversalModelMixin:__init__:interface_config] Sources are not implemented")
+            if not interface_config["model_configuration"]:
+                raise ValueError("[UniversalModelMixin:__init__:interface_config] Model configuration is not implemented")
+            if not interface_config["inference_configuration"]:
+                raise ValueError("[UniversalModelMixin:__init__:interface_config] Inference configuration is not implemented")
+            if not interface_config["processor_configuration"]:
+                raise ValueError("[UniversalModelMixin:__init__:interface_config] Processor configuration is not implemented")
+            if not interface_config["chat_template"]:
+                raise ValueError("[UniversalModelMixin:__init__:interface_config] Chat template is not implemented")
 
-            # If default quantization fits within 80% of available memory, use it
-            if required_memory <= available_memory:
-                self.quantization = default_quant
-                print(f"[Decision] Using default quantization '{default_quant}' as it fits in available memory")
+            logger.print(message=f'* Initializing model.. ({interface_config["name"]}) *\n', color=Color.WHITE)
+
+            # Check Hugging Face login status
+            logger.print(prefix="Credentials", message="Checking Hugging Face status..")
+            try:
+                whoami()
+                logger.print(prefix="Credentials", message="Hugging Face login found", color=Color.GREEN, replace_last_line=True)
+            except Exception:
+                message = "Hugging Face login not detected. Some models may require authentication to download.\n"
+                logger.print(prefix="Credentials", message="Hugging Face login not detected. Some models may require authentication to download.", color=Color.YELLOW, replace_last_line=True)
+                logger.print(prefix="Credentials", message="To login, run: huggingface-cli login", color=Color.YELLOW)
+                logger.print(prefix="Credentials", message="For more information, visit: https://huggingface.co/docs/huggingface_hub/quick-start#login", color=Color.YELLOW)
+                raise Exception(message) from None
+
+            # Define the interface configuration
+            self._name: str = interface_config["name"]
+            self._sources: Sources = interface_config["sources"]
+            self._model_configuration: ModelConfiguration = interface_config["model_configuration"]
+            self._inference_configuration: InferenceConfiguration = interface_config["inference_configuration"]
+            self._processor_configuration: ProcessorConfiguration = interface_config["processor_configuration"]
+            self._chat_template: ChatTemplate = interface_config["chat_template"]
+
+            # Detect device type
+            logger.print(prefix="Device", message="Checking device type..")
+            device_type = "cpu"  # default
+            _device_warning = False
+            if torch.cuda.is_available():
+                device_type = "cuda"
+            elif torch.backends.mps.is_available():
+                device_type = "mps"
             else:
-                print("[Incompatiblility] Default quantization doesn't fit, searching for alternatives")
-                # Otherwise find the largest quantization that fits with minimum 4 bit precision
+                _device_warning = True
+
+            logger.print(prefix="Device", message=f"Using device type: {device_type}", color=Color.GREEN)
+            if _device_warning:
+                logger.print(prefix="Device", message="No compatible GPU device type detected. Using CPU as default.", color=Color.YELLOW)
+                logger.print(
+                    prefix="Device",
+                    message="""If running on a compatible device (mps,cuda), please ensure that the correct driver is installed, and that the "universal_intelligence" package is installed with the correct dependencies by running:
+\n\npip install "universal_intelligence[community,cuda]"\n(or)\npip install "universal_intelligence[community,mps]"
+                    """,
+                    color=Color.YELLOW,
+                )
+                logger.print(prefix="Device", message="See https://github.com/huggingface/universal_intelligence/ for installation instructions.", color=Color.YELLOW)
+
+            # Get device-specific sources
+            logger.print(prefix="Model", message="Checking availabilty..")
+            device_sources = self._sources.get(device_type, self._sources["cpu"])  # fallback to CPU if device not found
+            logger.print(prefix="Model", message=f"Checking available quantizations for {device_type}", color=Color.GRAY)
+            logger.print(prefix="Model", message=f"Available quantizations for {device_type}: {list(device_sources.keys())}", color=Color.GRAY, debug=True)
+
+            # Set maximum memory allocation (default: 85% of available memory)
+            logger.print(prefix="Model", message="Checking maximum allowed memory allocation..")
+            self.usable_memory = 0.85
+            if max_memory_allocation:
+                if 0 <= max_memory_allocation <= 1:
+                    self.usable_memory = max_memory_allocation
+                    logger.print(prefix="Model", message=f"Max allowed memory allocation: {self.usable_memory * 100}%", color=Color.BLUE, replace_last_line=True)
+                else:
+                    raise ValueError(f"Invalid max_memory value: {max_memory_allocation} (percentage must be between 0 and 1 inclusive)")
+            else:
+                logger.print(prefix="Model", message=f"Max allowed memory allocation: {self.usable_memory * 100}% (default)", color=Color.GREEN, replace_last_line=True)
+
+            # Set quantization based on device-specific defaults or user input
+            logger.print(prefix="Model", message="Setting model precision..")
+            self.quantization = quantization
+            if self.quantization is None:
+                logger.print(prefix="Model", message="No quantization specified, using automatic selection", color=Color.GRAY)
+                # Default case - use current logic but cap minimum precision to 4 bit
+                default_quant = next(quant for quant, source in device_sources.items() if source.get("is_default", False))
+                required_memory = device_sources[default_quant].get("memory", float("inf"))
+                available_memory = self._get_available_memory(device_type) * self.usable_memory
+
+                logger.print(prefix="Model", message=f"Default quantization '{default_quant}' requires {required_memory:.1f}GB, available: {available_memory:.1f}GB", color=Color.GRAY)
+
+                # If default quantization fits within 80% of available memory, use it
+                if required_memory <= available_memory:
+                    self.quantization = default_quant
+                    logger.print(prefix="Model", message=f"Using default quantization '{default_quant}' as it fits in available memory", color=Color.GREEN)
+                else:
+                    logger.print(prefix="Model", message="Default quantization doesn't fit, searching for alternatives", color=Color.YELLOW)
+                    # Otherwise find the largest quantization that fits with minimum 4 bit precision
+                    quantizations = sorted(
+                        device_sources.items(),
+                        key=lambda x: x[1].get("memory", float("inf")),
+                        reverse=True,
+                    )
+                    for quant, source in quantizations:
+                        if source.get("precision", 32) >= 4:  # Minimum 4 bit precision
+                            required_memory = source.get("memory", float("inf"))
+                            if required_memory <= available_memory:
+                                self.quantization = quant
+                                logger.print(prefix="Model", message=f"Found suitable quantization '{quant}' with {source.get('precision', 32)}-bit precision requiring {required_memory:.1f}GB", color=Color.GREEN)
+                                break
+                            else:
+                                logger.print(prefix="Model", message=f"Quantization '{quant}' does not fit within available memory", color=Color.GRAY)
+                        else:
+                            logger.print(prefix="Model", message=f"Quantization '{quant}' does not meet minimum 4-bit precision", color=Color.GRAY)
+                    else:
+                        raise ValueError(f"No quantization with minimum 4-bit precision found that fits within {self.usable_memory * 100}% of the available memory ({available_memory:.1f}GB)")
+            elif isinstance(self.quantization, str):
+                logger.print(prefix="Model", message=f"Using specified quantization: {self.quantization}", color=Color.BLUE)
+                # Check if specified quantization exists and fits in memory
+                if self.quantization not in device_sources:
+                    raise ValueError(f"Specified quantization '{self.quantization}' is not supported for {device_type}")
+
+                required_memory = device_sources[self.quantization].get("memory", float("inf"))
+                available_memory = self._get_available_memory(device_type) * self.usable_memory
+
+                if required_memory > available_memory:
+                    raise ValueError(f"Specified quantization '{self.quantization}' requires {required_memory:.1f}GB but only {available_memory:.1f}GB is available")
+
+                logger.print(prefix="Model", message=f"Confirmed quantization '{self.quantization}' fits within available memory ({required_memory:.1f}GB / {available_memory:.1f}GB)", color=Color.GREEN)
+
+            elif isinstance(self.quantization, list):
+                logger.print(prefix="Model", message=f"Trying quantizations from priority list: {self.quantization}", color=Color.BLUE)
+                available_memory = self._get_available_memory(device_type) * self.usable_memory
+
+                # List case - try each quantization in order
+                for quant in self.quantization:
+                    if quant not in device_sources:
+                        logger.print(prefix="Model", message=f"Quantization '{quant}' not supported, skipping", color=Color.GRAY)
+                        continue
+
+                    required_memory = device_sources[quant].get("memory", float("inf"))
+                    if required_memory > available_memory:
+                        logger.print(prefix="Model", message=f"Quantization '{quant}' requires {required_memory:.1f}GB but only {available_memory:.1f}GB available, skipping", color=Color.GRAY)
+                        continue
+
+                    self.quantization = quant
+                    logger.print(prefix="Model", message=f"Using quantization '{quant}' from provided list ({required_memory:.1f}GB / {available_memory:.1f}GB)", color=Color.GREEN)
+                    break
+                else:
+                    raise ValueError(f"No quantization from the provided list {self.quantization} fits within available memory ({available_memory:.1f}GB)")
+            else:  # QuantizationSettings case
+                logger.print(prefix="Model", message="Using QuantizationSettings configuration", color=Color.BLUE)
+                # Get min and max precision from settings
+                min_precision = 4  # Default minimum
+                max_precision = 8  # Default maximum
+
+                if self.quantization.min_precision:
+                    min_precision = extract_precision_from_descriptor(self.quantization.min_precision)
+                    logger.print(prefix="Model", message=f"Using custom min precision: {min_precision} bits", color=Color.BLUE)
+                elif self.quantization.default:
+                    default_quant = self.quantization.default
+                    if default_quant in device_sources:
+                        min_precision = min(4, device_sources[default_quant].get("precision", 32))
+                        logger.print(prefix="Model", message=f"Using min precision from default quantization '{default_quant}': {min_precision} bits", color=Color.BLUE)
+
+                if self.quantization.max_precision:
+                    max_precision = extract_precision_from_descriptor(self.quantization.max_precision)
+                    logger.print(prefix="Model", message=f"Using custom max precision: {max_precision} bits", color=Color.BLUE)
+                elif self.quantization.default:
+                    default_quant = self.quantization.default
+                    if default_quant in device_sources:
+                        max_precision = device_sources[default_quant].get("precision", 32)
+                        logger.print(prefix="Model", message=f"Using max precision from default quantization '{default_quant}': {max_precision} bits", color=Color.BLUE)
+
+                # Find the highest precision quantization that fits within max allowed memory allocation
+                available_memory = self._get_available_memory(device_type) * self.usable_memory
+                logger.print(prefix="Model", message=f"Available memory for quantization: {available_memory:.1f}GB", color=Color.GRAY)
+
                 quantizations = sorted(
                     device_sources.items(),
-                    key=lambda x: x[1].get("memory", float("inf")),
+                    key=lambda x: x[1].get("precision", 32),
                     reverse=True,
                 )
+
                 for quant, source in quantizations:
-                    if source.get("precision", 32) >= 4:  # Minimum 4 bit precision
+                    precision = source.get("precision", 32)
+                    if min_precision <= precision <= max_precision:
                         required_memory = source.get("memory", float("inf"))
+                        logger.print(prefix="Model", message=f"Checking quantization '{quant}' - Precision: {precision} bits, Required memory: {required_memory:.1f}GB", color=Color.GRAY)
                         if required_memory <= available_memory:
                             self.quantization = quant
-                            print(f"[Decision] Found suitable quantization '{quant}' with {source.get('precision', 32)}-bit precision requiring {required_memory:.1f}GB")
+                            logger.print(prefix="Model", message=f"Selected quantization '{quant}' with {precision}-bit precision requiring {required_memory:.1f}GB", color=Color.GREEN)
                             break
                         else:
-                            print(f"[Assesment] Quantization '{quant}' does not fit within available memory")
+                            logger.print(prefix="Model", message=f"Quantization '{quant}' does not fit within available memory", color=Color.GRAY)
                     else:
-                        print(f"[Assesment] Quantization '{quant}' does not meet minimum 4-bit precision")
+                        logger.print(prefix="Model", message=f"Quantization '{quant}' does not meet precision requirements", color=Color.GRAY)
                 else:
-                    raise ValueError(f"No quantization with minimum 4-bit precision found that fits within {self.usable_memory * 100}% of the available memory ({available_memory:.1f}GB)")
-        elif isinstance(self.quantization, str):
-            print(f"\n[Quantization Selection] Using specified quantization: {self.quantization}")
-            # Single string case - use as is, no defaulting
-            pass
-        elif isinstance(self.quantization, list):
-            print(f"\n[Quantization Selection] Trying quantizations from list: {self.quantization}")
-            # List case - try each quantization in order
-            for quant in self.quantization:
-                if quant in device_sources:
-                    self.quantization = quant
-                    print(f"[Decision] Using quantization '{quant}' from provided list")
-                    break
-            else:
-                raise ValueError(f"No quantization from the provided list {self.quantization} is supported for {device_type}")
-        else:  # QuantizationSettings case
-            print("\n[Quantization Selection] Using QuantizationSettings configuration")
-            # Get min and max precision from settings
-            min_precision = 4  # Default minimum
-            max_precision = 8  # Default maximum
+                    raise ValueError(f"No quantization found with precision between {min_precision} and {max_precision} bits " f"that fits within {self.usable_memory * 100}% of the available memory ({available_memory:.1f}GB)")
 
-            if self.quantization.min_precision:
-                min_precision = extract_precision_from_descriptor(self.quantization.min_precision)
-                print(f"[Precision] Using custom min precision: {min_precision} bits")
-            elif self.quantization.default:
-                default_quant = self.quantization.default
-                if default_quant in device_sources:
-                    min_precision = min(4, device_sources[default_quant].get("precision", 32))
-                    print(f"[Precision] Using min precision from default quantization '{default_quant}': {min_precision} bits")
+            # Validate quantization is supported for this device
+            supported_quantizations = device_sources.keys()
+            if self.quantization not in supported_quantizations:
+                raise ValueError(f"Quantization {self.quantization} not supported for {device_type}. Use one of {supported_quantizations}")
 
-            if self.quantization.max_precision:
-                max_precision = extract_precision_from_descriptor(self.quantization.max_precision)
-                print(f"[Precision] Using custom max precision: {max_precision} bits")
-            elif self.quantization.default:
-                default_quant = self.quantization.default
-                if default_quant in device_sources:
-                    max_precision = device_sources[default_quant].get("precision", 32)
-                    print(f"[Precision] Using max precision from default quantization '{default_quant}': {max_precision} bits")
+            # Get available engines for the selected quantization
+            logger.print(prefix="Model", message="Setting engine..")
+            available_engines = device_sources[self.quantization]["available_engines"]
+            logger.print(prefix="Model", message=f"Available engines for quantization '{self.quantization}': {[engine['name'] for engine in available_engines]}", color=Color.GRAY)
 
-            # Find the highest precision quantization that fits within max allowed memory allocation
-            available_memory = self._get_available_memory(device_type) * self.usable_memory
-            print(f"[Memory Check] Available memory for quantization: {available_memory:.1f}GB")
-
-            quantizations = sorted(
-                device_sources.items(),
-                key=lambda x: x[1].get("precision", 32),
-                reverse=True,
-            )
-
-            for quant, source in quantizations:
-                precision = source.get("precision", 32)
-                if min_precision <= precision <= max_precision:
-                    required_memory = source.get("memory", float("inf"))
-                    print(f"[Checking] Quantization '{quant}' - Precision: {precision} bits, Required memory: {required_memory:.1f}GB")
-                    if required_memory <= available_memory:
-                        self.quantization = quant
-                        print(f"[Decision] Selected quantization '{quant}' with {precision}-bit precision requiring {required_memory:.1f}GB")
+            # Set engine based on user input or default
+            self.engine = engine
+            if not self.engine:
+                # Find the default engine for this quantization
+                default_engine = next(
+                    (engine["name"] for engine in available_engines if engine.get("is_default", False)),
+                    None,
+                )
+                if not default_engine:
+                    # If no default is marked, use the first available engine
+                    default_engine = available_engines[0]["name"]
+                self.engine = default_engine
+                logger.print(prefix="Model", message=f"Using default engine '{default_engine}' for quantization '{self.quantization}'", color=Color.GREEN)
+            elif isinstance(self.engine, list):
+                logger.print(prefix="Model", message=f"Trying engines from list: {self.engine}", color=Color.BLUE)
+                # If engine is a list, try each engine in order until finding a supported one
+                supported_engines = {engine["name"] for engine in available_engines}
+                for engine_name in self.engine:
+                    if engine_name in supported_engines:
+                        self.engine = engine_name
+                        logger.print(prefix="Model", message=f"Using engine '{engine_name}' from provided list", color=Color.GREEN)
                         break
-                    else:
-                        print(f"[Assesment] Quantization '{quant}' does not fit within available memory")
                 else:
-                    print(f"[Assesment] Quantization '{quant}' does not meet precision requirements")
+                    # If no engine in the list is supported, raise an error
+                    raise ValueError(f"No engine from the provided list {self.engine} is supported for {device_type} device " f"with quantization {self.quantization}. Use one of {supported_engines}")
             else:
-                raise ValueError(f"No quantization found with precision between {min_precision} and {max_precision} bits " f"that fits within {self.usable_memory * 100}% of the available memory ({available_memory:.1f}GB)")
+                logger.print(prefix="Model", message=f"Using provided engine '{self.engine}'", color=Color.BLUE)
 
-        # Validate quantization is supported for this device
-        supported_quantizations = device_sources.keys()
-        if self.quantization not in supported_quantizations:
-            raise ValueError(f"Quantization {self.quantization} not supported for {device_type}. Use one of {supported_quantizations}")
-
-        # Get available engines for the selected quantization
-        available_engines = device_sources[self.quantization]["available_engines"]
-        print(f"\n[Engine Selection] Available engines for quantization '{self.quantization}': {[engine['name'] for engine in available_engines]}")
-
-        # Set engine based on user input or default
-        self.engine = engine
-        if not self.engine:
-            # Find the default engine for this quantization
-            default_engine = next(
-                (engine["name"] for engine in available_engines if engine.get("is_default", False)),
-                None,
-            )
-            if not default_engine:
-                # If no default is marked, use the first available engine
-                default_engine = available_engines[0]["name"]
-            self.engine = default_engine
-            print(f"[Decision] Using default engine '{default_engine}' for quantization '{self.quantization}'")
-        elif isinstance(self.engine, list):
-            print(f"[Engine Selection] Trying engines from list: {self.engine}")
-            # If engine is a list, try each engine in order until finding a supported one
+            # Validate engine is supported for this device and quantization
             supported_engines = {engine["name"] for engine in available_engines}
-            for engine_name in self.engine:
-                if engine_name in supported_engines:
-                    self.engine = engine_name
-                    print(f"[Decision] Using engine '{engine_name}' from provided list")
-                    break
-            else:
-                # If no engine in the list is supported, raise an error
-                raise ValueError(f"No engine from the provided list {self.engine} is supported for {device_type} device " f"with quantization {self.quantization}. Use one of {supported_engines}")
+            if self.engine not in supported_engines:
+                raise ValueError(f"Engine {self.engine} not supported for {device_type} device with quantization {self.quantization}. Use one of {supported_engines}")
 
-        # Validate engine is supported for this device and quantization
-        supported_engines = {engine["name"] for engine in available_engines}
-        if self.engine not in supported_engines:
-            raise ValueError(f"Engine {self.engine} not supported for {device_type} device with quantization {self.quantization}. Use one of {supported_engines}")
+            # Store the selected engine configuration for later use
+            self.engine_config = next(engine for engine in available_engines if engine["name"] == self.engine)
+            # logger.print(prefix="Model", message=f"Using engine '{self.engine}' with quantization '{self.quantization}' on {device_type} device", color=Color.MAGENTA)
 
-        # Store the selected engine configuration for later use
-        self.engine_config = next(engine for engine in available_engines if engine["name"] == self.engine)
-        print(f"\n[Proceeding] Using engine '{self.engine}' with quantization '{self.quantization}' on {device_type} device\n")
-
-        self.config = configuration or {}
-        self.model = None
-        self.tokenizer = None
-        self.history = []
-        print(f"Initializing model: {self._name}")
-        print(f"Device: {device_type}, Engine: {self.engine}, Quantization: {self.quantization}, Config: {self.config}")
+            self.config = configuration or {}
+            self.model = None
+            self.tokenizer = None
+            self.history = []
+            logger.print(prefix="Model", message=f"Initialized model: {self._name}", color=Color.MAGENTA)
+            logger.print(prefix="Model", message=f"Device: {device_type}, Engine: {self.engine}, Quantization: {self.quantization}, Config: {self.config}\n", color=Color.MAGENTA)
+            # logger.art("star", Color.WHITE)
 
     def _translate_model_config(self) -> dict:
         """Get the appropriate model configuration based on engine type."""
@@ -448,265 +506,294 @@ class UniversalModelMixin(AbstractUniversalModel):
 
     def process(self, input: str | list[Message], context: list[Any] | None = None, configuration: dict | None = None, remember: bool = False, keep_alive: bool = False) -> tuple[Any, dict]:
         """Process input through the model."""
-        if not input:
-            raise ValueError("Input is required")
+        with Logger(self._log_level) as logger:
+            logger.print(message=f"* Invoking model.. ({self._name}) *\n", color=Color.WHITE)
+            if not input:
+                raise ValueError("Input is required")
 
-        if not self.model:
-            self.load()
+            if not self.model:
+                logger.print(prefix="Model", message="Loading model..", color=Color.CYAN)
+                self.load()
+                logger.print(prefix="Model", message="Loading model..", color=Color.GRAY, replace_last_line=True)
+                logger.print(prefix="Model", message="Model loaded", color=Color.GREEN)
+            else:
+                logger.print(prefix="Model", message="Model already loaded", color=Color.GREEN)
 
-        # Convert input to messages format if string
-        messages = input if isinstance(input, list) else [{"role": "user", "content": input}]
+            logger.print(prefix="Input", message="Translating input..", color=Color.GRAY)
 
-        # Add context if provided
-        if context:
-            messages = [{"role": "system", "content": str(ctx)} for ctx in context] + messages
+            # Convert input to messages format if string
+            messages = input if isinstance(input, list) else [{"role": "user", "content": input}]
 
-        # Add history to current messages
-        if self.history:
-            messages = self.history + messages
+            # Add context if provided
+            if context:
+                messages = [{"role": "system", "content": str(ctx)} for ctx in context] + messages
 
-        # Get processor configurations
-        input_processor_config = self._processor_configuration[self.engine]["input"].copy()
-        output_processor_config = self._processor_configuration[self.engine]["output"].copy()
+            # Add history to current messages
+            if self.history:
+                messages = self.history + messages
+                
+            logger.print(prefix="Model", message=f"Translated input: {messages}", color=Color.GRAY, debug=True)
 
-        # Update with user-provided processor configurations if available
-        if "processor" in self.config:
-            if "input" in self.config["processor"]:
-                if "tokenizer" in self.config["processor"]["input"]:
-                    input_processor_config["tokenizer"].update(self.config["processor"]["input"]["tokenizer"])
-                if "chat_template" in self.config["processor"]["input"]:
-                    input_processor_config["chat_template"].update(self.config["processor"]["input"]["chat_template"])
-            if "output" in self.config["processor"]:
-                output_processor_config.update(self.config["processor"]["output"])
+            logger.print(prefix="Model", message="Configuring engine..", color=Color.GRAY)
 
-        # Process based on engine
-        if self.engine == "transformers":
-            # Apply input processor config for tokenization
-            input_text = self.tokenizer.apply_chat_template(
-                messages,
-                tokenize=False,
-                **input_processor_config.get("chat_template", {}),
-            )
-            inputs = self.tokenizer(
-                input_text,
-                return_tensors="pt",
-                **input_processor_config.get("tokenizer", {}),
-            ).to(self.model.device)
+            # Get processor configurations
+            input_processor_config = self._processor_configuration[self.engine]["input"].copy()
+            output_processor_config = self._processor_configuration[self.engine]["output"].copy()
 
-            gen_config = self._translate_generation_config(configuration)
-            outputs = self.model.generate(**inputs, **gen_config)
+            # Update with user-provided processor configurations if available
+            if "processor" in self.config:
+                if "input" in self.config["processor"]:
+                    if "tokenizer" in self.config["processor"]["input"]:
+                        input_processor_config["tokenizer"].update(self.config["processor"]["input"]["tokenizer"])
+                    if "chat_template" in self.config["processor"]["input"]:
+                        input_processor_config["chat_template"].update(self.config["processor"]["input"]["chat_template"])
+                if "output" in self.config["processor"]:
+                    output_processor_config.update(self.config["processor"]["output"])
+                    
+            logger.print(prefix="Model", message=f"Input processor config: {input_processor_config}", color=Color.GRAY, debug=True)
+            logger.print(prefix="Model", message=f"Output processor config: {output_processor_config}", color=Color.GRAY, debug=True)
 
-            # Apply output processor config for decoding
-            response = self.tokenizer.decode(
-                outputs[0][len(inputs.input_ids[0]) :],
-                skip_special_tokens=True,
-                **output_processor_config,
-            )
+            logger.print(prefix="Model", message="Generating output..", color=Color.CYAN)
 
-        elif self.engine == "mlx-lm":
-            from mlx_lm import generate
-            from mlx_lm.sample_utils import make_sampler
-
-            # Convert messages to prompt using chat template if available
-            if hasattr(self.tokenizer, "apply_chat_template") and self.tokenizer.chat_template is not None:
+            # Process based on engine
+            if self.engine == "transformers":
+                # Apply input processor config for tokenization
                 input_text = self.tokenizer.apply_chat_template(
                     messages,
                     tokenize=False,
                     **input_processor_config.get("chat_template", {}),
                 )
-            else:
-                # Fallback to simple concatenation if no chat template
-                input_text = "\n".join(msg["content"] for msg in messages)
+                inputs = self.tokenizer(
+                    input_text,
+                    return_tensors="pt",
+                    **input_processor_config.get("tokenizer", {}),
+                ).to(self.model.device)
 
-            # Configure generation parameters
-            gen_config = self._translate_generation_config(configuration)
+                gen_config = self._translate_generation_config(configuration)
+                outputs = self.model.generate(**inputs, **gen_config)
 
-            # Extract parameters for sampler and generate
-            max_tokens = gen_config.get("max_tokens", 2500)
-            temp = gen_config.get("temp", 0.1)
-            top_p = gen_config.get("top_p", 0.9)
+                # Apply output processor config for decoding
+                response = self.tokenizer.decode(
+                    outputs[0][len(inputs.input_ids[0]) :],
+                    skip_special_tokens=True,
+                    **output_processor_config,
+                )
 
-            # Create sampler with temperature and top_p
-            sampler = make_sampler(temp, top_p=top_p)
+            elif self.engine == "mlx-lm":
+                from mlx_lm import generate
+                from mlx_lm.sample_utils import make_sampler
 
-            # Build generation kwargs
-            generate_kwargs = {
-                "verbose": True,
-                "sampler": sampler,
-                "max_tokens": max_tokens,
-            }
+                # Convert messages to prompt using chat template if available
+                if hasattr(self.tokenizer, "apply_chat_template") and self.tokenizer.chat_template is not None:
+                    input_text = self.tokenizer.apply_chat_template(
+                        messages,
+                        tokenize=False,
+                        **input_processor_config.get("chat_template", {}),
+                    )
+                else:
+                    # Fallback to simple concatenation if no chat template
+                    input_text = "\n".join(msg["content"] for msg in messages)
 
-            # Only add stop and stop_tokens if present in gen_config
-            if "stop" in gen_config:
-                generate_kwargs["stop"] = gen_config["stop"]
-            if "stop_tokens" in gen_config:
-                generate_kwargs["stop_tokens"] = gen_config["stop_tokens"]
+                # Configure generation parameters
+                gen_config = self._translate_generation_config(configuration)
 
-            response = generate(self.model, self.tokenizer, prompt=input_text, **generate_kwargs)
+                # Extract parameters for sampler and generate
+                max_tokens = gen_config.get("max_tokens", 2500)
+                temp = gen_config.get("temp", 0.1)
+                top_p = gen_config.get("top_p", 0.9)
 
-        else:  # llama.cpp
-            # Format the prompt using the chat template
-            prompt = self._format_chat_prompt(messages)
+                # Create sampler with temperature and top_p
+                sampler = make_sampler(temp, top_p=top_p)
 
-            # Configure generation parameters
-            gen_config = self._translate_generation_config(configuration)
+                # Build generation kwargs
+                generate_kwargs = {
+                    "verbose": True,
+                    "sampler": sampler,
+                    "max_tokens": max_tokens,
+                }
 
-            response = self.model(prompt, **gen_config)["choices"][0]["text"].strip()
+                # Only add stop and stop_tokens if present in gen_config
+                if "stop" in gen_config:
+                    generate_kwargs["stop"] = gen_config["stop"]
+                if "stop_tokens" in gen_config:
+                    generate_kwargs["stop_tokens"] = gen_config["stop_tokens"]
 
-        if not keep_alive:
-            self.unload()
+                response = generate(self.model, self.tokenizer, prompt=input_text, **generate_kwargs)
 
-        # Update history if remember is True
-        if remember:
-            self.history = [*messages, {"role": "assistant", "content": response}]
+            else:  # llama.cpp
+                # Format the prompt using the chat template
+                prompt = self._format_chat_prompt(messages)
 
-        return response, {"engine": self.engine, "quantization": self.quantization}
+                # Configure generation parameters
+                gen_config = self._translate_generation_config(configuration)
+
+                response = self.model(prompt, **gen_config)["choices"][0]["text"].strip()
+
+            logger.print(prefix="Model", message="Generating output..", color=Color.GRAY, replace_last_line=True)
+            logger.print(prefix="Model", message="Generation complete", color=Color.GREEN)
+
+            if not keep_alive:
+                logger.print(prefix="Model", message="Unloading model..", color=Color.GRAY)
+                self.unload()
+                logger.print(prefix="Model", message="Model unloaded", color=Color.GREEN)
+
+            # Update history if remember is True
+            if remember:
+                self.history = [*messages, {"role": "assistant", "content": response}]
+                
+            logger.print(prefix="Model", message=f"Response: {response}", color=Color.GRAY, debug=True)
+
+            return response, {"engine": self.engine, "quantization": self.quantization}
 
     def load(self) -> None:
         """Load model into memory based on engine type."""
-        # Clear CUDA cache and reset memory stats if CUDA is available
-        if torch.cuda.is_available():
-            for i in range(torch.cuda.device_count()):
-                torch.cuda.empty_cache()
-                torch.cuda.reset_peak_memory_stats(i)
-                torch.cuda.reset_accumulated_memory_stats(i)
-                # Cap available memory for each GPU
-                torch.cuda.set_per_process_memory_fraction(self.usable_memory, i)
+        with Logger(self._log_level) as logger:
+            logger.print(message=f"* Loading model.. ({self._name}) *", color=Color.WHITE)
+            # Clear CUDA cache and reset memory stats if CUDA is available
+            if torch.cuda.is_available():
+                for i in range(torch.cuda.device_count()):
+                    torch.cuda.empty_cache()
+                    torch.cuda.reset_peak_memory_stats(i)
+                    torch.cuda.reset_accumulated_memory_stats(i)
+                    # Cap available memory for each GPU
+                    torch.cuda.set_per_process_memory_fraction(self.usable_memory, i)
 
-        if self.engine == "transformers":
-            model_id = self.engine_config["model_id"]
+            if self.engine == "transformers":
+                model_id = self.engine_config["model_id"]
 
-            # Get tokenizer config from default and user processor settings
-            tokenizer_config = self._processor_configuration[self.engine]["input"]["tokenizer"].copy()
-            if "processor" in self.config and "input" in self.config["processor"] and "tokenizer" in self.config["processor"]["input"]:
-                tokenizer_config.update(self.config["processor"]["input"]["tokenizer"])
+                # Get tokenizer config from default and user processor settings
+                tokenizer_config = self._processor_configuration[self.engine]["input"]["tokenizer"].copy()
+                if "processor" in self.config and "input" in self.config["processor"] and "tokenizer" in self.config["processor"]["input"]:
+                    tokenizer_config.update(self.config["processor"]["input"]["tokenizer"])
 
-            # Extract and remove special tokens configuration
-            special_tokens = tokenizer_config.pop("special_tokens", {})
+                # Extract and remove special tokens configuration
+                special_tokens = tokenizer_config.pop("special_tokens", {})
 
-            # Initialize tokenizer with remaining config
-            self.tokenizer = AutoTokenizer.from_pretrained(model_id, **tokenizer_config)
+                # Initialize tokenizer with remaining config
+                self.tokenizer = AutoTokenizer.from_pretrained(model_id, **tokenizer_config)
 
-            # Add special tokens if provided
-            if special_tokens:
-                self.tokenizer.add_special_tokens(special_tokens)
-                # Update processor configuration to remove special_tokens
-                if "special_tokens" in self._processor_configuration[self.engine]["input"]["tokenizer"]:
-                    del self._processor_configuration[self.engine]["input"]["tokenizer"]["special_tokens"]
+                # Add special tokens if provided
+                if special_tokens:
+                    self.tokenizer.add_special_tokens(special_tokens)
+                    # Update processor configuration to remove special_tokens
+                    if "special_tokens" in self._processor_configuration[self.engine]["input"]["tokenizer"]:
+                        del self._processor_configuration[self.engine]["input"]["tokenizer"]["special_tokens"]
 
-            # Load model with memory-efficient settings
-            model_config = self._translate_model_config()
+                # Load model with memory-efficient settings
+                model_config = self._translate_model_config()
 
-            self.model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True, **model_config)
+                self.model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True, **model_config)
 
-        elif self.engine == "mlx-lm":
-            from mlx_lm import load
+            elif self.engine == "mlx-lm":
+                from mlx_lm import load
 
-            model_id = self.engine_config["model_id"]
+                model_id = self.engine_config["model_id"]
 
-            # Get tokenizer config from default and user processor settings
-            tokenizer_config = self._processor_configuration[self.engine]["input"]["tokenizer"].copy()
-            if "processor" in self.config and "input" in self.config["processor"] and "tokenizer" in self.config["processor"]["input"]:
-                tokenizer_config.update(self.config["processor"]["input"]["tokenizer"])
+                # Get tokenizer config from default and user processor settings
+                tokenizer_config = self._processor_configuration[self.engine]["input"]["tokenizer"].copy()
+                if "processor" in self.config and "input" in self.config["processor"] and "tokenizer" in self.config["processor"]["input"]:
+                    tokenizer_config.update(self.config["processor"]["input"]["tokenizer"])
 
-            self.model, self.tokenizer = load(model_id, tokenizer_config=tokenizer_config)
+                self.model, self.tokenizer = load(model_id, tokenizer_config=tokenizer_config)
 
-        else:  # llama.cpp
-            from llama_cpp import Llama
+            else:  # llama.cpp
+                from llama_cpp import Llama
 
-            # Download the GGUF model from HuggingFace
-            model_id = self.engine_config["model_id"]
-            model_file = self.engine_config["model_file"]
-            model_path = hf_hub_download(repo_id=model_id, filename=model_file, repo_type="model")
+                # Download the GGUF model from HuggingFace
+                model_id = self.engine_config["model_id"]
+                model_file = self.engine_config["model_file"]
+                model_path = hf_hub_download(repo_id=model_id, filename=model_file, repo_type="model")
 
-            self.model = Llama(model_path=model_path, **self._translate_model_config())
+                self.model = Llama(model_path=model_path, **self._translate_model_config())
 
-        # Final memory cleanup
-        if torch.cuda.is_available():
-            for i in range(torch.cuda.device_count()):
-                torch.cuda.empty_cache()
-                torch.cuda.reset_peak_memory_stats(i)
-                torch.cuda.reset_accumulated_memory_stats(i)
+            # Final memory cleanup
+            if torch.cuda.is_available():
+                for i in range(torch.cuda.device_count()):
+                    torch.cuda.empty_cache()
+                    torch.cuda.reset_peak_memory_stats(i)
+                    torch.cuda.reset_accumulated_memory_stats(i)
 
     def unload(self) -> None:
         """Unload model from memory."""
-        # Clear any cached tensors and move model to CPU if needed
-        if self.model:
-            # Clear any cached tensors
-            if hasattr(self.model, "clear_cache"):
-                self.model.clear_cache()
+        with Logger(self._log_level) as logger:
+            logger.print(message=f"* Unloading model.. ({self._name}) *", color=Color.WHITE)
+            # Clear any cached tensors and move model to CPU if needed
+            if self.model:
+                # Clear any cached tensors
+                if hasattr(self.model, "clear_cache"):
+                    self.model.clear_cache()
 
-            # Delete model and force garbage collection
-            del self.model
-            self.model = None
+                # Delete model and force garbage collection
+                del self.model
+                self.model = None
+                gc.collect()
+
+            if self.tokenizer:
+                del self.tokenizer
+                self.tokenizer = None
+                gc.collect()
+
+            # Clear memory based on device type
+            if torch.cuda.is_available():
+                for i in range(torch.cuda.device_count()):
+                    # Reset memory stats first
+                    torch.cuda.reset_peak_memory_stats(i)
+                    torch.cuda.reset_accumulated_memory_stats(i)
+
+                    # Clear cache and synchronize
+                    torch.cuda.empty_cache()
+                    torch.cuda.synchronize(i)
+
+                    # Reset memory stats again after cleanup
+                    torch.cuda.reset_peak_memory_stats(i)
+                    torch.cuda.reset_accumulated_memory_stats(i)
+
+                    # Force CUDA to release memory
+                    torch.cuda.set_per_process_memory_fraction(1.0, i)
+
+            elif torch.backends.mps.is_available():
+                # For MPS, we need to clear the cache and synchronize
+                torch.mps.empty_cache()
+                torch.mps.synchronize()
+
+                # Additional MPS-specific cleanup
+                if hasattr(torch.mps, "reset_peak_memory_stats"):
+                    torch.mps.reset_peak_memory_stats()
+
+                # Force garbage collection again after MPS cleanup
+                gc.collect()
+
+                # Log memory state after cleanup
+                print("\n[Memory Post-Cleanup]")
+                print(f"Tensor bytes allocated: {torch.mps.current_allocated_memory()}")
+                print(f"Driver bytes reserved: {torch.mps.driver_allocated_memory()}")
+
+                # Note: MPS driver memory may not be immediately released
+                print("\n[Memory Note] MPS driver memory may remain allocated until system needs it.")
+                print("This is normal behavior and the memory will be reused for future operations.")
+
+            # Final garbage collection with more aggressive settings
+            gc.set_threshold(1)  # Temporarily set threshold to minimum
             gc.collect()
+            gc.set_threshold(700, 10, 5)  # Reset to default thresholds
 
-        if self.tokenizer:
-            del self.tokenizer
-            self.tokenizer = None
-            gc.collect()
+            # Reset memory allocation fraction to default for CUDA
+            if torch.cuda.is_available():
+                for i in range(torch.cuda.device_count()):
+                    torch.cuda.set_per_process_memory_fraction(self.usable_memory, i)
 
-        # Clear memory based on device type
-        if torch.cuda.is_available():
-            for i in range(torch.cuda.device_count()):
-                # Reset memory stats first
-                torch.cuda.reset_peak_memory_stats(i)
-                torch.cuda.reset_accumulated_memory_stats(i)
+                # Log memory state after cleanup
+                print("\n[Memory Post-Cleanup]")
+                for i in range(torch.cuda.device_count()):
+                    print(f"Device {i}:")
+                    print(f"  Allocated: {torch.cuda.memory_allocated(i) / (1024**3):.2f}GB")
+                    print(f"  Reserved: {torch.cuda.memory_reserved(i) / (1024**3):.2f}GB")
+                    print(f"  Max allocated: {torch.cuda.max_memory_allocated(i) / (1024**3):.2f}GB")
+                    print(f"  Max reserved: {torch.cuda.max_memory_reserved(i) / (1024**3):.2f}GB")
 
-                # Clear cache and synchronize
-                torch.cuda.empty_cache()
-                torch.cuda.synchronize(i)
-
-                # Reset memory stats again after cleanup
-                torch.cuda.reset_peak_memory_stats(i)
-                torch.cuda.reset_accumulated_memory_stats(i)
-
-                # Force CUDA to release memory
-                torch.cuda.set_per_process_memory_fraction(1.0, i)
-
-        elif torch.backends.mps.is_available():
-            # For MPS, we need to clear the cache and synchronize
-            torch.mps.empty_cache()
-            torch.mps.synchronize()
-
-            # Additional MPS-specific cleanup
-            if hasattr(torch.mps, "reset_peak_memory_stats"):
-                torch.mps.reset_peak_memory_stats()
-
-            # Force garbage collection again after MPS cleanup
-            gc.collect()
-
-            # Log memory state after cleanup
-            print("\n[Memory Post-Cleanup]")
-            print(f"Tensor bytes allocated: {torch.mps.current_allocated_memory()}")
-            print(f"Driver bytes reserved: {torch.mps.driver_allocated_memory()}")
-
-            # Note: MPS driver memory may not be immediately released
-            print("\n[Memory Note] MPS driver memory may remain allocated until system needs it.")
-            print("This is normal behavior and the memory will be reused for future operations.")
-
-        # Final garbage collection with more aggressive settings
-        gc.set_threshold(1)  # Temporarily set threshold to minimum
-        gc.collect()
-        gc.set_threshold(700, 10, 5)  # Reset to default thresholds
-
-        # Reset memory allocation fraction to default for CUDA
-        if torch.cuda.is_available():
-            for i in range(torch.cuda.device_count()):
-                torch.cuda.set_per_process_memory_fraction(self.usable_memory, i)
-
-            # Log memory state after cleanup
-            print("\n[Memory Post-Cleanup]")
-            for i in range(torch.cuda.device_count()):
-                print(f"Device {i}:")
-                print(f"  Allocated: {torch.cuda.memory_allocated(i) / (1024**3):.2f}GB")
-                print(f"  Reserved: {torch.cuda.memory_reserved(i) / (1024**3):.2f}GB")
-                print(f"  Max allocated: {torch.cuda.max_memory_allocated(i) / (1024**3):.2f}GB")
-                print(f"  Max reserved: {torch.cuda.max_memory_reserved(i) / (1024**3):.2f}GB")
-
-            # Note: CUDA memory management
-            print("\n[Memory Note] CUDA memory may remain in reserved pool for efficiency.")
-            print("This is normal behavior and allows faster reallocation for future operations.")
+                # Note: CUDA memory management
+                print("\n[Memory Note] CUDA memory may remain in reserved pool for efficiency.")
+                print("This is normal behavior and allows faster reallocation for future operations.")
 
     def loaded(self) -> bool:
         """Check if model is loaded"""
@@ -714,14 +801,15 @@ class UniversalModelMixin(AbstractUniversalModel):
 
     def configuration(self) -> dict:
         """Get model configuration"""
-        config = {
-            "engine": self.engine,
-            "quantization": self.quantization,
-            "model_config": self._translate_model_config(),
-            "inference_config": self._translate_generation_config(self.configuration),
-            "processor_config": self._processor_configuration[self.engine],
-        }
-        return config
+        with Logger(self._log_level):
+            config = {
+                "engine": self.engine,
+                "quantization": self.quantization,
+                "model_config": self._translate_model_config(),
+                "inference_config": self._translate_generation_config(self.configuration),
+                "processor_config": self._processor_configuration[self.engine],
+            }
+            return config
 
     def reset(self) -> None:
         """Reset model chat history."""

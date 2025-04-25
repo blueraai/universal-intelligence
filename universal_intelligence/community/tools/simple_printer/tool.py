@@ -31,7 +31,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
             },
             {
@@ -81,8 +81,9 @@ class UniversalTool(AbstractUniversalTool):
     def requirements(cls) -> list[Requirement]:
         return cls._requirements.copy()
 
-    def __init__(self, configuration: dict | None = None) -> None:
+    def __init__(self, configuration: dict | None = None, verbose: str = "DEFAULT") -> None:
         self._configuration = configuration if configuration is not None else {}
+        self._verbose = verbose
 
     def print_text(self, text: str) -> tuple[str, dict]:
         print("\n\n\n")
@@ -91,4 +92,4 @@ class UniversalTool(AbstractUniversalTool):
         else:
             print(text)
         print("\n\n\n")
-        return text, { "status": "success" }
+        return text, {"status": "success"}

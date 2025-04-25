@@ -3,9 +3,12 @@ import * as yaml from 'js-yaml'
 import { AbstractUniversalModel } from "../../../core/UniversalModel"
 import UniversalModel from "../../models/qwen2_5_3b_instruct/model"
 
+import { Logger, LogLevel } from "./../../../community/__utils__/logger"
 import { Contract, Compatibility, Requirement, Message } from "./../../../core/types"
 import { AbstractUniversalAgent } from "./../../../core/UniversalAgent"
 import { AbstractUniversalTool } from "./../../../core/UniversalTool"
+
+
 
 const _contract: Contract = {
   name: "Simple Agent",
@@ -272,19 +275,28 @@ export default class UniversalAgent extends AbstractUniversalAgent {
   private model: AbstractUniversalModel
   private tools: AbstractUniversalTool[]
   private team: AbstractUniversalAgent[]
-
+  private _logger: Logger
   constructor(
     payload?: {
       model?: AbstractUniversalModel,
       expandTools?: AbstractUniversalTool[],
       expandTeam?: AbstractUniversalAgent[],
+      configuration?: Record<string, any>,
+      verbose?: boolean | string
     } | undefined
   ) {
-    const { model, expandTools, expandTeam } = payload || {}
+    const { model, expandTools, expandTeam, configuration, verbose } = payload || {}
     super(payload)
-    this.model = model ? model : new UniversalModel()
+    this.model = model ? model : new UniversalModel({ verbose })
     this.tools = UniversalAgent._defaultTools.concat(expandTools ? expandTools : [])
     this.team = UniversalAgent._defaultTeam.concat(expandTeam ? expandTeam : [])
+    if (typeof verbose === 'string') {
+      this._logger = new Logger(LogLevel[verbose as keyof typeof LogLevel])
+    } else if (typeof verbose === 'boolean') {
+      this._logger = new Logger(verbose ? LogLevel.DEBUG : LogLevel.NONE)
+    } else {
+      this._logger = new Logger()
+    }
   }
   
   private async _planDependencyCalls(
@@ -348,7 +360,7 @@ User Query: ${query}
 Available Capabilities:
 ${yaml.dump(capabilities, { sortKeys: false })}
 `
-    console.log("[Agent] Planning tasks to satisfy query..", { ask: { query, capabilities }})
+    this._logger.log("[Agent] Planning tasks to satisfy query..", { ask: { query, capabilities }})
     const [planResponse] = await this.model.process(planningPrompt)
     try {
       // Parse the YAML response into a list of planned calls
@@ -358,7 +370,7 @@ ${yaml.dump(capabilities, { sortKeys: false })}
       }
 
       // Validate and limit number of calls
-      console.log("[Agent] Validating and limiting number of planned tasks..", { plannedCalls })
+      this._logger.log("[Agent] Validating and limiting number of planned tasks..", { plannedCalls })
       const validCalls = plannedCalls
         .slice(0, 10) // Limit to 10 calls
         .filter(call => {
@@ -371,13 +383,13 @@ ${yaml.dump(capabilities, { sortKeys: false })}
           return requiredKeys.every(k => k in call)
         })
 
-      console.log("[Agent] Staging valid tasks for execution..", { validCalls })
+      this._logger.log("[Agent] Staging valid tasks for execution..", { validCalls })
       validCalls.map(call => {
         try {
           let methodNameSplits = call["method_name"].split(".")
           call["method_name"] = methodNameSplits[methodNameSplits.length - 1]
         } catch (error) {
-          console.warn("[Plan] Task Planning Error: ", error)
+          this._logger.warn("[Plan] Task Planning Error: ", error)
         }
         return call
       })
@@ -405,7 +417,7 @@ ${yaml.dump(capabilities, { sortKeys: false })}
       const dependencyName = call["dependency_name"]
       const methodName = call["method_name"]
       const args = call["arguments"]
-      console.log("[Agent] Executing task..", { call })
+      this._logger.log("[Agent] Executing task..", { call })
 
       // Find the matching dependency
       const dependencies = dependencyType === "tool" ? tools : team
@@ -423,7 +435,7 @@ ${yaml.dump(capabilities, { sortKeys: false })}
           let result
           if (isAsync) {
             [result] = await method.call(dependency, args).catch(error => {
-              console.error(`Error calling ${methodName} on ${dependencyName}:`, error)
+              this._logger.error(`Error calling ${methodName} on ${dependencyName}:`, error)
               return ['Dependency call failed.']
             })
           } else {
@@ -431,7 +443,7 @@ ${yaml.dump(capabilities, { sortKeys: false })}
               try {
                 return method.call(dependency, args)
               } catch (error) {
-                console.error(`Error calling ${methodName} on ${dependencyName}:`, error)
+                this._logger.error(`Error calling ${methodName} on ${dependencyName}:`, error)
                 return ['Dependency call failed.']
               }
             })()
@@ -494,7 +506,7 @@ Execution Results:
 ${resultsYaml}
 `
 
-    console.log("[Agent] Processing tasks results..", { callResults })
+    this._logger.log("[Agent] Processing tasks results..", { callResults })
     const [response, logs] = await this.model.process(
       finalPrompt,
       {
@@ -534,7 +546,7 @@ ${resultsYaml}
       universalAgents?: AbstractUniversalAgent[]
     }
   ): Promise<void> {
-    console.log("[Agent] Connecting additional tools and agents..", payload)
+    this._logger.log("[Agent] Connecting additional tools and agents..", payload)
     const { universalTools, universalAgents } = payload || {}
     await this.model.ready()
     if (universalTools) {
@@ -551,7 +563,7 @@ ${resultsYaml}
       universalAgents?: AbstractUniversalAgent[]
     }
   ): Promise<void> {
-    console.log("[Agent] Disconnecting additional tools and agents..", payload)
+    this._logger.log("[Agent] Disconnecting additional tools and agents..", payload)
     const { universalTools, universalAgents } = payload || {}
     await this.model.ready()
     if (universalTools) {

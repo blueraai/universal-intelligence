@@ -1,6 +1,7 @@
 import { Contract, Requirement } from '../../../core/types'
 import { AbstractUniversalTool } from '../../../core/UniversalTool'
 
+import { Logger, LogLevel } from './../../../community/__utils__/logger'
 export class UniversalTool extends AbstractUniversalTool {
   private static readonly _contract: Contract = {
     name: "Simple Error Generator",
@@ -68,6 +69,7 @@ export class UniversalTool extends AbstractUniversalTool {
   ]
 
   private _configuration: Record<string, any>
+  private _logger: Logger
 
   static contract(): Contract {
     return { ...UniversalTool._contract }
@@ -88,11 +90,19 @@ export class UniversalTool extends AbstractUniversalTool {
   constructor(configuration?: Record<string, any>) {
     super(configuration)
     this._configuration = configuration || {}
+    const { verbose } = this._configuration || {}
+    if (typeof verbose === 'string') {
+      this._logger = new Logger(LogLevel[verbose as keyof typeof LogLevel])
+    } else if (typeof verbose === 'boolean') {
+      this._logger = new Logger(verbose ? LogLevel.DEBUG : LogLevel.NONE)
+    } else {
+      this._logger = new Logger()
+    }
   }
 
   raiseError({ text = "Something went wrong" }: { text?: string }): [string, Record<string, any>] {
-    console.log("[Tool Call] Simple Error Generator.raiseError", { args: { text }})
-    console.log("\n\n\n")
+    this._logger.log("[Tool Call] Simple Error Generator.raiseError", { args: { text }})
+    this._logger.log("\n\n\n")
     if (this._configuration.prefix) {
       throw new Error(`[${this._configuration.prefix}] ${text}`)
     } else {

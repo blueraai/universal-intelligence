@@ -70,7 +70,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
             },
             {
@@ -112,7 +112,7 @@ class UniversalTool(AbstractUniversalTool):
     def requirements(cls) -> list[Requirement]:
         return cls._requirements.copy()
 
-    def __init__(self, configuration: dict | None = None) -> None:
+    def __init__(self, configuration: dict | None = None, verbose: str = "DEFAULT") -> None:
         self._configuration = configuration if configuration is not None else {}
         self._default_headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -122,6 +122,7 @@ class UniversalTool(AbstractUniversalTool):
 
         self._last_request_time = 0
         self._min_request_interval = 2  # Minimum seconds between requests
+        self._verbose = verbose
 
     def call_api(
         self,
@@ -169,7 +170,7 @@ class UniversalTool(AbstractUniversalTool):
                 "headers": dict(response.headers),
                 "data": data,
                 "raw_response": response.text if not isinstance(data, dict) else None,
-            }, { "status": "success" }
+            }, {"status": "success"}
         except requests.exceptions.RequestException as e:
             return {
                 "error": str(e),
@@ -179,4 +180,4 @@ class UniversalTool(AbstractUniversalTool):
                     "method": method,
                     "error_type": type(e).__name__,
                 },
-            }, { "status": "error" }
+            }, {"status": "error"}

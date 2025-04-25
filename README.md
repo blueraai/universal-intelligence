@@ -59,6 +59,10 @@ model = Model()
 result, logs = model.process("Hello, how are you?")
 ```
 
+Preview:
+
+![uin-model-demo](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//model-demo.png)
+
 #### 🔧 Simple tool
 
 ```python
@@ -67,6 +71,10 @@ from universal_intelligence import Tool
 tool = Tool()
 result, logs = tool.print_text("This needs to be printed")
 ```
+
+Preview:
+
+![uin-tool-demo](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//tool-demo.png)
 
 #### 🤖 Simple agent (🧠 + 🔧)
 
@@ -80,6 +88,10 @@ agent = Agent(
 )
 result, logs = agent.process("Please print 'Hello World' to the console", extra_tools=[Tool()])
 ```
+
+Preview:
+
+![uin-agent-demo](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//simple-agent-demo.png)
 
 ### Playground
 
@@ -176,7 +188,8 @@ model = Model(
     #     device_map: "auto"
     #     ...
     # }
-  }
+  },
+  verbose=True # or string describing log level
 )
 
 
@@ -230,8 +243,11 @@ Model.compatibility()  # Compatibility
 ```python
 from <provider> import UniversalTool as Tool
 
-tool = Tool(configuration={ "any": "configuration" })
-result, logs = tool.example_task(example_argument='hello') # "hello"
+tool = Tool(
+  # configuration={ "any": "configuration" },
+  # verbose=False
+)
+result, logs = tool.example_task(example_argument=data)
 ```
 
 ###### Optional Methods
@@ -286,7 +302,11 @@ from <provider.tool> import UniversalTool as Tool # e.g. API, database
 agent = Agent(
   model=Model(), # see Universal Model API for customizations
   expand_tools=[Tool()], # see Universal Tool API for customizations
-  expand_team=[OtherAgent()]  # see Universal Agent API for customizations
+  expand_team=[OtherAgent()],  # see Universal Agent API for customizations
+  configuration={
+    # agent configuration (eg. guardrails, behavior, tracing)
+  },
+  verbose=True # or string describing log level
 )
 
 output, logs = agent.process(
@@ -356,7 +376,7 @@ A self-contained environment for running AI models with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `__init__` | • `engine: str \| List[str] = None`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `quantization: str \| List[str] \| QuantizationSettings = None`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'min_precision': '4bit', 'max_precision': '8bit'}*)<br>• `max_memory_allocation: float = None`: Maximum allowed memory allocation in percentage<br>• `configuration: Dict = None`: Configuration for model and processor settings | `None` | Initialize a Universal Model |
+| `__init__` | • `engine: str \| List[str] = None`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `quantization: str \| List[str] \| QuantizationSettings = None`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'min_precision': '4bit', 'max_precision': '8bit'}*)<br>• `max_memory_allocation: float = None`: Maximum allowed memory allocation in percentage<br>• `configuration: Dict = None`: Configuration for model and processor settings<br>• `verbose: bool \| str = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `None` | Initialize a Universal Model |
 | `process` | • `input: Any \| List[Message]`: Input or input messages<br>• `context: List[Any] = None`: Context items (multimodal supported)<br>• `configuration: Dict = None`: Runtime configuration<br>• `remember: bool = False`: Whether to remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `stream: bool = False`: Stream output asynchronously<br>• `keep_alive: bool = None`: Keep model loaded for faster consecutive interactions | `Tuple[Any, Dict]` | Process input through the model and return output and logs. The output is typically the model's response and the logs contain processing metadata |
 | `load` | None | `None` | Load model into memory |
 | `loaded` | None | `bool` | Check if model is currently loaded in memory |
@@ -386,7 +406,7 @@ An AI agent powered by Universal Models and Tools with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `__init__` | • `model: UniversalModel = None`: Model powering this agent<br>• `expand_tools: List[UniversalTool] = None`: Tools to connect<br>• `expand_team: List[UniversalAgent] = None`: Other agents to connect | `None` | Initialize a Universal Agent |
+| `__init__` | • `model: UniversalModel = None`: Model powering this agent<br>• `expand_tools: List[UniversalTool] = None`: Tools to connect<br>• `expand_team: List[UniversalAgent] = None`: Other agents to connect<br>• `configuration: Dict = None`: Agent configuration (eg. guardrails, behavior, tracing)<br>• `verbose: bool \| str = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `None` | Initialize a Universal Agent |
 | `process` | • `input: Any \| List[Message]`: Input or input messages<br>• `context: List[Any] = None`: Context items (multimodal)<br>• `configuration: Dict = None`: Runtime configuration<br>• `remember: bool = False`: Remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `stream: bool = False`: Stream output asynchronously<br>• `extra_tools: List[UniversalTool] = None`: Additional tools<br>• `extra_team: List[UniversalAgent] = None`: Additional agents<br>• `keep_alive: bool = None`: Keep underlaying model loaded for faster consecutive interactions | `Tuple[Any, Dict]` | Process input through the agent and return output and logs. The output is typically the agent's response and the logs contain processing metadata including tool/agent calls |
 | `load` | None | `None` | Load agent's model into memory |
 | `loaded` | None | `bool` | Check if the agent's model is currently loaded in memory |
@@ -597,7 +617,8 @@ output, logs = model.process("How are you doing today?")
 #       "device_map": "auto",
 #       "torch_dtype": "auto"
 #     }
-#   }
+#   },
+#   verbose='DEBUG' # one of True, False, 'NONE', 'DEFAULT', 'DEBUG'
 # )
 
 

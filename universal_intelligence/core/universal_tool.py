@@ -19,12 +19,13 @@ class AbstractUniversalTool(ABC):
         pass
 
     @abstractmethod
-    def __init__(self, configuration: dict | None = None) -> None:
+    def __init__(self, configuration: dict | None = None, verbose: bool | str = False) -> None:
         """
         Initialize a Universal Tool.
 
         Args:
             configuration: Tool configuration including required credentials
+            verbose: Optional verbose flag
         """
         pass
 

@@ -33,6 +33,8 @@ class AbstractUniversalAgent(ABC):
         model: AbstractUniversalModel | None = None,
         expand_tools: list[AbstractUniversalTool] | None = None,
         expand_team: list["AbstractUniversalAgent"] | None = None,
+        configuration: dict | None = None,
+        verbose: bool | str = False,
     ) -> None:
         """
         Initialize a Universal Agent.
@@ -41,6 +43,8 @@ class AbstractUniversalAgent(ABC):
             model: The model powering this agent
             expand_tools: List of tools to connect to the agent
             expand_team: List of other agents to connect to this agent
+            configuration: Optional configuration dictionary for the agent (eg. guardrails, behavior, tracing)
+            verbose: Optional verbose flag
         """
         pass
 

@@ -23,7 +23,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
             },
             {
@@ -73,12 +73,13 @@ class UniversalTool(AbstractUniversalTool):
     def requirements(cls) -> list[Requirement]:
         return cls._requirements.copy()
 
-    def __init__(self, configuration: dict | None = None) -> None:
+    def __init__(self, configuration: dict | None = None, verbose: str = "DEFAULT") -> None:
         self._configuration = configuration if configuration is not None else {}
+        self._verbose = verbose
 
     def raise_error(self, text: str = "Something went wrong") -> tuple[str, dict]:
         print("\n\n\n")
         if "prefix" in self._configuration:
-            raise Exception(f"[{self._configuration['prefix']}] {text}"), { "status": "error" }
+            raise Exception(f"[{self._configuration['prefix']}] {text}")
         else:
-            raise Exception(text), { "status": "error" }
+            raise Exception(text)

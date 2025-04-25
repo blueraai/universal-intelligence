@@ -66,7 +66,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
                 "asynchronous": True,
             },
@@ -85,7 +85,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
                 "asynchronous": True,
             },
@@ -117,7 +117,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
                 "asynchronous": True,
             },
@@ -136,7 +136,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
                 "asynchronous": True,
             },
@@ -155,7 +155,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
                 "asynchronous": True,
             },
@@ -193,7 +193,7 @@ class UniversalTool(AbstractUniversalTool):
                         "value_type": "dict",
                         "description": "Status of the operation",
                         "required": True,
-                    }
+                    },
                 ],
                 "asynchronous": True,
             },
@@ -224,9 +224,10 @@ class UniversalTool(AbstractUniversalTool):
         },
     ]
 
-    def __init__(self, configuration: dict[str, Any] | None = None) -> None:
+    def __init__(self, configuration: dict[str, Any] | None = None, verbose: str = "DEFAULT") -> None:
         self._configuration = configuration if configuration is not None else {}
         self._session: ClientSession | None = None
+        self._verbose = verbose
 
         # Validate required configuration
         if "server_command" not in self._configuration:
@@ -255,43 +256,43 @@ class UniversalTool(AbstractUniversalTool):
     async def call_tool(self, tool_name: str, arguments: dict[str, Any] | None = None) -> tuple[str, dict]:
         await self._initialize_session()
         if self._session:
-            return await self._session.call_tool(tool_name, arguments or {}), { "status": "success" }
-        return None, { "status": "error" }
+            return await self._session.call_tool(tool_name, arguments or {}), {"status": "success"}
+        return None, {"status": "error"}
 
     async def list_prompts(self) -> tuple[list[str], dict]:
         """List all available prompts from the MCP server."""
         await self._initialize_session()
         if self._session:
-            return await self._session.list_prompts(), { "status": "success" }
-        return [], { "status": "error" }
+            return await self._session.list_prompts(), {"status": "success"}
+        return [], {"status": "error"}
 
     async def get_prompt(self, prompt_name: str, arguments: dict[str, Any] | None = None) -> tuple[str, dict]:
         """Get a specific prompt from the MCP server with optional arguments."""
         await self._initialize_session()
         if self._session:
-            return await self._session.get_prompt(prompt_name, arguments or {}), { "status": "success" }
-        return None, { "status": "error" }
+            return await self._session.get_prompt(prompt_name, arguments or {}), {"status": "success"}
+        return None, {"status": "error"}
 
     async def list_resources(self) -> tuple[list[str], dict]:
         """List all available resources from the MCP server."""
         await self._initialize_session()
         if self._session:
-            return await self._session.list_resources(), { "status": "success" }
-        return [], { "status": "error" }
+            return await self._session.list_resources(), {"status": "success"}
+        return [], {"status": "error"}
 
     async def list_tools(self) -> tuple[list[str], dict]:
         """List all available tools from the MCP server."""
         await self._initialize_session()
         if self._session:
-            return await self._session.list_tools(), { "status": "success" }
-        return [], { "status": "error" }
+            return await self._session.list_tools(), {"status": "success"}
+        return [], {"status": "error"}
 
     async def read_resource(self, resource_path: str) -> tuple[tuple[str, str], dict]:
         """Read a resource from the MCP server and return its content and MIME type."""
         await self._initialize_session()
         if self._session:
-            return (await self._session.read_resource(resource_path)), { "status": "success" }
-        return (None, None), { "status": "error" }
+            return (await self._session.read_resource(resource_path)), {"status": "success"}
+        return (None, None), {"status": "error"}
 
     async def __aenter__(self):
         await self._initialize_session()

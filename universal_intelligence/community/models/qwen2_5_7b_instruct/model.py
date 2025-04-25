@@ -1,10 +1,10 @@
 import os
 from typing import ClassVar
 
+from ....core.utils.types import Compatibility, Contract
 from ..__utils__.mixins.text_to_text.interface import UniversalModelMixin
 from ..__utils__.mixins.text_to_text.meta import generate_sources_from_yaml, generate_standard_compatibility, generate_standard_contract
 from ..__utils__.mixins.text_to_text.types import ChatTemplate, InferenceConfiguration, ModelConfiguration, ProcessorConfiguration, Sources
-from ....core.utils.types import Compatibility, Contract
 
 
 class UniversalModel(UniversalModelMixin):
@@ -93,4 +93,4 @@ class UniversalModel(UniversalModelMixin):
 
     @classmethod
     def compatibility(cls) -> list[Compatibility]:
-        return generate_standard_compatibility(cls()._sources) # FIXME: generating sources should be done outside the class to prevent artificial intentiation of the model
+        return generate_standard_compatibility(cls()._sources)  # FIXME: generating sources should be done outside the class to prevent artificial intentiation of the model

@@ -3,8 +3,8 @@ import re
 
 import yaml
 
-from .types import Sources
 from ......core.utils.types import Compatibility, Contract
+from .types import Sources
 
 
 def extract_precision_from_descriptor(precision_descriptor: str) -> int:
