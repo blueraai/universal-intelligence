@@ -45,7 +45,7 @@ class ConfigurationTracker:
 
 def test_meta_information(model_class: AbstractUniversalModel):
     """Test the meta information of the model class."""
-    print("\033[94m" + "\n\n================================================\n\n>> Testing meta information: \n\n" + "\033[0m")
+    print("\033[94m" + "\n\n================================================\n## Testing meta information \n================================================\n" + "\033[0m")
 
     contract = model_class.contract()
     compatibility = model_class.compatibility()
@@ -55,7 +55,7 @@ def test_meta_information(model_class: AbstractUniversalModel):
     if compatibility is None:
         raise ValueError("compatibility() returned None")
 
-    print("\033[92m" + "\n> [PASSED] Contract and Compatibility checks" + "\033[0m\n\n\n")
+    print("\033[92m" + "\n--------------------------------------------------\n [PASSED] Contract and Compatibility checks" + "\033[0m\n--------------------------------------------------\n\n\n")
 
 
 def get_device_info():
@@ -161,7 +161,7 @@ def test_model(
             },
         }
 
-    print("\033[94m" + f"\n\n================================================\n\n>> Testing configuration: \n\n(universal_model_config) \n{universal_model_config}\n\n(inference_config) \n{inference_config}\n\n------------------------------------------------\n\n" + "\033[0m")
+    print("\033[94m" + f"\n\n================================================\n## Testing configuration: \n\n(universal_model_config) \n{universal_model_config}\n\n(inference_config) \n{inference_config}\n================================================\n\n" + "\033[0m")
     try:
         start_time = time.time()
         model = model_class(**universal_model_config) if universal_model_config else model_class()
@@ -181,7 +181,7 @@ def test_model(
 
         results, logs = model.process(**inference_config)
         elapsed_time = time.time() - start_time
-        print("\033[92m" + f"\n\n> [PASSED]: \n\n(output) \n{results}\n\n(logs) \n{logs}\n\n" + "\033[0m")
+        print("\033[92m" + f"\n--------------------------------------------------\n [PASSED]: \n\n(output) \n{results}\n\n(logs) \n{logs}\n\n--------------------------------------------------\n" + "\033[0m")
         # Clean up
         model.unload()
         del model
@@ -195,7 +195,7 @@ def test_model(
             tracker.print_status_list()
     except Exception as e:
         elapsed_time = time.time() - start_time
-        print("\033[91m" + f"\n\n> [FAILED] Error: \n\n{e}\n\n" + "\033[0m")
+        print("\033[91m" + f"\n--------------------------------------------------\n [FAILED] Error: \n\n{e}\n\n--------------------------------------------------\n" + "\033[0m")
         if tracker:
             tracker.update_status(universal_model_config, TestStatus.FAILURE, elapsed_time)
             tracker.print_status_list()
@@ -207,7 +207,7 @@ def run_all_tests(model_class: AbstractUniversalModel, inference_config: dict | 
     test_meta_information(model_class)
     time.sleep(2)  # allow time for the user to read the output
 
-    print("\033[94m" + "\n\n================================================\n\n>> Setting up tests\n\n" + "\033[0m")
+    print("\033[94m" + "\n\n================================================\n## Setting up tests\n================================================\n" + "\033[0m")
     device_info = get_device_info()
     print(f"\nDevice Info: {device_info}\n")
 

@@ -1,5 +1,6 @@
 import { MLCEngine } from "@mlc-ai/web-llm"
 
+import { Logger, LogLevel } from '../../../../../community/__utils__/logger'
 import { QuantizationSettings , Message, Contract, Compatibility } from '../../../../../core/types'
 import { AbstractUniversalModel } from '../../../../../core/UniversalModel'
 
@@ -22,21 +23,21 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
   private _streamingCallback: ((chunk: string) => void) | null = null
   private _initializationPromise: Promise<void> | null = null
   private _initializationError: Error | null = null
-
+  private _logger: Logger
   private async _getAvailableMemory(deviceType: string = 'webgpu'): Promise<number> {
     if (deviceType === 'webgpu') {
       try {
         // Get WebGPU adapter and device
         const adapter = await navigator.gpu?.requestAdapter()
         if (!adapter) {
-          console.error('[Unsupported Browser] WebGPU is not supported in this browser, please try a different browser (e.g. Chrome).')
+          this._logger.error('[Unsupported Browser] WebGPU is not supported in this browser, please try a different browser (e.g. Chrome).')
           return 0
         }
 
         // Get adapter limits
         const limits = adapter.limits
         if (!limits) {
-          console.error('[Memory] WebGPU adapter limits are not available')
+          this._logger.error('[Memory] WebGPU adapter limits are not available')
           return 0
         }
 
@@ -47,7 +48,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
         const maxStorageBufferBindingSize = limits.maxStorageBufferBindingSize || 0
         
         if (maxBufferSize === 0 || maxStorageBufferBindingSize === 0) {
-          console.error('[Memory] WebGPU memory limits are not properly initialized')
+          this._logger.error('[Memory] WebGPU memory limits are not properly initialized')
           return 0
         }
 
@@ -76,7 +77,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
         
         return availableMemoryGB
       } catch (error) {
-        console.error('[Memory] Error accessing WebGPU adapter limits:', error)
+        this._logger.error('[Memory] Error accessing WebGPU adapter limits:', error)
         return 0
       }
     }
@@ -95,11 +96,20 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       engine?: string | string[],
       quantization?: string | string[] | QuantizationSettings,
       maxMemoryAllocation?: number,
-      configuration?: Record<string, any>
+      configuration?: Record<string, any>,
+      verbose?: boolean | string
     } | undefined
   ) {
-    const { engine, quantization, maxMemoryAllocation, configuration } = payload || {}
+    const { engine, quantization, maxMemoryAllocation, configuration, verbose } = payload || {}
     super(payload)
+
+    if (typeof verbose === 'string') {
+      this._logger = new Logger(LogLevel[verbose as keyof typeof LogLevel])
+    } else if (typeof verbose === 'boolean') {
+      this._logger = new Logger(verbose ? LogLevel.DEBUG : LogLevel.NONE)
+    } else {
+      this._logger = new Logger()
+    }
 
     // Validate interface configuration
     if (!interfaceConfig.name) {
@@ -138,7 +148,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     this._initializationPromise = this._initializeAsync(engine, quantization, maxMemoryAllocation)
       .catch(error => {
         this._initializationError = error
-        console.error('[Initialization] Error during async initialization:', error)
+        this._logger.error('[Initialization] Error during async initialization:', error)
         throw error
       })
   }
@@ -166,17 +176,17 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       deviceWarning += '\n[Warning] WebGPU is not supported in this browser.'
     }
 
-    console.log(`[Device Detection] Using device type: ${deviceType}${deviceWarning}`)
+    this._logger.log(`[Device Detection] Using device type: ${deviceType}${deviceWarning}`)
 
     // Get device-specific sources
     const deviceSources: Record<string, QuantizationConfig> = this._sources[deviceType] || this._sources['webgpu'] // fallback to webgpu if device not found
-    console.log(`[Device Sources] Available sources for ${deviceType}: ${Object.keys(deviceSources)}`)
+    this._logger.log(`[Device Sources] Available sources for ${deviceType}: ${Object.keys(deviceSources)}`)
 
     // Set maximum memory allocation (default: 85% of available memory)
     if (maxMemoryAllocation) {
       if (maxMemoryAllocation >= 0 && maxMemoryAllocation <= 1) {
         this._usableMemory = maxMemoryAllocation
-        console.log(`[Memory Allocation] Using custom max memory allocation: ${this._usableMemory * 100}%`)
+        this._logger.log(`[Memory Allocation] Using custom max memory allocation: ${this._usableMemory * 100}%`)
       } else {
         throw new Error(`Invalid max_memory value: ${maxMemoryAllocation} (percentage must be between 0 and 1 inclusive)`)
       }
@@ -184,7 +194,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
 
     // Set quantization based on device-specific defaults or user input
     if (quantization === null || quantization === undefined) {
-      console.log("[Quantization Selection] No quantization specified, using automatic selection")
+      this._logger.log("[Quantization Selection] No quantization specified, using automatic selection")
       // Default case - use current logic but cap minimum precision to 4 bit
       const defaultQuant = Object.entries(deviceSources)
         .find(([_, source]) => source.is_default)?.[0]
@@ -195,14 +205,14 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       const requiredMemory = deviceSources[defaultQuant].memory
       const availableMemory = await this._getAvailableMemory(deviceType) * this._usableMemory
 
-      console.log(`[Memory Check] Default quantization '${defaultQuant}' requires ${requiredMemory}GB, available: ${availableMemory.toFixed(2)}GB`)
+      this._logger.log(`[Memory Check] Default quantization '${defaultQuant}' requires ${requiredMemory}GB, available: ${availableMemory.toFixed(2)}GB`)
 
       // If default quantization fits within 80% of available memory, use it
       if (requiredMemory <= availableMemory) {
         this._quantization = defaultQuant
-        console.log(`[Decision] Using default quantization '${defaultQuant}' as it fits in available memory`)
+        this._logger.log(`[Decision] Using default quantization '${defaultQuant}' as it fits in available memory`)
       } else {
-        console.log("[Incompatibility] Default quantization doesn't fit, searching for alternatives")
+        this._logger.log("[Incompatibility] Default quantization doesn't fit, searching for alternatives")
         // Otherwise find the largest quantization that fits with minimum 4 bit precision
         const quantizations = Object.entries(deviceSources)
           .sort((a, b) => b[1].memory - a[1].memory)
@@ -211,13 +221,13 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
           if (source.precision >= 4) { // Minimum 4 bit precision
             if (source.memory <= availableMemory) {
               this._quantization = quant
-              console.log(`[Decision] Found suitable quantization '${quant}' with ${source.precision}-bit precision requiring ${source.memory}GB`)
+              this._logger.log(`[Decision] Found suitable quantization '${quant}' with ${source.precision}-bit precision requiring ${source.memory}GB`)
               break
             } else {
-              console.log(`[Assessment] Quantization '${quant}' does not fit within available memory`)
+              this._logger.log(`[Assessment] Quantization '${quant}' does not fit within available memory`)
             }
           } else {
-            console.log(`[Assessment] Quantization '${quant}' does not meet minimum 4-bit precision`)
+            this._logger.log(`[Assessment] Quantization '${quant}' does not meet minimum 4-bit precision`)
           }
         }
 
@@ -226,67 +236,83 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
         }
       }
     } else if (typeof quantization === 'string') {
-      console.log(`[Quantization Selection] Using specified quantization: ${quantization}`)
+      this._logger.log(`[Quantization Selection] Using specified quantization: ${quantization}`)
+      // Check if quantization exists and fits in memory
+      if (!(quantization in deviceSources)) {
+        throw new Error(`Specified quantization '${quantization}' not found for ${deviceType}`)
+      }
+      const requiredMemory = deviceSources[quantization].memory
+      const availableMemory = await this._getAvailableMemory(deviceType) * this._usableMemory
+      if (requiredMemory > availableMemory) {
+        throw new Error(`Specified quantization '${quantization}' requires ${requiredMemory}GB but only ${availableMemory.toFixed(2)}GB is available`)
+      }
       this._quantization = quantization
+      this._logger.log(`[Memory Check] Quantization '${quantization}' fits within available memory (requires ${requiredMemory}GB, available ${availableMemory.toFixed(2)}GB)`)
     } else if (Array.isArray(quantization)) {
-      console.log(`[Quantization Selection] Trying quantizations from list: ${quantization}`)
+      this._logger.log(`[Quantization Selection] Trying quantizations from list: ${quantization}`)
+      const availableMemory = await this._getAvailableMemory(deviceType) * this._usableMemory
       for (const quant of quantization) {
         if (quant in deviceSources) {
-          this._quantization = quant
-          console.log(`[Decision] Using quantization '${quant}' from provided list`)
-          break
+          const requiredMemory = deviceSources[quant].memory
+          if (requiredMemory <= availableMemory) {
+            this._quantization = quant
+            this._logger.log(`[Decision] Using quantization '${quant}' from provided list (requires ${requiredMemory}GB, available ${availableMemory.toFixed(2)}GB)`)
+            break
+          } else {
+            this._logger.log(`[Assessment] Quantization '${quant}' requires ${requiredMemory}GB but only ${availableMemory.toFixed(2)}GB available - trying next option`)
+          }
         }
       }
       if (!this._quantization) {
-        throw new Error(`No quantization from the provided list ${quantization} is supported for ${deviceType}`)
+        throw new Error(`No quantization from the provided list ${quantization} fits within available memory (${availableMemory.toFixed(2)}GB) for ${deviceType}`)
       }
     } else {
-      console.log("[Quantization Selection] Using QuantizationSettings configuration")
+      this._logger.log("[Quantization Selection] Using QuantizationSettings configuration")
       // Get min and max precision from settings
       let minPrecision = 4 // Default minimum
       let maxPrecision = 8 // Default maximum
 
       if (quantization.minPrecision) {
         minPrecision = extractPrecisionFromDescriptor(quantization.minPrecision)
-        console.log(`[Precision] Using custom min precision: ${minPrecision} bits`)
+        this._logger.log(`[Precision] Using custom min precision: ${minPrecision} bits`)
       } else if (quantization.default) {
         const defaultQuant = quantization.default
         if (defaultQuant in deviceSources) {
           minPrecision = Math.min(4, deviceSources[defaultQuant].precision)
-          console.log(`[Precision] Using min precision from default quantization '${defaultQuant}': ${minPrecision} bits`)
+          this._logger.log(`[Precision] Using min precision from default quantization '${defaultQuant}': ${minPrecision} bits`)
         }
       }
 
       if (quantization.maxPrecision) {
         maxPrecision = extractPrecisionFromDescriptor(quantization.maxPrecision)
-        console.log(`[Precision] Using custom max precision: ${maxPrecision} bits`)
+        this._logger.log(`[Precision] Using custom max precision: ${maxPrecision} bits`)
       } else if (quantization.default) {
         const defaultQuant = quantization.default
         if (defaultQuant in deviceSources) {
           maxPrecision = deviceSources[defaultQuant].precision
-          console.log(`[Precision] Using max precision from default quantization '${defaultQuant}': ${maxPrecision} bits`)
+          this._logger.log(`[Precision] Using max precision from default quantization '${defaultQuant}': ${maxPrecision} bits`)
         }
       }
 
       // Find the highest precision quantization that fits within max allowed memory allocation
       const availableMemory = await this._getAvailableMemory(deviceType) * this._usableMemory
-      console.log(`[Memory Check] Available memory for quantization: ${availableMemory.toFixed(2)}GB`)
+      this._logger.log(`[Memory Check] Available memory for quantization: ${availableMemory.toFixed(2)}GB`)
 
       const quantizations = Object.entries(deviceSources)
         .sort((a, b) => b[1].precision - a[1].precision)
 
       for (const [quant, source] of quantizations) {
         if (minPrecision <= source.precision && source.precision <= maxPrecision) {
-          console.log(`[Checking] Quantization '${quant}' - Precision: ${source.precision} bits, Required memory: ${source.memory}GB`)
+          this._logger.log(`[Checking] Quantization '${quant}' - Precision: ${source.precision} bits, Required memory: ${source.memory}GB`)
           if (source.memory <= availableMemory) {
             this._quantization = quant
-            console.log(`[Decision] Selected quantization '${quant}' with ${source.precision}-bit precision requiring ${source.memory}GB`)
+            this._logger.log(`[Decision] Selected quantization '${quant}' with ${source.precision}-bit precision requiring ${source.memory}GB`)
             break
           } else {
-            console.log(`[Assessment] Quantization '${quant}' does not fit within available memory`)
+            this._logger.log(`[Assessment] Quantization '${quant}' does not fit within available memory`)
           }
         } else {
-          console.log(`[Assessment] Quantization '${quant}' does not meet precision requirements`)
+          this._logger.log(`[Assessment] Quantization '${quant}' does not meet precision requirements`)
         }
       }
 
@@ -303,7 +329,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
 
     // Get available engines for the selected quantization
     const availableEngines = deviceSources[this._quantization].available_engines
-    console.log(`[Engine Selection] Available engines for quantization '${this._quantization}': ${availableEngines.map(e => e.name)}`)
+    this._logger.log(`[Engine Selection] Available engines for quantization '${this._quantization}': ${availableEngines.map(e => e.name)}`)
 
     // Set engine based on user input or default
     if (!engine) {
@@ -315,17 +341,17 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       } else {
         this._engine = defaultEngine
       }
-      console.log(`[Decision] Using default engine '${this._engine}' for quantization '${this._quantization}'`)
+      this._logger.log(`[Decision] Using default engine '${this._engine}' for quantization '${this._quantization}'`)
     } else if (typeof engine === 'string') {
       this._engine = engine
     } else if (Array.isArray(engine)) {
-      console.log(`[Engine Selection] Trying engines from list: ${engine}`)
+      this._logger.log(`[Engine Selection] Trying engines from list: ${engine}`)
       // If engine is a list, try each engine in order until finding a supported one
       const supportedEngines = new Set(availableEngines.map(e => e.name))
       for (const engineName of engine) {
         if (supportedEngines.has(engineName)) {
           this._engine = engineName
-          console.log(`[Decision] Using engine '${engineName}' from provided list`)
+          this._logger.log(`[Decision] Using engine '${engineName}' from provided list`)
           break
         }
       }
@@ -346,9 +372,9 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       throw new Error(`Engine configuration not found for ${this._engine}`)
     }
 
-    console.log(`[Proceeding] Using engine '${this._engine}' with quantization '${this._quantization}' on ${deviceType} device\n`)
-    console.log(`[Proceeding] Initializing model: ${this._name}`)
-    console.log(`[Proceeding] Device: ${deviceType}, Engine: ${this._engine}, Quantization: ${this._quantization}, Config: ${JSON.stringify(this._config)}`)
+    this._logger.log(`[Proceeding] Using engine '${this._engine}' with quantization '${this._quantization}' on ${deviceType} device\n`)
+    this._logger.log(`[Proceeding] Initializing model: ${this._name}`)
+    this._logger.log(`[Proceeding] Device: ${deviceType}, Engine: ${this._engine}, Quantization: ${this._quantization}, Config: ${JSON.stringify(this._config)}`)
   }
 
   async loaded(): Promise<boolean> {
@@ -364,7 +390,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       try {
         this._model?.resetChat(this._modelConfiguration[this._engine].model_id)
       } catch (error) {
-        console.warn('[Reset] Warning:', error)
+        this._logger.warn('[Reset] Warning:', error)
       }
     }
     this._history = []
@@ -407,7 +433,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     await this.ready()
 
     if (this._model) {
-      console.log('[Model] Model already loaded')
+      this._logger.log('[Model] Model already loaded')
       return
     }
 
@@ -438,15 +464,15 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
 
     // Log initial memory state
     const initialMemory = await this._getAvailableMemory('webgpu')
-    console.log(`[Memory Pre-Load] Available memory: ${initialMemory.toFixed(2)}GB`)
+    this._logger.log(`[Memory Pre-Load] Available memory: ${initialMemory.toFixed(2)}GB`)
 
     try {
       // Initialize with progress callback
       const initProgressCallback = (progress: any) : void => {
-        console.debug(`[Model] ${progress?.text}`, { details: progress })
+        this._logger.debug(`[Model] ${progress?.text}`, { details: progress })
       }
 
-      console.log("[Model] Loading model..")
+      this._logger.log("[Model] Loading model..")
 
       // Create MLCEngine instance
       this._model = new MLCEngine({
@@ -464,11 +490,11 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
 
       // Log memory state after loading
       const postLoadMemory = await this._getAvailableMemory('webgpu')
-      console.log(`[Memory Post-Load]Available memory: ${postLoadMemory.toFixed(2)}GB`)
-      console.log(`[Memory Post-Load] Memory used by model: ${(initialMemory - postLoadMemory).toFixed(2)}GB`)
-      console.log('[Model] Model loaded successfully')
+      this._logger.log(`[Memory Post-Load]Available memory: ${postLoadMemory.toFixed(2)}GB`)
+      this._logger.log(`[Memory Post-Load] Memory used by model: ${(initialMemory - postLoadMemory).toFixed(2)}GB`)
+      this._logger.log('[Model] Model loaded successfully')
     } catch (error) {
-      console.error('[Model] Loading Error:', error)
+      this._logger.error('[Model] Loading Error:', error)
       this._model = undefined
       throw error
     }
@@ -480,13 +506,13 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
 
     // Log memory state before unloading
     const preUnloadMemory = await this._getAvailableMemory('webgpu')
-    console.log(`[Memory Pre-Unload] Available memory: ${preUnloadMemory.toFixed(2)}GB`)
+    this._logger.log(`[Memory Pre-Unload] Available memory: ${preUnloadMemory.toFixed(2)}GB`)
 
     if (this._engine === 'webllm') {
       try {
         await this._model?.unload()
       } catch (error) {
-        console.warn('[Model] Unloading Warning:', error)
+        this._logger.warn('[Model] Unloading Warning:', error)
       }
     }
 
@@ -495,9 +521,9 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
 
     // Log memory state after unloading
     const postUnloadMemory = await this._getAvailableMemory('webgpu')
-    console.log(`[Memory Post-Unload] Available memory: ${postUnloadMemory.toFixed(2)}GB`)
-    console.log(`[Memory Post-Unload] Memory freed: ${(postUnloadMemory - preUnloadMemory).toFixed(2)}GB`)
-    console.log('[Model] Model unloaded successfully')
+    this._logger.log(`[Memory Post-Unload] Available memory: ${postUnloadMemory.toFixed(2)}GB`)
+    this._logger.log(`[Memory Post-Unload] Memory freed: ${(postUnloadMemory - preUnloadMemory).toFixed(2)}GB`)
+    this._logger.log('[Model] Model unloaded successfully')
   }
 
   async process(input: string | Message[], payload? : {
@@ -508,7 +534,7 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     stream?: boolean
   }): Promise<[string, any]> {
     const { context, configuration, remember, keepAlive, stream } = payload || {}
-    console.log("[Model] Request received..", { ask: { input, optionalPayload: payload }})
+    this._logger.log("[Model] Request received..", { ask: { input, optionalPayload: payload }})
 
     // Wait for model to be ready
     await this.ready()
@@ -517,8 +543,8 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     if (!this._model) {
       await this.load()
     }
-    console.log("[Model] Model ready. Continuing..")
-    console.log("[Model] Processing input..", { ask: { input, optionalPayload: payload }})
+    this._logger.log("[Model] Model ready. Continuing..")
+    this._logger.log("[Model] Processing input..", { ask: { input, optionalPayload: payload }})
 
     // Convert input to messages format if string
     const messages = Array.isArray(input) ? input : [{ role: 'user', content: input }]
@@ -575,10 +601,10 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
         await this.unload()
       }
 
-      console.log("[Model] Processing completed.", { output: { response }})
+      this._logger.log("[Model] Processing completed.", { output: { response }})
       return [response ?? '', { engine: this._engine, quantization: this._quantization }]
     } catch (error) {
-      console.error('[Process] Error:', error)
+      this._logger.error('[Process] Error:', error)
       if (!keepAlive) {
         await this.unload()
       }

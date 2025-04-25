@@ -36,7 +36,8 @@ export abstract class AbstractUniversalModel {
     engine?: string | string[],
     quantization?: string | string[] | QuantizationSettings,
     maxMemoryAllocation?: number,
-    configuration?: Record<string, any>
+    configuration?: Record<string, any>,
+    verbose?: boolean | string
   } | undefined) {
     if (this.constructor === AbstractUniversalModel) {
       throw new Error('Abstract class cannot be instantiated')

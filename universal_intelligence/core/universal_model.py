@@ -30,6 +30,7 @@ class AbstractUniversalModel(ABC):
         quantization: str | list[str] | QuantizationSettings | None = None,
         max_memory_allocation: float | None = None,
         configuration: dict | None = None,
+        verbose: bool | str = False,
     ) -> None:
         """
         Initialize a Universal Model.
@@ -39,6 +40,7 @@ class AbstractUniversalModel(ABC):
             quantization: Optional quantization specification (e.g., 'Q4_K_M', 'Q8_0' -or- ['Q4_K_M', 'Q8_0'] -or- {'default': 'Q4_K_M', 'min_precision': '4bit', 'max_precision': '8bit'})
             max_memory_allocation: Optional maximum memory allocation in percentage
             configuration: Optional configuration dictionary for model and processor settings
+            verbose: Optional verbose flag
         """
         pass
 

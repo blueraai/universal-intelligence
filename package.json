@@ -1,6 +1,6 @@
 {
   "name": "universalintelligence",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Universal Intelligence Protocols and Community Components",
   "main": "distweb/index.js",
   "type": "module",

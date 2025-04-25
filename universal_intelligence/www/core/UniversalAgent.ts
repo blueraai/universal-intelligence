@@ -48,7 +48,9 @@ export abstract class AbstractUniversalAgent {
   constructor(payload: {
     model?: AbstractUniversalModel,
     expandTools?: AbstractUniversalTool[],
-    expandTeam?: AbstractUniversalAgent[]
+    expandTeam?: AbstractUniversalAgent[],
+    configuration?: Record<string, any>,
+    verbose?: boolean | string
   } | undefined) {
     if (this.constructor === AbstractUniversalAgent) {
       throw new Error('Abstract class cannot be instantiated')

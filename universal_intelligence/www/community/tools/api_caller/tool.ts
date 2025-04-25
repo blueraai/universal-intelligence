@@ -1,6 +1,8 @@
 import { Contract, Requirement } from '../../../core/types'
 import { AbstractUniversalTool } from '../../../core/UniversalTool'
 
+import { Logger, LogLevel } from './../../../community/__utils__/logger'
+
 export class UniversalTool extends AbstractUniversalTool {
   private static readonly _contract: Contract = {
     name: "API Caller",
@@ -100,6 +102,7 @@ export class UniversalTool extends AbstractUniversalTool {
   private _defaultHeaders: Record<string, string>
   private _lastRequestTime: number
   private readonly _minRequestInterval: number
+  private _logger: Logger
 
   static contract(): Contract {
     return { ...UniversalTool._contract }
@@ -127,6 +130,15 @@ export class UniversalTool extends AbstractUniversalTool {
     }
     this._lastRequestTime = 0
     this._minRequestInterval = 2 // Minimum seconds between requests
+    
+    const { verbose } = this._configuration || {}
+    if (typeof verbose === 'string') {
+      this._logger = new Logger(LogLevel[verbose as keyof typeof LogLevel])
+    } else if (typeof verbose === 'boolean') {
+      this._logger = new Logger(verbose ? LogLevel.DEBUG : LogLevel.NONE)
+    } else {
+      this._logger = new Logger()
+    }
   }
 
   async callApi({
@@ -144,7 +156,7 @@ export class UniversalTool extends AbstractUniversalTool {
     headers?: Record<string, string>,
     timeout?: number
   }): Promise<[Record<string, any>, Record<string, any>]> {
-    console.log("[Tool Call] API Caller.callApi", { args: { url, method, body, params, headers, timeout }})
+    this._logger.log("[Tool Call] API Caller.callApi", { args: { url, method, body, params, headers, timeout }})
 
     // Throttle requests to avoid rate limiting
     const currentTime = Date.now() / 1000
