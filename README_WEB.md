@@ -24,7 +24,7 @@ This project also provides ready-to-use **community-built components**, implemen
 
 ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` protocols and components can be used across **all platforms** (cloud, desktop, web, mobile).
 
-> 🧩 AI Components as Building Blocks.
+> 🧩 AI made simple.
 >
 > [Bluera Inc.](https://bluera.ai)
 
