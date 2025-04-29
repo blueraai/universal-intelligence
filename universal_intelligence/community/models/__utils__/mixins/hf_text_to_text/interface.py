@@ -531,7 +531,7 @@ class UniversalModelMixin(AbstractUniversalModel):
             # Add history to current messages
             if self.history:
                 messages = self.history + messages
-                
+
             logger.print(prefix="Model", message=f"Translated input: {messages}", color=Color.GRAY, debug=True)
 
             logger.print(prefix="Model", message="Configuring engine..", color=Color.GRAY)
@@ -549,7 +549,7 @@ class UniversalModelMixin(AbstractUniversalModel):
                         input_processor_config["chat_template"].update(self.config["processor"]["input"]["chat_template"])
                 if "output" in self.config["processor"]:
                     output_processor_config.update(self.config["processor"]["output"])
-                    
+
             logger.print(prefix="Model", message=f"Input processor config: {input_processor_config}", color=Color.GRAY, debug=True)
             logger.print(prefix="Model", message=f"Output processor config: {output_processor_config}", color=Color.GRAY, debug=True)
 
@@ -640,7 +640,7 @@ class UniversalModelMixin(AbstractUniversalModel):
             # Update history if remember is True
             if remember:
                 self.history = [*messages, {"role": "assistant", "content": response}]
-                
+
             logger.print(prefix="Model", message=f"Response: {response}", color=Color.GRAY, debug=True)
 
             return response, {"engine": self.engine, "quantization": self.quantization}

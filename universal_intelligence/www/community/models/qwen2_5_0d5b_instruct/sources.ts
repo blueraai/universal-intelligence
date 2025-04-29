@@ -1,4 +1,4 @@
-import { SourcesConfig } from '../__utils__/mixins/text_to_text/types'
+import { SourcesConfig } from '../__utils__/mixins/hf_text_to_text/types'
 
 const sources: SourcesConfig = {
   model_info: {

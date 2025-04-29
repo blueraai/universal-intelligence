@@ -542,35 +542,35 @@ ${resultsYaml}
 
   async connect(
     payload: {
-      universalTools?: AbstractUniversalTool[],
-      universalAgents?: AbstractUniversalAgent[]
+      tools?: AbstractUniversalTool[],
+      agents?: AbstractUniversalAgent[]
     }
   ): Promise<void> {
     this._logger.log("[Agent] Connecting additional tools and agents..", payload)
-    const { universalTools, universalAgents } = payload || {}
+    const { tools, agents } = payload || {}
     await this.model.ready()
-    if (universalTools) {
-      this.tools.push(...universalTools)
+    if (tools) {
+      this.tools.push(...tools)
     }
-    if (universalAgents) {
-      this.team.push(...universalAgents)
+    if (agents) {
+      this.team.push(...agents)
     }
   }
 
   async disconnect(
     payload: {
-      universalTools?: AbstractUniversalTool[],
-      universalAgents?: AbstractUniversalAgent[]
+      tools?: AbstractUniversalTool[],
+      agents?: AbstractUniversalAgent[]
     }
   ): Promise<void> {
     this._logger.log("[Agent] Disconnecting additional tools and agents..", payload)
-    const { universalTools, universalAgents } = payload || {}
+    const { tools, agents } = payload || {}
     await this.model.ready()
-    if (universalTools) {
-      this.tools = this.tools.filter(t => !universalTools.includes(t))
+    if (tools) {
+      this.tools = this.tools.filter(t => !tools.includes(t))
     }
-    if (universalAgents) {
-      this.team = this.team.filter(a => !universalAgents.includes(a))
+    if (agents) {
+      this.team = this.team.filter(a => !agents.includes(a))
     }
   }
 }

@@ -1,8 +1,8 @@
-import UniversalModelMixin from "../__utils__/mixins/text_to_text/interface"
-import { ModelConfiguration, InferenceConfiguration, ProcessorConfiguration } from "../__utils__/mixins/text_to_text/types"
+import UniversalModelMixin from "../__utils__/mixins/hf_text_to_text/interface"
+import { ModelConfiguration, InferenceConfiguration, ProcessorConfiguration } from "../__utils__/mixins/hf_text_to_text/types"
 
 import { Compatibility, Contract } from "./../../../core/types"
-import { generateStandardContract, generateStandardCompatibility, generateSourcesFromConfig } from "./../__utils__/mixins/text_to_text/meta"
+import { generateStandardContract, generateStandardCompatibility, generateSourcesFromConfig } from "./../__utils__/mixins/hf_text_to_text/meta"
 import SOURCES from "./sources"
 
 const _name: string = "Qwen2.5-0.5B-Instruct"
