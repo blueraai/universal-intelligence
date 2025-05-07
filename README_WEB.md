@@ -12,30 +12,87 @@
 
 ## Overview
 
-`Universal Intelligence` (aka `UIN`) standardizes, simplifies and modularizes the usage and distribution of artifical intelligence.
+`Universal Intelligence` (aka `UIN`) aims to **make AI development accessible to everyone** through a **simple interface**, which can *optionally* be *customized* to **grow with you as you learn**, up to production readiness. 
 
-It aims to be a **framework-less agentic protocol**, removing the need for proprietary frameworks (eg. Langchain, Google ADK, Autogen, CrewAI) to build *simple, portable and composable intelligent applications*. 
+It provides both a **standard protocol**, and a **library of components** implementating the protocol for you to get started —on *any platform* ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png).
 
-It does so by standardizing the fondamental building blocks used to make an intelligent application (models, tools, agents), which agentic frameworks typically (re)define and build upon.
+> 🧩 AI made simple. [Bluera Inc.](https://bluera.ai)
+
+Learn more by clicking the most appropriate option for you:
+<details>
+
+<summary><strong style="display: inline; cursor: pointer; margin: 0; padding: 0;">I'm new to building agentic apps</strong></summary>
+
+<br>
+
+Welcome! Before jumping into what this project is, let's start with the basics.
+
+##### What is an agentic app?
+
+Agentics apps are applications which use AI. They typically use pretrained models, or agents, to interact with the user and/or achieve tasks.
+
+##### What is a model?
+
+Models are artificial brains, or *neural networks* in coding terms. 🧠  
+
+They can think, but they can't act without being given the appropriate tools for the job. They are *trained* to produce a specific output, given a specific input. These can be of any type (often called modalities —eg. text, audio, image, video).
+
+##### What is a tool?
+
+Tools are scripted task, or *functions* in coding terms. 🔧
+
+They can't think, but they can be used to achieve a pre-defined task (eg. executing a script, making an API call, interacting with a database).
+
+##### What is an agent?
+
+Agents are robots, or simply put, *models and tools connected together*. 🤖
+
+> 🤖 = 🧠 + [🔧, 🔧,..]
+
+They can think *and* act. They typically use a model to decompose a task into a list of actions, and use the appropriate tools to perform these actions.
+
+##### What is `⚪ Universal Intelligence`?
+
+UIN is a protocol aiming to standardize, simplify and modularize these fundamental AI components (ie. models, tools and agents), for them to be accessible by any developers, and distributed on any platform.
 
 It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
 
-This project also provides ready-to-use **community-built components**, implementing the `Universal Intelligence` specification.
+UIN also provides a set of **ready-made components and playgrounds** for you to get familiar with the protocol and start building in seconds.
+
+![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` can be used across **all platforms** (cloud, desktop, web, mobile).
+
+</details>
+
+<details>
+
+<summary><strong style="display: inline; cursor: pointer; margin: 0; padding: 0;">I have experience in building agentic apps</strong></summary>
+
+<br>
+
+`Universal Intelligence` standardizes, simplifies and modularizes the usage and distribution of artifical intelligence.
+
+It aims to be a **framework-less agentic protocol**, removing the need for proprietary frameworks (eg. Langchain, Google ADK, Autogen, CrewAI) to build *simple, portable and composable intelligent applications*. 
+
+It does so by standardizing the fundamental building blocks used to make an intelligent application (models, tools, agents), which agentic frameworks typically (re)define and build upon —and by ensuring these blocks can communicate and run on any hardware (model, size, and precision dynamically set; agents share resources).
+
+It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
+
+This project also provides a set of **community-built components and playgrounds**, implementing the UIN specification, for you to get familiar with the protocol and start building in seconds.
 
 ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` protocols and components can be used across **all platforms** (cloud, desktop, web, mobile).
 
-> 🧩 AI made simple.
->
-> [Bluera Inc.](https://bluera.ai)
 
-## Agentic Framework vs. Agentic Protocol
+
+#### Agentic Framework vs. Agentic Protocol
 
 > How do they compare?
 
-Agent frameworks (like Langchain, Google ADK, Autogen, CrewAI), each orchestrate their own versions of so-called building blocks. Some of them implement the building blocks themselves, others have them built by the community.
+Agent frameworks (like Langchain, Google ADK, Autogen, CrewAI), each orchestrate their own versions of so-called building blocks. Some of them implement the building blocks themselves, others have them built by the community. 
   
 UIN hopes to standardize those building blocks and remove the need for a framework to run/orchestrate them. It also adds a few cool features to these blocks like portability. 
 For example, UIN models are designed to automatically detect the current hardware (cuda, mps, webgpu), its available memory, and run the appropriate quantization and engine for it (eg. transformers, llama.cpp, mlx, web-llm). It allows developers not to have to implement different stacks to support different devices when running models locally, and (maybe more importantly) not to have to know or care about hardware compatibility, so long as they don't try to run a rocket on a gameboy 🙂
+
+</details>
 
 ## Get Started 
 
@@ -95,8 +152,7 @@ npm install && npm run build && python3 playground/web/server.py  # Ctrl+C to ki
 
 Open in Chrome: `http://localhost:8000/playground/web`
 
-
-## Specification
+## Protocol Specifications
 
 ### Universal Model
 
@@ -163,6 +219,7 @@ Those are defined by and specific to the *universal model provider*.
 import Model from "<provider>"
 
 const model = new Model({
+  credentials: '<token>', // (or) object containing credentials eg. { id: 'example', passkey: 'example' }
   engine: 'webllm', // (or) ordered by priority ['transformers', 'llama.cpp']
   quantization: 'MLC_4', // (or) ordered by priority ['Q4_K_M', 'Q8_0'] (or) auto in range {'default': 'Q4_K_M', 'minPrecision': '4bit', 'maxPrecision': '8bit'}
   maxMemoryAllocation: 0.8, // maximum allowed memory allocation in percentage
@@ -295,6 +352,7 @@ import Tool from "<provider>"
 // a team of agents shares the same intelligence(s), thus removing hardware overhead, 
 // and scaling at virtually no cost.
 const agent = new Agent({
+  credentials: '<token>', // (or) object containing credentials eg. { id: 'example', passkey: 'example' }
   model: Model(), // see Universal Model API for customizations
   expand_tools: [Tool()], // see Universal Tool API for customizations
   expand_team:[OtherAgent()],  // see Universal Agent API for customizations
@@ -356,8 +414,8 @@ await agent.load() // loads the agent's model in memory (otherwise automatically
 await agent.loaded() // checks if agent is loaded
 await agent.unload() // unloads the agent's model from memory (otherwise automatically loaded/unloaded on execution of `.process()`)
 await agent.reset() // resets remembered chat history
-await agent.connect({ universalTools: [tool], universalAgents: [otherAgent] }) // connects additionnal tools/agents
-await agent.disconnect({ universalTools: [tool], universalAgents: [otherAgent] }) // disconnects tools/agents
+await agent.connect({ tools: [tool], agents: [otherAgent] }) // connects additionnal tools/agents
+await agent.disconnect({ tools: [tool], agents: [otherAgent] }) // disconnects tools/agents
 
 // Class Optional
 Agent.contract()  // Contract 
@@ -373,7 +431,7 @@ A self-contained environment for running AI models with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `constructor` | • `payload.engine?: string \| string[]`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `payload.quantization?: string \| string[] \| QuantizationSettings`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'minPrecision': '4bit', 'maxPrecision': '8bit'}*)<br>• `payload.maxMemoryAllocation?: number`: Maximum allowed memory allocation in percentage<br>• `payload.configuration?: Record<string, any>`: Configuration for model and processor settings<br>• `payload.verbose: boolean \| string = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `void` | Initialize a Universal Model |
+| `constructor` | • `payload.credentials?: str \| Record<string, any> = None`: Authentication information (e.g. authentication token (or) object containing credentials such as  *{ id: 'example', passkey: 'example' }*)<br>• `payload.engine?: string \| string[]`: Engine used (e.g., 'transformers', 'llama.cpp', (or) ordered by priority *['transformers', 'llama.cpp']*). Prefer setting quantizations over engines for broader portability.<br>• `payload.quantization?: string \| string[] \| QuantizationSettings`: Quantization specification (e.g., *'Q4_K_M'*, (or) ordered by priority *['Q4_K_M', 'Q8_0']* (or) auto in range *{'default': 'Q4_K_M', 'minPrecision': '4bit', 'maxPrecision': '8bit'}*)<br>• `payload.maxMemoryAllocation?: number`: Maximum allowed memory allocation in percentage<br>• `payload.configuration?: Record<string, any>`: Configuration for model and processor settings<br>• `payload.verbose?: boolean \| string = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `void` | Initialize a Universal Model |
 | `process` | • `input: any \| Message[]`: Input or input messages<br>• `payload.context?: any[]`: Context items (multimodal supported)<br>• `payload.configuration?: Record<string, any>`: Runtime configuration<br>• `payload.remember?: boolean`: Whether to remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `payload.keepAlive?: boolean`: Keep model loaded for faster consecutive interactions<br>• `payload.stream?: boolean`: Stream output asynchronously | `Promise<[any \| null, Record<string, any>]>` | Process input through the model and return output and logs. The output is typically the model's response and the logs contain processing metadata |
 | `load` | None | `Promise<void>` | Load model into memory |
 | `loaded` | None | `Promise<boolean>` | Check if model is currently loaded in memory |
@@ -404,14 +462,14 @@ An AI agent powered by Universal Models and Tools with standardized interfaces.
 
 | Method | Parameters | Return Type | Description |
 |--------|------------|-------------|-------------|
-| `constructor` | • `payload.model?: AbstractUniversalModel`: Model powering this agent<br>• `payload.expandTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.expandTeam?: AbstractUniversalAgent[]`: Other agents to connect<br>• `payload.configuration?: Record<string, any>`: Agent configuration (eg. guardrails, behavior, tracing)<br>• `payload.verbose: boolean \| string = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `void` | Initialize a Universal Agent |
+| `constructor` | • `payload.credentials?: str \| Record<string, any> = None`: Authentication information (e.g. authentication token (or) object containing credentials such as  *{ id: 'example', passkey: 'example' }*)<br>• `payload.model?: AbstractUniversalModel`: Model powering this agent<br>• `payload.expandTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.expandTeam?: AbstractUniversalAgent[]`: Other agents to connect<br>• `payload.configuration?: Record<string, any>`: Agent configuration (eg. guardrails, behavior, tracing)<br>• `payload.verbose?: boolean \| string = "DEFAULT"`: Enable/Disable logs, or set a specific log level | `void` | Initialize a Universal Agent |
 | `process` | • `input: any \| Message[]`: Input or input messages<br>• `payload.context?: any[]`: Context items (multimodal)<br>• `payload.configuration?: Record<string, any>`: Runtime configuration<br>• `payload.remember?: boolean`: Remember this interaction. Please be mindful of the available context length of the underlaying model.<br>• `payload.stream?: boolean`: Stream output asynchronously<br>• `payload.extraTools?: AbstractUniversalTool[]`: Additional tools<br>• `payload.extraTeam?: AbstractUniversalAgent[]`: Additional agents<br>• `payload.keepAlive?: boolean`: Keep underlaying model loaded for faster consecutive interactions | `Promise<[any \| null, Record<string, any>]>` | Process input through the agent and return output and logs. The output is typically the agent's response and the logs contain processing metadata including tool/agent calls |
 | `load` | None | `Promise<void>` | Load agent's model into memory |
 | `loaded` | None | `Promise<boolean>` | Check if the agent's model is currently loaded in memory |
 | `unload` | None | `Promise<void>` | Unload agent's model from memory |
 | `reset` | None | `Promise<void>` | Reset agent's chat history |
-| `connect` | • `payload.universalTools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.universalAgents?: AbstractUniversalAgent[]`: Agents to connect | `Promise<void>` | Connect additional tools and agents |
-| `disconnect` | • `payload.universalTools?: AbstractUniversalTool[]`: Tools to disconnect<br>• `payload.universalAgents?: AbstractUniversalAgent[]`: Agents to disconnect | `Promise<void>` | Disconnect tools and agents |
+| `connect` | • `payload.tools?: AbstractUniversalTool[]`: Tools to connect<br>• `payload.agents?: AbstractUniversalAgent[]`: Agents to connect | `Promise<void>` | Connect additional tools and agents |
+| `disconnect` | • `payload.tools?: AbstractUniversalTool[]`: Tools to disconnect<br>• `payload.agents?: AbstractUniversalAgent[]`: Agents to disconnect | `Promise<void>` | Disconnect tools and agents |
 | `(class).contract` | None | `Contract` | Agent description and interface specification |
 | `(class).requirements` | None | `Requirement[]` | Agent configuration requirements |
 | `(class).compatibility` | None | `Compatibility[]` | Agent compatibility specification |

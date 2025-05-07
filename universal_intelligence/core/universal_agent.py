@@ -101,29 +101,29 @@ class AbstractUniversalAgent(ABC):
     @abstractmethod
     def connect(
         self,
-        universal_tools: list[AbstractUniversalTool] | None = None,
-        universal_agents: list["AbstractUniversalAgent"] | None = None,
+        tools: list[AbstractUniversalTool] | None = None,
+        agents: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """
         Connect additional tools and agents.
 
         Args:
-            universal_tools: List of tools to connect
-            universal_agents: List of agents to connect
+            tools: List of tools to connect
+            agents: List of agents to connect
         """
         pass
 
     @abstractmethod
     def disconnect(
         self,
-        universal_tools: list[AbstractUniversalTool] | None = None,
-        universal_agents: list["AbstractUniversalAgent"] | None = None,
+        tools: list[AbstractUniversalTool] | None = None,
+        agents: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """
         Disconnect tools and agents.
 
         Args:
-            universal_tools: List of tools to disconnect
-            universal_agents: List of agents to disconnect
+            tools: List of tools to disconnect
+            agents: List of agents to disconnect
         """
         pass

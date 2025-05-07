@@ -282,7 +282,7 @@ class UniversalAgent(AbstractUniversalAgent):
             logger.print(message=f'* Initializing agent.. ({self._contract["name"]}) *\n', color=Color.WHITE)
 
             logger.print(prefix="Agent", message="Setting model..", color=Color.GRAY)
-            self.model = model if model is not None else UniversalModel(verbose=verbose if self._log_level == LogLevel.DEBUG else 'NONE')
+            self.model = model if model is not None else UniversalModel(verbose=verbose if self._log_level == LogLevel.DEBUG else "NONE")
             logger.print(prefix="Agent", message="Setting tools..", color=Color.GRAY)
             self.tools = self._default_tools + (expand_tools if expand_tools else [])
             logger.print(prefix="Agent", message="Setting team..", color=Color.GRAY)
@@ -549,32 +549,32 @@ Available Capabilities:
 
     def connect(
         self,
-        universal_tools: list[AbstractUniversalTool] | None = None,
-        universal_agents: list["AbstractUniversalAgent"] | None = None,
+        tools: list[AbstractUniversalTool] | None = None,
+        agents: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """Connect additional tools and agents."""
         with Logger(self._log_level) as logger:
             logger.print(message=f'* Connecting additional tools and agents.. ({self._contract["name"]}) *\n', color=Color.WHITE)
-            if universal_tools:
+            if tools:
                 logger.print(prefix="Agent", message="Connecting tools..", color=Color.GRAY)
-                self.tools.extend(universal_tools)
-            if universal_agents:
+                self.tools.extend(tools)
+            if agents:
                 logger.print(prefix="Agent", message="Connecting agents..", color=Color.GRAY)
-                self.team.extend(universal_agents)
+                self.team.extend(agents)
             logger.print(prefix="Agent", message="Tools and agents connected\n", color=Color.GREEN)
 
     def disconnect(
         self,
-        universal_tools: list[AbstractUniversalTool] | None = None,
-        universal_agents: list["AbstractUniversalAgent"] | None = None,
+        tools: list[AbstractUniversalTool] | None = None,
+        agents: list["AbstractUniversalAgent"] | None = None,
     ) -> None:
         """Disconnect tools and agents."""
         with Logger(self._log_level) as logger:
             logger.print(message=f'* Disconnecting additional tools and agents.. ({self._contract["name"]}) *\n', color=Color.WHITE)
-            if universal_tools:
+            if tools:
                 logger.print(prefix="Agent", message="Disconnecting tools..", color=Color.GRAY)
-                self.tools = [t for t in self.tools if t not in universal_tools]
-            if universal_agents:
+                self.tools = [t for t in self.tools if t not in tools]
+            if agents:
                 logger.print(prefix="Agent", message="Disconnecting agents..", color=Color.GRAY)
-                self.team = [a for a in self.team if a not in universal_agents]
+                self.team = [a for a in self.team if a not in agents]
             logger.print(prefix="Agent", message="Tools and agents disconnected\n", color=Color.GREEN)

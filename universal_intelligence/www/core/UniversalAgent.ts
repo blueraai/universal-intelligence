@@ -105,8 +105,8 @@ export abstract class AbstractUniversalAgent {
    * @param payload.universalAgents - List of agents to connect
    */
   abstract connect(payload: {
-    universalTools?: AbstractUniversalTool[],
-    universalAgents?: AbstractUniversalAgent[]
+    tools?: AbstractUniversalTool[],
+    agents?: AbstractUniversalAgent[]
   }): Promise<void>;
 
   /**
@@ -115,7 +115,7 @@ export abstract class AbstractUniversalAgent {
    * @param payload.universalAgents - List of agents to disconnect
    */
   abstract disconnect(payload: {
-    universalTools?: AbstractUniversalTool[],
-    universalAgents?: AbstractUniversalAgent[]
+    tools?: AbstractUniversalTool[],
+    agents?: AbstractUniversalAgent[]
   }): Promise<void>;
 } 
