@@ -25,23 +25,23 @@ Learn more by clicking the most appropriate option for you:
 
 Welcome! Before jumping into what this project is, let's start with the basics.
 
-##### What is an agentic app?
+#### What is an agentic app?
 
 Agentics apps are applications which use AI. They typically use pretrained models, or agents, to interact with the user and/or achieve tasks.
 
-##### What is a model?
+#### What is a model?
 
 Models are artificial brains, or *neural networks* in coding terms. 🧠  
 
 They can think, but they can't act without being given the appropriate tools for the job. They are *trained* to produce a specific output, given a specific input. These can be of any type (often called modalities —eg. text, audio, image, video).
 
-##### What is a tool?
+#### What is a tool?
 
-Tools are scripted task, or *functions* in coding terms. 🔧
+Tools are scripted tasks, or *functions* in coding terms. 🔧
 
 They can't think, but they can be used to achieve a pre-defined task (eg. executing a script, making an API call, interacting with a database).
 
-##### What is an agent?
+#### What is an agent?
 
 Agents are robots, or simply put, *models and tools connected together*. 🤖
 
@@ -49,7 +49,7 @@ Agents are robots, or simply put, *models and tools connected together*. 🤖
 
 They can think *and* act. They typically use a model to decompose a task into a list of actions, and use the appropriate tools to perform these actions.
 
-##### What is `⚪ Universal Intelligence`?
+#### What is `⚪ Universal Intelligence`?
 
 UIN is a protocol aiming to standardize, simplify and modularize these fundamental AI components (ie. models, tools and agents), for them to be accessible by any developers, and distributed on any platform.
 
