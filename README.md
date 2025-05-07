@@ -51,7 +51,7 @@ They can think *and* act. They typically use a model to decompose a task into a 
 
 #### What is `⚪ Universal Intelligence`?
 
-UIN is a protocol aiming to standardize, simplify and modularize these fundamental AI components (ie. models, tools and agents), for them to be accessible by any developers, and distributed on any platform.
+UIN is a protocol aiming to standardize, simplify and modularize these fundamental AI components (ie. models, tools and agents), for them to be accessible to any developer, and distributed on any platform.
 
 It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
 
