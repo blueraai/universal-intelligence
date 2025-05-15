@@ -1,0 +1,5 @@
+pocketflow>=0.0.2
+anthropic>=0.15.0
+python-dotenv
+httpx
+aiofiles 

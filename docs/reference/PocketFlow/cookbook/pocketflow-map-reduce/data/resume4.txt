@@ -1,0 +1,28 @@
+Lisa Chen
+Frontend Developer
+
+Education:
+- Bachelor of Fine Arts, Rhode Island School of Design, 2019
+
+Experience:
+- UI/UX Designer, Airbnb, 2020-present
+  * Designed user interfaces for mobile and web applications
+  * Created wireframes and prototypes for new features
+  * Conducted user research and usability testing
+
+- Junior Designer, Freelance, 2019-2020
+  * Worked with small businesses on branding and website design
+  * Developed responsive web designs using HTML, CSS, and JavaScript
+
+Skills:
+- Design: Figma, Sketch, Adobe XD
+- Development: HTML, CSS, JavaScript, React
+- Tools: Git, Zeplin
+
+Portfolio Highlights:
+- Redesigned checkout flow resulting in 15% conversion increase
+- Created custom icon set for mobile application
+- Designed responsive email templates
+
+Certifications:
+- UI/UX Design Certificate, Coursera, 2019 

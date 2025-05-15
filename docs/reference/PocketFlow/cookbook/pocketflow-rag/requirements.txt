@@ -1,0 +1,4 @@
+pocketflow>=0.0.1
+numpy>=1.20.0
+faiss-cpu>=1.7.0
+openai>=1.0.0

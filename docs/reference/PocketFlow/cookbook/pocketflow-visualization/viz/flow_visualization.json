@@ -1,0 +1,99 @@
+{
+  "nodes": [
+    {
+      "id": 3,
+      "name": "ValidatePayment",
+      "group": 2
+    },
+    {
+      "id": 4,
+      "name": "ProcessPayment",
+      "group": 2
+    },
+    {
+      "id": 5,
+      "name": "PaymentConfirmation",
+      "group": 2
+    },
+    {
+      "id": 7,
+      "name": "CheckStock",
+      "group": 6
+    },
+    {
+      "id": 8,
+      "name": "ReserveItems",
+      "group": 6
+    },
+    {
+      "id": 9,
+      "name": "UpdateInventory",
+      "group": 6
+    },
+    {
+      "id": 11,
+      "name": "CreateLabel",
+      "group": 10
+    },
+    {
+      "id": 12,
+      "name": "AssignCarrier",
+      "group": 10
+    },
+    {
+      "id": 13,
+      "name": "SchedulePickup",
+      "group": 10
+    }
+  ],
+  "links": [
+    {
+      "source": 3,
+      "target": 4,
+      "action": "default"
+    },
+    {
+      "source": 4,
+      "target": 5,
+      "action": "default"
+    },
+    {
+      "source": 7,
+      "target": 8,
+      "action": "default"
+    },
+    {
+      "source": 8,
+      "target": 9,
+      "action": "default"
+    },
+    {
+      "source": 11,
+      "target": 12,
+      "action": "default"
+    },
+    {
+      "source": 12,
+      "target": 13,
+      "action": "default"
+    }
+  ],
+  "group_links": [
+    {
+      "source": 2,
+      "target": 6,
+      "action": "default"
+    },
+    {
+      "source": 6,
+      "target": 10,
+      "action": "default"
+    }
+  ],
+  "flows": {
+    "1": "OrderFlow",
+    "2": "AsyncFlow",
+    "6": "AsyncFlow",
+    "10": "AsyncFlow"
+  }
+}

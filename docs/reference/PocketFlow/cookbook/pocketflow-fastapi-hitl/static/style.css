@@ -1,0 +1,137 @@
+body {
+    font-family: sans-serif;
+    margin: 0; /* Remove default body margin */
+    padding: 20px; /* Add some padding around the content */
+    background-color: #f8f9fa; /* Lighter grey background */
+    display: flex; /* Enable Flexbox */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    min-height: 100vh; /* Ensure body takes at least full viewport height */
+    box-sizing: border-box; /* Include padding in height calculation */
+}
+
+h1 {
+    text-align: center; /* Center the main title */
+    color: #343a40;
+    margin-bottom: 25px;
+}
+
+/* Style the main containers */
+.container, .status-container {
+    background: #ffffff;
+    padding: 20px 25px; /* More padding */
+    border: 1px solid #dee2e6; /* Softer border */
+    margin-bottom: 20px;
+    border-radius: 6px; /* Slightly rounder corners */
+    width: 90%; /* Responsive width */
+    max-width: 650px; /* Max width for readability */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle shadow */
+    box-sizing: border-box; /* Include padding/border in width */
+}
+
+textarea {
+    width: 100%; /* Take full width of parent container */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1em;
+    min-height: 60px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 9px 15px; /* Slightly adjusted padding */
+    margin-right: 8px;
+    cursor: pointer;
+    border: none; /* Remove default border */
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Specific button styling */
+#submit-button {
+    background-color: #0d6efd; /* Bootstrap primary blue */
+    color: white;
+}
+#submit-button:hover:not(:disabled) {
+    background-color: #0b5ed7;
+}
+
+.approve {
+    background-color: #198754; /* Bootstrap success green */
+    color: white;
+}
+.approve:hover:not(:disabled) {
+    background-color: #157347;
+}
+
+.reject {
+    background-color: #dc3545; /* Bootstrap danger red */
+    color: white;
+}
+.reject:hover:not(:disabled) {
+    background-color: #bb2d3b;
+}
+
+
+#task-id-display {
+    font-size: 0.9em;
+    color: #6c757d; /* Bootstrap secondary text color */
+    margin-bottom: 8px;
+    word-wrap: break-word;
+}
+
+#status-display {
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #e9ecef; /* Light grey background */
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    color: #495057;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Review/Result Box Styling */
+.review-box, .result-box {
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 4px;
+    background-color: #f8f9fa; /* Very light background */
+}
+
+h2, h3 {
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+h3 {
+     border-bottom: 1px solid #eee;
+     padding-bottom: 8px;
+}
+
+pre {
+    background-color: #e9ecef;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 250px; /* Adjusted height */
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.95em;
+    color: #212529;
+}

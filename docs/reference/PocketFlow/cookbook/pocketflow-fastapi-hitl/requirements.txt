@@ -1,0 +1,4 @@
+pocketflow>=0.0.1
+fastapi
+uvicorn[standard] # ASGI server for FastAPI
+jinja2 # For HTML templating

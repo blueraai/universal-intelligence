@@ -1,0 +1,2 @@
+pocketflow>=0.0.1
+anthropic>=0.15.0   # For Claude API access 

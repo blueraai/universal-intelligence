@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PocketFlow: Flow Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        svg {
+            width: 100vw;
+            height: 100vh;
+        }
+        .links path {
+            fill: none;
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 1.5px;
+        }
+        .group-links path {
+            fill: none;
+            stroke: #333;
+            stroke-opacity: 0.8;
+            stroke-width: 2px;
+            stroke-dasharray: 5,5;
+        }
+        .nodes circle {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+        .node-labels {
+            font-size: 12px;
+            pointer-events: none;
+        }
+        .link-labels {
+            font-size: 10px;
+            fill: #666;
+            pointer-events: none;
+        }
+        .group-link-labels {
+            font-size: 11px;
+            font-weight: bold;
+            fill: #333;
+            pointer-events: none;
+        }
+        .group-container {
+            stroke: #333;
+            stroke-width: 1.5px;
+            stroke-dasharray: 5,5;
+            fill: rgba(200, 200, 200, 0.1);
+            rx: 10;
+            ry: 10;
+        }
+        .group-label {
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <svg id="graph"></svg>
+    <script>
+        // Load data from file
+        d3.json("flow_visualization.json").then(data => {
+            const svg = d3.select("#graph");
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Define arrow markers for links
+            svg.append("defs").append("marker")
+                .attr("id", "arrowhead")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 25) // Position the arrow away from the target node
+                .attr("refY", 0)
+                .attr("orient", "auto")
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("xoverflow", "visible")
+                .append("path")
+                .attr("d", "M 0,-5 L 10,0 L 0,5")
+                .attr("fill", "#999");
+                
+            // Define thicker arrow markers for group links
+            svg.append("defs").append("marker")
+                .attr("id", "group-arrowhead")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 3) // Position at the boundary of the group
+                .attr("refY", 0)
+                .attr("orient", "auto")
+                .attr("markerWidth", 8)
+                .attr("markerHeight", 8)
+                .attr("xoverflow", "visible")
+                .append("path")
+                .attr("d", "M 0,-5 L 10,0 L 0,5")
+                .attr("fill", "#333");
+            
+            // Color scale for node groups
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
+            
+            // Process the data to identify groups
+            const groups = {};
+            data.nodes.forEach(node => {
+                if (node.group > 0) {
+                    if (!groups[node.group]) {
+                        // Use the flow name instead of generic "Group X"
+                        const flowName = data.flows && data.flows[node.group] ? data.flows[node.group] : `Flow ${node.group}`;
+                        groups[node.group] = {
+                            id: node.group,
+                            name: flowName,
+                            nodes: [],
+                            x: 0,
+                            y: 0,
+                            width: 0,
+                            height: 0
+                        };
+                    }
+                    groups[node.group].nodes.push(node);
+                }
+            });
+            
+            // Create a force simulation
+            const simulation = d3.forceSimulation(data.nodes)
+                // Controls the distance between connected nodes
+                .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
+                // Controls how nodes repel each other - lower values bring nodes closer
+                .force("charge", d3.forceManyBody().strength(-30))
+                // Centers the entire graph in the SVG
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                // Prevents nodes from overlapping - acts like a minimum distance
+                .force("collide", d3.forceCollide().radius(50));
+            
+            // Group forces - create a force to keep nodes in the same group closer together
+            // This creates the effect of nodes clustering within their group boxes
+            const groupForce = alpha => {
+                for (let i = 0; i < data.nodes.length; i++) {
+                    const node = data.nodes[i];
+                    if (node.group > 0) {
+                        const group = groups[node.group];
+                        if (group && group.nodes.length > 1) {
+                            // Calculate center of group
+                            let centerX = 0, centerY = 0;
+                            group.nodes.forEach(n => {
+                                centerX += n.x || 0;
+                                centerY += n.y || 0;
+                            });
+                            centerX /= group.nodes.length;
+                            centerY /= group.nodes.length;
+                            
+                            // Move nodes toward center
+                            const k = alpha * 0.3; // Increased from 0.1 to 0.3
+                            node.vx += (centerX - node.x) * k;
+                            node.vy += (centerY - node.y) * k;
+                        }
+                    }
+                }
+            };
+            
+            // Additional force to position groups in a more organized layout (like in the image)
+            // This arranges the groups horizontally/vertically based on their connections
+            const groupLayoutForce = alpha => {
+                // Get group centers
+                const groupCenters = Object.values(groups).map(g => {
+                    return { id: g.id, cx: 0, cy: 0 };
+                });
+                
+                // Calculate current center positions
+                Object.values(groups).forEach(g => {
+                    if (g.nodes.length > 0) {
+                        let cx = 0, cy = 0;
+                        g.nodes.forEach(n => {
+                            cx += n.x || 0;
+                            cy += n.y || 0;
+                        });
+                        
+                        const groupCenter = groupCenters.find(gc => gc.id === g.id);
+                        if (groupCenter) {
+                            groupCenter.cx = cx / g.nodes.length;
+                            groupCenter.cy = cy / g.nodes.length;
+                        }
+                    }
+                });
+                
+                // Apply forces to position groups
+                const k = alpha * 0.05;
+                
+                // Try to position groups in a more structured way
+                // Adjust these values to change the overall layout
+                for (let i = 0; i < data.group_links.length; i++) {
+                    const link = data.group_links[i];
+                    const source = groupCenters.find(g => g.id === link.source);
+                    const target = groupCenters.find(g => g.id === link.target);
+                    
+                    if (source && target) {
+                        // Add a horizontal force to align groups
+                        const desiredDx = 300; // Desired horizontal distance between linked groups
+                        const dx = target.cx - source.cx;
+                        const diff = desiredDx - Math.abs(dx);
+                        
+                        // Apply forces to group nodes
+                        groups[source.id].nodes.forEach(n => {
+                            if (dx > 0) {
+                                n.vx -= diff * k;
+                            } else {
+                                n.vx += diff * k;
+                            }
+                        });
+                        
+                        groups[target.id].nodes.forEach(n => {
+                            if (dx > 0) {
+                                n.vx += diff * k;
+                            } else {
+                                n.vx -= diff * k;
+                            }
+                        });
+                    }
+                }
+            };
+            
+            simulation.force("group", groupForce);
+            simulation.force("groupLayout", groupLayoutForce);
+            
+            // Create links with arrow paths instead of lines
+            const link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("path")
+                .data(data.links)
+                .enter()
+                .append("path")
+                .attr("stroke-width", 2)
+                .attr("stroke", "#999")
+                .attr("marker-end", "url(#arrowhead)");  // Add the arrowhead marker
+            
+            // Create group containers (drawn before nodes)
+            const groupContainers = svg.append("g")
+                .attr("class", "groups")
+                .selectAll("rect")
+                .data(Object.values(groups))
+                .enter()
+                .append("rect")
+                .attr("class", "group-container")
+                .attr("fill", d => d3.color(color(d.id)).copy({opacity: 0.2}));
+            
+            // Create group links between flows
+            const groupLink = svg.append("g")
+                .attr("class", "group-links")
+                .selectAll("path")
+                .data(data.group_links || [])
+                .enter()
+                .append("path")
+                .attr("stroke-width", 2)
+                .attr("stroke", "#333")
+                .attr("marker-end", "url(#group-arrowhead)");
+                
+            // Create group link labels
+            const groupLinkLabel = svg.append("g")
+                .attr("class", "group-link-labels")
+                .selectAll("text")
+                .data(data.group_links || [])
+                .enter()
+                .append("text")
+                .text(d => d.action)
+                .attr("font-size", "11px")
+                .attr("font-weight", "bold")
+                .attr("fill", "#333");
+            
+            // Create group labels
+            const groupLabels = svg.append("g")
+                .attr("class", "group-labels")
+                .selectAll("text")
+                .data(Object.values(groups))
+                .enter()
+                .append("text")
+                .attr("class", "group-label")
+                .text(d => d.name)  // Now using the proper flow name
+                .attr("fill", d => d3.color(color(d.id)).darker());
+            
+            // Create link labels
+            const linkLabel = svg.append("g")
+                .attr("class", "link-labels")
+                .selectAll("text")
+                .data(data.links)
+                .enter()
+                .append("text")
+                .text(d => d.action)
+                .attr("font-size", "10px")
+                .attr("fill", "#666");
+            
+            // Create nodes
+            const node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(data.nodes)
+                .enter()
+                .append("circle")
+                .attr("r", 15)
+                .attr("fill", d => color(d.group))
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+            
+            // Create node labels
+            const nodeLabel = svg.append("g")
+                .attr("class", "node-labels")
+                .selectAll("text")
+                .data(data.nodes)
+                .enter()
+                .append("text")
+                .text(d => d.name)
+                .attr("text-anchor", "middle")
+                .attr("dy", 25);
+            
+            // Add tooltip on hover
+            node.append("title")
+                .text(d => d.name);
+            
+            // Update positions on each tick
+            simulation.on("tick", () => {
+                // Update links with straight lines
+                link.attr("d", d => {
+                    return `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`;
+                });
+                
+                // Update nodes
+                node
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+                
+                // Update node labels
+                nodeLabel
+                    .attr("x", d => d.x)
+                    .attr("y", d => d.y);
+                
+                // Position link labels at midpoint
+                linkLabel
+                    .attr("x", d => (d.source.x + d.target.x) / 2)
+                    .attr("y", d => (d.source.y + d.target.y) / 2);
+                
+                // Update group containers
+                groupContainers.each(function(d) {
+                    // If there are nodes in this group
+                    if (d.nodes.length > 0) {
+                        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                        
+                        // Find the bounding box for all nodes in the group
+                        d.nodes.forEach(n => {
+                            minX = Math.min(minX, n.x - 30);
+                            minY = Math.min(minY, n.y - 30);
+                            maxX = Math.max(maxX, n.x + 30);
+                            maxY = Math.max(maxY, n.y + 40); // Extra space for labels
+                        });
+                        
+                        // Add padding
+                        const padding = 20;
+                        minX -= padding;
+                        minY -= padding;
+                        maxX += padding;
+                        maxY += padding;
+                        
+                        // Save group dimensions
+                        d.x = minX;
+                        d.y = minY;
+                        d.width = maxX - minX;
+                        d.height = maxY - minY;
+                        d.centerX = minX + d.width / 2;
+                        d.centerY = minY + d.height / 2;
+                        
+                        // Set position and size of the group container
+                        d3.select(this)
+                            .attr("x", minX)
+                            .attr("y", minY)
+                            .attr("width", d.width)
+                            .attr("height", d.height);
+                        
+                        // Update group label position (top-left of group)
+                        groupLabels.filter(g => g.id === d.id)
+                            .attr("x", minX + 10)
+                            .attr("y", minY + 20);
+                    }
+                });
+                
+                // Update group links between flows
+                groupLink.attr("d", d => {
+                    const sourceGroup = groups[d.source];
+                    const targetGroup = groups[d.target];
+                    
+                    if (!sourceGroup || !targetGroup) return "";
+                    
+                    // Find intersection points with group boundaries
+                    // This ensures links connect to the group's border rather than its center
+                    
+                    // Calculate centers of groups
+                    const sx = sourceGroup.centerX;
+                    const sy = sourceGroup.centerY;
+                    const tx = targetGroup.centerX;
+                    const ty = targetGroup.centerY;
+                    
+                    // Calculate angle between centers - used to find intersection points
+                    const angle = Math.atan2(ty - sy, tx - sx);
+                    
+                    // Calculate intersection points with source group borders
+                    // We cast a ray from center in the direction of the target
+                    let sourceX, sourceY;
+                    const cosA = Math.cos(angle);
+                    const sinA = Math.sin(angle);
+                    
+                    // Check intersection with horizontal borders (top and bottom)
+                    const ts_top = (sourceGroup.y - sy) / sinA;
+                    const ts_bottom = (sourceGroup.y + sourceGroup.height - sy) / sinA;
+                    
+                    // Check intersection with vertical borders (left and right)
+                    const ts_left = (sourceGroup.x - sx) / cosA;
+                    const ts_right = (sourceGroup.x + sourceGroup.width - sx) / cosA;
+                    
+                    // Use the closest positive intersection (first hit with the boundary)
+                    let t_source = Infinity;
+                    if (ts_top > 0) t_source = Math.min(t_source, ts_top);
+                    if (ts_bottom > 0) t_source = Math.min(t_source, ts_bottom);
+                    if (ts_left > 0) t_source = Math.min(t_source, ts_left);
+                    if (ts_right > 0) t_source = Math.min(t_source, ts_right);
+                    
+                    // Target group: Find intersection in the opposite direction
+                    // We cast a ray from target center toward the source
+                    let targetX, targetY;
+                    const oppositeAngle = angle + Math.PI;
+                    const cosOpp = Math.cos(oppositeAngle);
+                    const sinOpp = Math.sin(oppositeAngle);
+                    
+                    // Check intersections for target group
+                    const tt_top = (targetGroup.y - ty) / sinOpp;
+                    const tt_bottom = (targetGroup.y + targetGroup.height - ty) / sinOpp;
+                    const tt_left = (targetGroup.x - tx) / cosOpp;
+                    const tt_right = (targetGroup.x + targetGroup.width - tx) / cosOpp;
+                    
+                    // Use the closest positive intersection
+                    let t_target = Infinity;
+                    if (tt_top > 0) t_target = Math.min(t_target, tt_top);
+                    if (tt_bottom > 0) t_target = Math.min(t_target, tt_bottom);
+                    if (tt_left > 0) t_target = Math.min(t_target, tt_left);
+                    if (tt_right > 0) t_target = Math.min(t_target, tt_right);
+                    
+                    // Calculate actual border points using parametric equation:
+                    // point = center + t * direction
+                    if (t_source !== Infinity) {
+                        sourceX = sx + cosA * t_source;
+                        sourceY = sy + sinA * t_source;
+                    } else {
+                        sourceX = sx;
+                        sourceY = sy;
+                    }
+                    
+                    if (t_target !== Infinity) {
+                        targetX = tx + cosOpp * t_target;
+                        targetY = ty + sinOpp * t_target;
+                    } else {
+                        targetX = tx;
+                        targetY = ty;
+                    }
+                    
+                    // Create a straight line between the border points
+                    return `M${sourceX},${sourceY} L${targetX},${targetY}`;
+                });
+                
+                // Update group link labels
+                groupLinkLabel.attr("x", d => {
+                    const sourceGroup = groups[d.source];
+                    const targetGroup = groups[d.target];
+                    if (!sourceGroup || !targetGroup) return 0;
+                    return (sourceGroup.centerX + targetGroup.centerX) / 2;
+                })
+                .attr("y", d => {
+                    const sourceGroup = groups[d.source];
+                    const targetGroup = groups[d.target];
+                    if (!sourceGroup || !targetGroup) return 0;
+                    return (sourceGroup.centerY + targetGroup.centerY) / 2 - 10;
+                });
+            });
+            
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        });
+    </script>
+</body>
+</html>

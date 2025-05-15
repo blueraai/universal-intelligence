@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Flow Web Feedback</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <h1>Pocket Flow Web Feedback</h1>
+
+    <div class="container">
+        <textarea id="task-input" rows="3" placeholder="Enter text to process..."></textarea>
+        <button id="submit-button">Submit</button>
+    </div>
+
+    <div class="status-container">
+        <h2>Status</h2>
+        <div id="task-id-display">Task ID: N/A</div>
+        <div id="status-display">Submit a task.</div>
+
+        <div id="review-section" class="hidden review-box">
+            <h3>Review Output</h3>
+            <pre id="review-output"></pre>
+            <button id="approve-button" class="feedback-button approve">Approve</button>
+            <button id="reject-button" class="feedback-button reject">Reject</button>
+        </div>
+
+        <div id="result-section" class="hidden result-box">
+            <h3>Final Result</h3>
+            <pre id="final-result"></pre>
+        </div>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById('task-input');
+        const submitButton = document.getElementById('submit-button');
+        const taskIdDisplay = document.getElementById('task-id-display');
+        const statusDisplay = document.getElementById('status-display');
+        const reviewSection = document.getElementById('review-section');
+        const reviewOutput = document.getElementById('review-output');
+        const approveButton = document.getElementById('approve-button');
+        const rejectButton = document.getElementById('reject-button');
+        const resultSection = document.getElementById('result-section');
+        const finalResult = document.getElementById('final-result');
+
+        let currentTaskId = null;
+        let eventSource = null;
+
+        submitButton.addEventListener('click', handleSubmit);
+        approveButton.addEventListener('click', () => handleFeedback('approved'));
+        rejectButton.addEventListener('click', () => handleFeedback('rejected'));
+
+        async function handleSubmit() {
+            const data = taskInput.value.trim();
+            if (!data) return alert('Input is empty.');
+
+            resetUI();
+            statusDisplay.textContent = 'Submitting...';
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: data })
+                });
+                if (!response.ok) throw new Error(`Submit failed: ${response.status}`);
+                const result = await response.json();
+                currentTaskId = result.task_id;
+                taskIdDisplay.textContent = `Task ID: ${currentTaskId}`;
+                startSSEListener(currentTaskId);
+            } catch (error) {
+                console.error('Submit error:', error);
+                statusDisplay.textContent = `Submit Error: ${error.message}`;
+                resetUI();
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        function startSSEListener(taskId) {
+            closeSSEListener(); // Close existing connection
+            eventSource = new EventSource(`/stream/${taskId}`);
+            eventSource.onmessage = handleSSEMessage;
+            eventSource.onerror = handleSSEError;
+            eventSource.onopen = () => console.log(`SSE connected for ${taskId}`);
+        }
+
+        function handleSSEMessage(event) {
+            console.log("SSE data:", event.data);
+            try {
+                const data = JSON.parse(event.data);
+                updateUI(data);
+            } catch (e) { console.error("SSE parse error:", e); }
+        }
+
+        function handleSSEError(error) {
+            console.error("SSE Error:", error);
+            statusDisplay.textContent = "Status stream error. Connection closed.";
+            closeSSEListener();
+        }
+
+        function closeSSEListener() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                console.log("SSE connection closed.");
+            }
+        }
+
+        function updateUI(data) {
+             // Always update main status
+            statusDisplay.textContent = `Status: ${data.status || 'Unknown'}`;
+
+            // Hide sections, then show relevant one
+            reviewSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            approveButton.disabled = false; // Re-enable by default
+            rejectButton.disabled = false;
+
+            switch(data.status) {
+                case 'waiting_for_review':
+                    reviewOutput.textContent = data.output_to_review || '';
+                    reviewSection.classList.remove('hidden');
+                    break;
+                case 'processing_feedback':
+                    approveButton.disabled = true; // Disable while processing
+                    rejectButton.disabled = true;
+                    break;
+                case 'completed':
+                    finalResult.textContent = data.final_result || '';
+                    resultSection.classList.remove('hidden');
+                    closeSSEListener();
+                    break;
+                case 'failed':
+                case 'feedback_error':
+                     statusDisplay.textContent = `Status: ${data.status} - ${data.error || 'Unknown error'}`;
+                     closeSSEListener();
+                     break;
+                case 'finished_incomplete':
+                     statusDisplay.textContent = `Status: Flow finished unexpectedly.`;
+                     closeSSEListener();
+                     break;
+                case 'stream_closed':
+                    // Server closed the stream gracefully (usually after completed/failed)
+                    if (!['completed', 'failed', 'finished_incomplete'].includes(tasks[currentTaskId]?.status)) {
+                         statusDisplay.textContent = "Status: Connection closed by server.";
+                    }
+                    closeSSEListener();
+                    break;
+                case 'pending':
+                case 'running':
+                     // Just update status text, wait for next message
+                     break;
+            }
+        }
+
+       async function handleFeedback(feedbackValue) {
+            if (!currentTaskId) return;
+            approveButton.disabled = true;
+            rejectButton.disabled = true;
+            statusDisplay.textContent = `Sending ${feedbackValue}...`; // Optimistic UI update
+
+            try {
+                const response = await fetch(`/feedback/${currentTaskId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ feedback: feedbackValue })
+                });
+                if (!response.ok) { // Rely on SSE for status change or error reporting
+                     const errorData = await response.json().catch(()=>({error: `Feedback failed: ${response.status}`}));
+                     throw new Error(errorData.error);
+                }
+                console.log(`Feedback ${feedbackValue} POST successful.`);
+                // Successful POST - wait for SSE to update status to 'processing', then 'running' etc.
+            } catch (error) {
+                console.error('Feedback error:', error);
+                statusDisplay.textContent = `Feedback Error: ${error.message}`;
+                // Re-enable buttons if feedback POST failed
+                approveButton.disabled = false;
+                rejectButton.disabled = false;
+            }
+        }
+
+        function resetUI() {
+            closeSSEListener();
+            currentTaskId = null;
+            taskIdDisplay.textContent = 'Task ID: N/A';
+            statusDisplay.textContent = 'Submit a task.';
+            reviewSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            taskInput.value = '';
+            submitButton.disabled = false;
+            approveButton.disabled = false;
+            rejectButton.disabled = false;
+        }
+    </script>
+</body>
+</html>

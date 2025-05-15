@@ -1,0 +1,25 @@
+John Smith
+Software Engineer
+
+Education:
+- Master of Computer Science, Stanford University, 2018
+- Bachelor of Computer Science, MIT, 2016
+
+Experience:
+- Senior Software Engineer, Google, 2019-present
+  * Led the development of cloud infrastructure projects
+  * Implemented scalable solutions using Kubernetes and Docker
+  * Reduced system latency by 40% through optimization
+
+- Software Developer, Microsoft, 2016-2019
+  * Worked on Azure cloud services
+  * Built RESTful APIs for enterprise solutions
+
+Skills:
+- Programming: Python, Java, C++, JavaScript
+- Technologies: Docker, Kubernetes, AWS, Azure
+- Tools: Git, Jenkins, Jira
+
+Projects:
+- Developed a recommendation engine that increased user engagement by 25%
+- Created a sentiment analysis tool using NLP techniques 

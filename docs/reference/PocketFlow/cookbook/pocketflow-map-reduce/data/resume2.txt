@@ -1,0 +1,25 @@
+Emily Johnson
+Data Scientist
+
+Education:
+- Ph.D. in Statistics, UC Berkeley, 2020
+- Master of Science in Mathematics, UCLA, 2016
+
+Experience:
+- Data Scientist, Netflix, 2020-present
+  * Developed machine learning models for content recommendation
+  * Implemented A/B testing frameworks to optimize user experience
+  * Collaborated with product teams to define metrics and KPIs
+
+- Data Analyst, Amazon, 2016-2020
+  * Analyzed user behavior patterns to improve conversion rates
+  * Created dashboards and visualizations for executive decision-making
+
+Skills:
+- Programming: R, Python, SQL
+- Machine Learning: TensorFlow, PyTorch, scikit-learn
+- Data Visualization: Tableau, PowerBI, matplotlib
+
+Publications:
+- "Advances in Recommendation Systems" - Journal of Machine Learning, 2021
+- "Statistical Methods for Big Data" - Conference on Data Science, 2019 
