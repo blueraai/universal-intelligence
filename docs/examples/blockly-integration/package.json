@@ -1,0 +1,11 @@
+{
+  "name": "universal-agents-blockly-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for Universal Agents Blockly integration",
+  "main": "integration_test.mjs",
+  "type": "module",
+  "dependencies": {
+    "blockly": "^9.3.3",
+    "jsdom": "^22.1.0"
+  }
+}

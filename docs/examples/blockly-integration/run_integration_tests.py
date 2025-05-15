@@ -88,7 +88,7 @@ def run_tests():
     
     # Run the tests
     result = subprocess.run(
-        ['node', 'integration_test.js'], 
+        ['node', 'integration_test.mjs'], 
         check=False
     )
     
@@ -115,8 +115,8 @@ def main():
         sys.exit(1)
     
     # Check if the integration test script exists
-    if not os.path.exists('integration_test.js'):
-        print("Error: integration_test.js not found in the current directory.")
+    if not os.path.exists('integration_test.mjs'):
+        print("Error: integration_test.mjs not found in the current directory.")
         sys.exit(1)
     
     # Install dependencies if node_modules doesn't exist
