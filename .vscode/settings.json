@@ -1,0 +1,36 @@
+{
+    "workbench.colorCustomizations": {
+        "editorRuler.foreground": "#383838",
+        "projectManager.sideBar.currentProjectHighlightForeground": "#e13015",
+        "terminal.background": "#000000",
+        "terminal.foreground": "#FFFFFF",
+        "activityBar.background": "#F5F5F5",
+        "titleBar.activeBackground": "#FFFFFF",
+        "titleBar.activeForeground": "#191919",
+        "[Material Theme*]": {
+            "activityBarBadge.background": "#64FFDA",
+            "activityBar.activeBorder": "#64FFDA",
+            "list.activeSelectionForeground": "#64FFDA",
+            "list.inactiveSelectionForeground": "#64FFDA",
+            "list.highlightForeground": "#64FFDA",
+            "scrollbarSlider.activeBackground": "#64FFDA50",
+            "editorSuggestWidget.highlightForeground": "#64FFDA",
+            "textLink.foreground": "#64FFDA",
+            "progressBar.background": "#64FFDA",
+            "pickerGroup.foreground": "#64FFDA",
+            "tab.activeBorder": "#64FFDA",
+            "notificationLink.foreground": "#64FFDA",
+            "editorWidget.resizeBorder": "#64FFDA",
+            "editorWidget.border": "#64FFDA",
+            "settings.modifiedItemIndicator": "#64FFDA",
+            "settings.headerForeground": "#64FFDA",
+            "panelTitle.activeBorder": "#64FFDA",
+            "breadcrumb.activeSelectionForeground": "#64FFDA",
+            "menu.selectionForeground": "#64FFDA",
+            "menubar.selectionForeground": "#64FFDA",
+            "editor.findMatchBorder": "#64FFDA",
+            "selection.background": "#64FFDA40",
+            "statusBarItem.remoteBackground": "#64FFDA"
+        }
+    }
+}
