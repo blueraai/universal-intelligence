@@ -10,6 +10,11 @@ from .map_reduce import (
     ReduceNode, ModelReduceNode,
     create_map_reduce_flow
 )
+from .multi_agent import (
+    AgentCoordinatorNode,
+    SpecialistAgentNode,
+    create_multi_agent_flow
+)
 
 __all__ = [
     "create_rag_flow",
@@ -17,5 +22,8 @@ __all__ = [
     "ModelMapNode",
     "ReduceNode",
     "ModelReduceNode",
-    "create_map_reduce_flow"
+    "create_map_reduce_flow",
+    "AgentCoordinatorNode",
+    "SpecialistAgentNode",
+    "create_multi_agent_flow"
 ]
