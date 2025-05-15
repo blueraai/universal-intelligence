@@ -25,7 +25,8 @@ class UniversalModelNode(Node):
                  input_keys: Optional[List[str]] = None,
                  output_key: str = "model_output",
                  name: Optional[str] = None,
-                 format_func: Optional[Callable[[Dict[str, Any]], str]] = None):
+                 format_func: Optional[Callable[[Dict[str, Any]], str]] = None,
+                 model_parameters: Optional[Dict[str, Any]] = None):
         """Initialize a new Universal Model node.
         
         Args:
@@ -35,13 +36,15 @@ class UniversalModelNode(Node):
             output_key: Key to store the model output in shared state
             name: Optional name for the node
             format_func: Optional function to format the prompt instead of using template
+            model_parameters: Optional parameters to pass to the model
         """
-        super().__init__(name or "UniversalModel")
+        super().__init__(name or "UniversalModelNode")
         self.model = model
         self.prompt_template = prompt_template
         self.input_keys = input_keys or []
         self.output_key = output_key
         self.format_func = format_func
+        self.model_parameters = model_parameters or {}
         
     def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
         """Prepare the prompt for the model.
@@ -98,7 +101,7 @@ class UniversalModelNode(Node):
         
         try:
             # Process the prompt with the model
-            response, _ = self.model.process(prompt)
+            response, _ = self.model.process(prompt, **self.model_parameters)
             return response
         except Exception as e:
             logger.error(f"Error processing prompt with model: {str(e)}")
@@ -140,6 +143,7 @@ class AsyncUniversalModelNode(AsyncNode, UniversalModelNode):
                  output_key: str = "model_output",
                  name: Optional[str] = None,
                  format_func: Optional[Callable[[Dict[str, Any]], str]] = None,
+                 model_parameters: Optional[Dict[str, Any]] = None,
                  streaming: bool = False):
         """Initialize a new Async Universal Model node.
         
@@ -150,6 +154,7 @@ class AsyncUniversalModelNode(AsyncNode, UniversalModelNode):
             output_key: Key to store the model output in shared state
             name: Optional name for the node
             format_func: Optional function to format the prompt instead of using template
+            model_parameters: Optional parameters to pass to the model
             streaming: Whether to use streaming generation
         """
         UniversalModelNode.__init__(
@@ -158,8 +163,9 @@ class AsyncUniversalModelNode(AsyncNode, UniversalModelNode):
             prompt_template=prompt_template,
             input_keys=input_keys,
             output_key=output_key,
-            name=name or "AsyncUniversalModel",
-            format_func=format_func
+            name=name or "AsyncUniversalModelNode",
+            format_func=format_func,
+            model_parameters=model_parameters
         )
         self.streaming = streaming
         
@@ -189,14 +195,15 @@ class AsyncUniversalModelNode(AsyncNode, UniversalModelNode):
                 response, _ = self.model.process(
                     prompt, 
                     stream=True, 
-                    streaming_callback=callback
+                    streaming_callback=callback,
+                    **self.model_parameters
                 )
                 
                 # Return the accumulated output or the final response
                 return "".join(output_chunks) if output_chunks else response
             else:
                 # For non-streaming, just process normally
-                response, _ = self.model.process(prompt)
+                response, _ = self.model.process(prompt, **self.model_parameters)
                 return response
                 
         except Exception as e:

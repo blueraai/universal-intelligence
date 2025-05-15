@@ -1,0 +1,145 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Universal Agents Flow Visualization</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                #flow-info { margin-bottom: 20px; }
+                #flow-info h1 { margin-bottom: 5px; }
+                #flow-info p { margin: 5px 0; }
+                #flow-graph { width: 100%; height: 500px; border: 1px solid #ccc; }
+                .node { padding: 10px; border-radius: 5px; }
+                .node.executed { background-color: #b3e0ff; }
+                .node:not(.executed) { background-color: #f0f0f0; }
+                .edge { stroke-width: 2px; }
+                .edge.traversed { stroke: #0066cc; }
+                .edge:not(.traversed) { stroke: #cccccc; }
+            </style>
+            <script src="https://d3js.org/d3.v5.min.js"></script>
+        </head>
+        <body>
+            <div id="flow-info">
+                <h1 id="flow-name"></h1>
+                <p>Execution Time: <span id="execution-time"></span></p>
+                <p>Steps: <span id="steps"></span></p>
+                <p>Execution Path: <span id="execution-path"></span></p>
+            </div>
+            
+            <div id="flow-graph"></div>
+            
+            <script>
+                // Load the JSON data
+                fetch('VisualizableFlow_20250514_233452.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display flow information
+                        document.getElementById('flow-name').textContent = data.flow_name;
+                        document.getElementById('execution-time').textContent = new Date(data.execution_time).toLocaleString();
+                        document.getElementById('steps').textContent = data.steps;
+                        document.getElementById('execution-path').textContent = data.execution_path.join(' → ');
+                        
+                        // Create a force-directed graph
+                        const width = document.getElementById('flow-graph').clientWidth;
+                        const height = document.getElementById('flow-graph').clientHeight;
+                        
+                        const svg = d3.select('#flow-graph')
+                            .append('svg')
+                            .attr('width', width)
+                            .attr('height', height);
+                        
+                        // Create a simulation for positioning nodes
+                        const simulation = d3.forceSimulation(data.nodes)
+                            .force('link', d3.forceLink(data.edges).id(d => d.id).distance(100))
+                            .force('charge', d3.forceManyBody().strength(-300))
+                            .force('center', d3.forceCenter(width / 2, height / 2));
+                        
+                        // Create the edges
+                        const edges = svg.append('g')
+                            .selectAll('line')
+                            .data(data.edges)
+                            .enter()
+                            .append('line')
+                            .attr('class', d => 'edge' + (d.traversed ? ' traversed' : ''))
+                            .style('stroke', d => d.traversed ? '#0066cc' : '#cccccc')
+                            .style('stroke-width', 2);
+                        
+                        // Add edge labels
+                        const edgeLabels = svg.append('g')
+                            .selectAll('text')
+                            .data(data.edges)
+                            .enter()
+                            .append('text')
+                            .text(d => d.label)
+                            .attr('font-size', 10)
+                            .attr('text-anchor', 'middle')
+                            .attr('dy', -5);
+                        
+                        // Create the nodes
+                        const nodes = svg.append('g')
+                            .selectAll('g')
+                            .data(data.nodes)
+                            .enter()
+                            .append('g')
+                            .call(d3.drag()
+                                .on('start', dragstarted)
+                                .on('drag', dragged)
+                                .on('end', dragended));
+                        
+                        // Add node rectangles
+                        nodes.append('rect')
+                            .attr('class', d => 'node' + (d.executed ? ' executed' : ''))
+                            .attr('width', 120)
+                            .attr('height', 40)
+                            .attr('rx', 5)
+                            .attr('ry', 5)
+                            .style('fill', d => d.executed ? '#b3e0ff' : '#f0f0f0')
+                            .style('stroke', '#666')
+                            .style('stroke-width', 1);
+                        
+                        // Add node labels
+                        nodes.append('text')
+                            .text(d => d.label)
+                            .attr('text-anchor', 'middle')
+                            .attr('dominant-baseline', 'middle')
+                            .attr('font-size', 12)
+                            .attr('x', 60)
+                            .attr('y', 20);
+                        
+                        // Update positions during simulation
+                        simulation.on('tick', () => {
+                            edges
+                                .attr('x1', d => d.source.x)
+                                .attr('y1', d => d.source.y)
+                                .attr('x2', d => d.target.x)
+                                .attr('y2', d => d.target.y);
+                            
+                            edgeLabels
+                                .attr('x', d => (d.source.x + d.target.x) / 2)
+                                .attr('y', d => (d.source.y + d.target.y) / 2);
+                            
+                            nodes.attr('transform', d => `translate(${d.x - 60}, ${d.y - 20})`);
+                        });
+                        
+                        // Drag functions
+                        function dragstarted(d) {
+                            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                            d.fx = d.x;
+                            d.fy = d.y;
+                        }
+                        
+                        function dragged(d) {
+                            d.fx = d3.event.x;
+                            d.fy = d3.event.y;
+                        }
+                        
+                        function dragended(d) {
+                            if (!d3.event.active) simulation.alphaTarget(0);
+                            d.fx = null;
+                            d.fy = null;
+                        }
+                    });
+            </script>
+        </body>
+        </html>
+        

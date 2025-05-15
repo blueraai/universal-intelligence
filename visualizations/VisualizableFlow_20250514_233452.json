@@ -1,0 +1,93 @@
+{
+  "flow_name": "VisualizableFlow",
+  "execution_time": "2025-05-14T23:34:52.692212",
+  "steps": 4,
+  "execution_path": [
+    "InputNode",
+    "ProcessingNode",
+    "GenerationNode",
+    "OutputNode"
+  ],
+  "nodes": [
+    {
+      "id": "InputNode",
+      "label": "InputNode",
+      "type": "InputNode",
+      "executed": true
+    },
+    {
+      "id": "ProcessingNode",
+      "label": "ProcessingNode",
+      "type": "ProcessingNode",
+      "executed": true
+    },
+    {
+      "id": "WeatherNode",
+      "label": "WeatherNode",
+      "type": "WeatherNode",
+      "executed": false
+    },
+    {
+      "id": "OutputNode",
+      "label": "OutputNode",
+      "type": "OutputNode",
+      "executed": true
+    },
+    {
+      "id": "GreetingNode",
+      "label": "GreetingNode",
+      "type": "GreetingNode",
+      "executed": false
+    },
+    {
+      "id": "GenerationNode",
+      "label": "GenerationNode",
+      "type": "GenerationNode",
+      "executed": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "InputNode",
+      "to": "ProcessingNode",
+      "label": "process",
+      "traversed": true
+    },
+    {
+      "from": "ProcessingNode",
+      "to": "WeatherNode",
+      "label": "weather",
+      "traversed": false
+    },
+    {
+      "from": "ProcessingNode",
+      "to": "GreetingNode",
+      "label": "greeting",
+      "traversed": false
+    },
+    {
+      "from": "ProcessingNode",
+      "to": "GenerationNode",
+      "label": "generate",
+      "traversed": true
+    },
+    {
+      "from": "WeatherNode",
+      "to": "OutputNode",
+      "label": "output",
+      "traversed": false
+    },
+    {
+      "from": "GreetingNode",
+      "to": "OutputNode",
+      "label": "output",
+      "traversed": false
+    },
+    {
+      "from": "GenerationNode",
+      "to": "OutputNode",
+      "label": "output",
+      "traversed": true
+    }
+  ]
+}

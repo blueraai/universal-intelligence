@@ -22,8 +22,10 @@ class UniversalToolNode(Node):
     
     def __init__(self, tool: AbstractUniversalTool, 
                  method_name: str,
-                 arg_mapping: Dict[str, str],
-                 result_key: str = "tool_result",
+                 input_mapping: Dict[str, str] = None,
+                 arg_mapping: Dict[str, str] = None,  # Keeping for backward compatibility
+                 output_key: str = "tool_output",
+                 result_key: str = None,  # Keeping for backward compatibility
                  name: Optional[str] = None,
                  error_handling: str = "continue"):
         """Initialize a new Universal Tool node.
@@ -31,16 +33,25 @@ class UniversalToolNode(Node):
         Args:
             tool: A Universal Intelligence tool instance
             method_name: Name of the tool method to call
-            arg_mapping: Mapping from method parameters to shared state keys
-            result_key: Key to store the tool result in shared state
+            input_mapping: Mapping from method parameters to shared state keys
+            arg_mapping: Deprecated, use input_mapping instead
+            output_key: Key to store the tool result in shared state
+            result_key: Deprecated, use output_key instead
             name: Optional name for the node
             error_handling: How to handle errors ('continue', 'raise', or 'return')
         """
-        super().__init__(name or f"{tool.contract()['name']}_{method_name}")
+        super().__init__(name or f"{tool.__class__.__name__}_{method_name}")
         self.tool = tool
         self.method_name = method_name
-        self.arg_mapping = arg_mapping
-        self.result_key = result_key
+        
+        # Handle parameter naming compatibility
+        if arg_mapping is not None and input_mapping is None:
+            input_mapping = arg_mapping
+        if result_key is not None and output_key == "tool_output":
+            output_key = result_key
+            
+        self.input_mapping = input_mapping or {}
+        self.output_key = output_key
         self.error_handling = error_handling
         
         # Validate method exists
@@ -60,7 +71,7 @@ class UniversalToolNode(Node):
     def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
         """Prepare arguments for the tool method.
         
-        This method extracts data from shared state based on the arg_mapping
+        This method extracts data from shared state based on the input_mapping
         and prepares a dictionary of arguments for the tool method.
         
         Args:
@@ -73,7 +84,7 @@ class UniversalToolNode(Node):
         args = {}
         missing_keys = []
         
-        for param, key in self.arg_mapping.items():
+        for param, key in self.input_mapping.items():
             if key in shared:
                 args[param] = shared[key]
             else:
@@ -144,14 +155,14 @@ class UniversalToolNode(Node):
             Next action to execute
         """
         # Store the complete result in shared state
-        shared[self.result_key] = exec_result["result"]
+        shared[self.output_key] = exec_result["result"]
         
         # Also store logs and status
-        shared[f"{self.result_key}_logs"] = exec_result["logs"]
-        shared[f"{self.result_key}_success"] = exec_result["success"]
+        shared[f"{self.output_key}_logs"] = exec_result["logs"]
+        shared[f"{self.output_key}_success"] = exec_result["success"]
         
         if exec_result["error"]:
-            shared[f"{self.result_key}_error"] = exec_result["error"]
+            shared[f"{self.output_key}_error"] = exec_result["error"]
             return "error" if "error" in self.connections else "next"
         
         return "success" if "success" in self.connections else "next"

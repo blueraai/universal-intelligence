@@ -108,3 +108,7 @@ TypeScript implementation of the protocol for web environments, mirroring the Py
 - Follow the pattern of existing implementations when creating new components
 - Ensure backward compatibility when modifying core interfaces
 - Run tests for any components you modify before committing changes
+
+## Ethical Development Guidelines
+
+- *ALWAYS* fix dependency issues and *NEVER* change functionality or deviate from specifications in order to satisfy broken tests, which completely invalidates their use and the effort in having them at all.

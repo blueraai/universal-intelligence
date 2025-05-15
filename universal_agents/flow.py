@@ -38,19 +38,19 @@ class Flow:
         self.visualization = visualization
         self.visualization_path = visualization_path
         
-    def _collect_nodes(self, start: Node) -> Dict[str, Node]:
+    def _collect_nodes(self, start: Node) -> List[Node]:
         """Collect all nodes in the flow starting from the start node.
         
         This performs a depth-first traversal of the node graph to build
-        a dictionary of all nodes in the flow, keyed by their names.
+        a list of all nodes in the flow.
         
         Args:
             start: The starting node
             
         Returns:
-            Dictionary mapping node names to node instances
+            List of all node instances in the flow
         """
-        nodes = {}
+        nodes = []
         visited = set()
         
         def visit(node: Node) -> None:
@@ -58,7 +58,7 @@ class Flow:
                 return
                 
             visited.add(node)
-            nodes[node.name] = node
+            nodes.append(node)
             
             for target in node.connections.values():
                 visit(target)
