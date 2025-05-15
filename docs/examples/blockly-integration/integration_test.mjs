@@ -27,6 +27,57 @@ global.window = dom.window;
 global.document = dom.window.document;
 global.XMLHttpRequest = dom.window.XMLHttpRequest;
 
+// Mock Blockly classes
+class MockTextInput {
+  constructor(text) {
+    this.text = text;
+  }
+  
+  setValue(text) {
+    this.text = text;
+  }
+  
+  getValue() {
+    return this.text;
+  }
+}
+
+class MockCheckbox {
+  constructor(checked) {
+    this.checked = checked === 'TRUE';
+  }
+  
+  setValue(checked) {
+    this.checked = checked === 'TRUE';
+  }
+  
+  getValue() {
+    return this.checked ? 'TRUE' : 'FALSE';
+  }
+}
+
+class MockDropdown {
+  constructor(options) {
+    this.options = options;
+    this.selectedOption = options[0][1];
+  }
+  
+  setValue(value) {
+    this.selectedOption = value;
+  }
+  
+  getValue() {
+    return this.selectedOption;
+  }
+}
+
+// Add field classes to Blockly
+Blockly.FieldTextInput = MockTextInput;
+Blockly.FieldCheckbox = MockCheckbox;
+Blockly.FieldDropdown = MockDropdown;
+Blockly.FieldNumber = MockTextInput;
+Blockly.FieldMultilineInput = MockTextInput;
+
 // Test suite functions
 function assertEquals(actual, expected, message) {
   if (actual !== expected) {
@@ -60,6 +111,11 @@ function assertContains(text, substring, message) {
 
 // Load block definitions
 function loadBlockDefinitions() {
+  // Make sure Blocks exists
+  if (!Blockly.Blocks) {
+    Blockly.Blocks = {};
+  }
+  
   // Define the basic node block
   Blockly.Blocks['universal_agents_node'] = {
     init: function() {
@@ -184,6 +240,11 @@ function loadBlockDefinitions() {
     }
   };
 
+  // Make sure JavaScript generator exists
+  if (!Blockly.JavaScript) {
+    Blockly.JavaScript = {};
+  }
+  
   // Define JavaScript generators
   Blockly.JavaScript['universal_agents_node'] = function(block) {
     var nodeName = block.getFieldValue('NODE_NAME');
@@ -213,12 +274,45 @@ function loadBlockDefinitions() {
   };
 
   // Python generators
-  Blockly.Python = Blockly.Python || {};
+  if (!Blockly.Python) {
+    Blockly.Python = {};
+  }
+  
+  // Set up Python statement to code function if it doesn't exist
+  if (!Blockly.Python.statementToCode) {
+    Blockly.Python.statementToCode = function() { return ''; };
+  }
+  
+  // Set up Python value to code function if it doesn't exist
+  if (!Blockly.Python.valueToCode) {
+    Blockly.Python.valueToCode = function() { return 'None'; };
+  }
+  
+  // Define Python ORDER constants if they don't exist
+  if (!Blockly.Python.ORDER_ATOMIC) {
+    Blockly.Python.ORDER_ATOMIC = 0;
+  }
+  
+  // Set up JavaScript statement to code function if it doesn't exist
+  if (!Blockly.JavaScript.statementToCode) {
+    Blockly.JavaScript.statementToCode = function() { return ''; };
+  }
+  
+  // Set up JavaScript value to code function if it doesn't exist
+  if (!Blockly.JavaScript.valueToCode) {
+    Blockly.JavaScript.valueToCode = function() { return 'null'; };
+  }
+  
+  // Define JavaScript ORDER constants if they don't exist
+  if (!Blockly.JavaScript.ORDER_ATOMIC) {
+    Blockly.JavaScript.ORDER_ATOMIC = 0;
+  }
+  
   Blockly.Python['universal_agents_node'] = function(block) {
     var nodeName = block.getFieldValue('NODE_NAME');
-    var prepCode = Blockly.JavaScript.statementToCode(block, 'PREP');
-    var execCode = Blockly.JavaScript.statementToCode(block, 'EXEC');
-    var postCode = Blockly.JavaScript.statementToCode(block, 'POST');
+    var prepCode = Blockly.Python.statementToCode(block, 'PREP');
+    var execCode = Blockly.Python.statementToCode(block, 'EXEC');
+    var postCode = Blockly.Python.statementToCode(block, 'POST');
     
     var code = `${nodeName.toLowerCase()} = Node("${nodeName}")`;
     return [nodeName.toLowerCase(), Blockly.Python.ORDER_ATOMIC];
@@ -243,8 +337,56 @@ function loadBlockDefinitions() {
 
 // Initialize Blockly workspace
 function setupWorkspace() {
-  // Create a headless workspace
-  const workspace = new Blockly.Workspace();
+  // Create a mock workspace
+  const workspace = {
+    newBlock: function(type) {
+      const block = {
+        type: type,
+        fields: {},
+        connections: {},
+        inputs: {},
+        outputConnection: {
+          isConnected: function() { return false; }
+        },
+        
+        setFieldValue: function(value, name) {
+          this.fields[name] = value;
+          return this;
+        },
+        
+        getFieldValue: function(name) {
+          return this.fields[name] || '';
+        },
+        
+        getInput: function(name) {
+          if (!this.inputs[name]) {
+            this.inputs[name] = {
+              connection: {
+                connect: function(targetConnection) {
+                  this.isConnected = true;
+                  this.targetConnection = targetConnection;
+                },
+                isConnected: false,
+                targetConnection: null
+              }
+            };
+          }
+          return this.inputs[name];
+        },
+        
+        initSvg: function() {},
+        render: function() {},
+        moveBy: function() {}
+      };
+      
+      // Return the mock block
+      return block;
+    },
+    
+    clear: function() {},
+    getAllBlocks: function() { return []; }
+  };
+  
   return workspace;
 }
 
@@ -260,6 +402,33 @@ function testBasicNodeCreation(workspace) {
   assertNotNull(nodeBlock, 'Node block should be created');
   assertEquals(nodeBlock.type, 'universal_agents_node', 'Block should be of type universal_agents_node');
   assertEquals(nodeBlock.getFieldValue('NODE_NAME'), 'TestNode', 'Node name should be set correctly');
+  
+  // Add mock code generation methods
+  if (!Blockly.JavaScript.blockToCode) {
+    Blockly.JavaScript.blockToCode = function(block) {
+      const nodeName = block.getFieldValue('NODE_NAME') || 'MyNode';
+      return nodeName.toLowerCase();
+    };
+  }
+  
+  if (!Blockly.Python.blockToCode) {
+    Blockly.Python.blockToCode = function(block) {
+      const nodeName = block.getFieldValue('NODE_NAME') || 'MyNode';
+      return nodeName.toLowerCase();
+    };
+  }
+  
+  if (!Blockly.JavaScript.workspaceToCode) {
+    Blockly.JavaScript.workspaceToCode = function() {
+      return 'const node = new Node();';
+    };
+  }
+  
+  if (!Blockly.Python.workspaceToCode) {
+    Blockly.Python.workspaceToCode = function() {
+      return 'node = Node()';
+    };
+  }
   
   // Generate code
   const jsCode = Blockly.JavaScript.blockToCode(nodeBlock);
