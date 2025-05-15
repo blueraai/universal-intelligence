@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8">
   <title>Universal Agents Blockly Integration</title>
+  <!-- Load Blockly libraries -->
   <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
   <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
   <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/en.js"></script>
   
   <style>
     body {
@@ -163,9 +166,9 @@
     
     <div class="code-container">
       <div class="code-tabs">
-        <button class="code-tab active" onclick="showTab('js')">JavaScript</button>
-        <button class="code-tab" onclick="showTab('python')">Python</button>
-        <button class="code-tab" onclick="showTab('flow')">Flow Visualization</button>
+        <button class="code-tab active" id="jsTab">JavaScript</button>
+        <button class="code-tab" id="pythonTab">Python</button>
+        <button class="code-tab" id="flowTab">Flow Visualization</button>
       </div>
       
       <div id="jsPanel" class="code-panel active">
@@ -190,70 +193,201 @@
       <button id="clearButton" class="danger-button">Clear Workspace</button>
     </div>
   </div>
-  
-  <!-- Load custom block definitions -->
-  <script src="basic_node_block_definition.js"></script>
-  <script src="flow_block_definition.js"></script>
-  <script src="model_node_block_definition.js"></script>
-  
-  <!-- Load toolbox configuration -->
-  <script src="toolbox_configuration.js"></script>
+
+  <xml id="toolbox" style="display: none">
+    <category name="Core" colour="#5C81A6">
+      <block type="controls_if"></block>
+      <block type="logic_compare"></block>
+      <block type="controls_repeat_ext"></block>
+      <block type="math_number"></block>
+      <block type="math_arithmetic"></block>
+      <block type="text"></block>
+      <block type="text_print"></block>
+    </category>
+    <category name="Universal Agents" colour="#A65C94">
+      <block type="text_print">
+        <field name="TEXT">Node Block (Placeholder)</field>
+      </block>
+      <block type="text_print">
+        <field name="TEXT">Flow Block (Placeholder)</field>
+      </block>
+    </category>
+    <category name="Patterns" colour="#5CA694">
+      <block type="text_print">
+        <field name="TEXT">RAG Pattern (Placeholder)</field>
+      </block>
+      <block type="text_print">
+        <field name="TEXT">Map-Reduce Pattern (Placeholder)</field>
+      </block>
+    </category>
+  </xml>
   
   <script>
-    // Tab switching functionality
-    function showTab(tabName) {
-      // Hide all panels
-      document.querySelectorAll('.code-panel').forEach(panel => {
+    // Initialize the Blockly workspace
+    var workspace = Blockly.inject('blocklyDiv', {
+      toolbox: document.getElementById('toolbox'),
+      grid: {
+        spacing: 20,
+        length: 3,
+        colour: '#ccc',
+        snap: true
+      },
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1.0,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2
+      },
+      trashcan: true
+    });
+
+    // Function to update JavaScript code
+    function updateJSCode() {
+      var code = Blockly.JavaScript.workspaceToCode(workspace);
+      document.getElementById('codeDiv').textContent = code || '// JavaScript code will appear here';
+    }
+
+    // Function to update Python code
+    function updatePyCode() {
+      var code = Blockly.Python.workspaceToCode(workspace);
+      document.getElementById('pythonCodeDiv').textContent = code || '# Python code will appear here';
+    }
+
+    // Update code when blocks change
+    workspace.addChangeListener(function(event) {
+      if (event.type != Blockly.Events.UI) {
+        updateJSCode();
+        updatePyCode();
+      }
+    });
+
+    // Tab switching
+    document.getElementById('jsTab').addEventListener('click', function() {
+      document.querySelectorAll('.code-panel').forEach(function(panel) {
         panel.classList.remove('active');
       });
-      
-      // Deactivate all tabs
-      document.querySelectorAll('.code-tab').forEach(tab => {
+      document.querySelectorAll('.code-tab').forEach(function(tab) {
         tab.classList.remove('active');
       });
+      document.getElementById('jsPanel').classList.add('active');
+      this.classList.add('active');
+    });
+
+    document.getElementById('pythonTab').addEventListener('click', function() {
+      document.querySelectorAll('.code-panel').forEach(function(panel) {
+        panel.classList.remove('active');
+      });
+      document.querySelectorAll('.code-tab').forEach(function(tab) {
+        tab.classList.remove('active');
+      });
+      document.getElementById('pythonPanel').classList.add('active');
+      this.classList.add('active');
+    });
+
+    document.getElementById('flowTab').addEventListener('click', function() {
+      document.querySelectorAll('.code-panel').forEach(function(panel) {
+        panel.classList.remove('active');
+      });
+      document.querySelectorAll('.code-tab').forEach(function(tab) {
+        tab.classList.remove('active');
+      });
+      document.getElementById('flowPanel').classList.add('active');
+      this.classList.add('active');
+    });
+
+    // Save and load functions
+    document.getElementById('saveButton').addEventListener('click', function() {
+      var xml = Blockly.Xml.workspaceToDom(workspace);
+      var xmlText = Blockly.Xml.domToText(xml);
+      localStorage.setItem('universalAgentsBlocks', xmlText);
+      document.getElementById('statusBar').textContent = 'Workspace saved to local storage';
+    });
+
+    document.getElementById('loadButton').addEventListener('click', function() {
+      var xmlText = localStorage.getItem('universalAgentsBlocks');
+      if (xmlText) {
+        workspace.clear();
+        var xml = Blockly.Xml.textToDom(xmlText);
+        Blockly.Xml.domToWorkspace(xml, workspace);
+        document.getElementById('statusBar').textContent = 'Workspace loaded from local storage';
+      } else {
+        document.getElementById('statusBar').textContent = 'No saved workspace found in local storage';
+      }
+    });
+
+    // Run button
+    document.getElementById('runButton').addEventListener('click', function() {
+      // Simulate running the flow
+      var blocks = workspace.getAllBlocks(false);
+      document.getElementById('statusBar').textContent = 'Running flow with ' + blocks.length + ' blocks';
       
-      // Show selected panel
-      document.getElementById(tabName + 'Panel').classList.add('active');
+      // Simple visualization
+      document.getElementById('flowVisualization').innerHTML = 
+        'Flow execution started with ' + blocks.length + ' blocks.<br>' +
+        'Execution path: ' + blocks.map(function(block) {
+          return block.type;
+        }).join(' → ');
       
-      // Activate selected tab
-      event.currentTarget.classList.add('active');
+      // Highlight blocks in sequence
+      highlightBlocks(blocks);
+    });
+
+    // Highlight blocks one by one
+    function highlightBlocks(blocks) {
+      var i = 0;
+      function highlightNext() {
+        // Reset all blocks
+        blocks.forEach(function(block) {
+          block.setHighlighted(false);
+        });
+        
+        if (i < blocks.length) {
+          blocks[i].setHighlighted(true);
+          i++;
+          setTimeout(highlightNext, 500);
+        }
+      }
+      highlightNext();
     }
-    
-    // Clear workspace button event listener
+
+    // Clear workspace
     document.getElementById('clearButton').addEventListener('click', function() {
-      if (confirm('Are you sure you want to clear the workspace? This cannot be undone.')) {
-        Blockly.getMainWorkspace().clear();
+      if (confirm('Are you sure you want to clear the workspace?')) {
+        workspace.clear();
+        updateJSCode();
+        updatePyCode();
         document.getElementById('statusBar').textContent = 'Workspace cleared';
       }
     });
-    
-    // Export code button event listener
+
+    // Export code
     document.getElementById('exportButton').addEventListener('click', function() {
-      var activePanel = document.querySelector('.code-panel.active');
-      var code = activePanel.querySelector('.code').textContent;
+      var code, filename;
       
-      // Create a temporary element for the download
-      var element = document.createElement('a');
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(code));
-      
-      // Set the filename based on active tab
-      var filename = 'universal_agents_flow';
-      if (activePanel.id === 'jsPanel') {
-        filename += '.js';
-      } else if (activePanel.id === 'pythonPanel') {
-        filename += '.py';
+      if (document.getElementById('jsPanel').classList.contains('active')) {
+        code = document.getElementById('codeDiv').textContent;
+        filename = 'universal_agents_flow.js';
+      } else if (document.getElementById('pythonPanel').classList.contains('active')) {
+        code = document.getElementById('pythonCodeDiv').textContent;
+        filename = 'universal_agents_flow.py';
+      } else {
+        return;
       }
       
-      element.setAttribute('download', filename);
-      
-      // Trigger the download
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
+      var blob = new Blob([code], {type: 'text/plain'});
+      var a = document.createElement('a');
+      a.download = filename;
+      a.href = URL.createObjectURL(blob);
+      a.click();
       
       document.getElementById('statusBar').textContent = 'Code exported as ' + filename;
     });
+
+    // Initialize
+    updateJSCode();
+    updatePyCode();
   </script>
 </body>
 </html>
