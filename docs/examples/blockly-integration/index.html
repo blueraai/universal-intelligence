@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Universal Agents Blockly Integration</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .header {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .title {
+      font-size: 1.5em;
+      margin: 0;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .blockly-container {
+      flex: 2;
+      height: 100%;
+      position: relative;
+    }
+    
+    #blocklyDiv {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    
+    .code-container {
+      flex: 1;
+      background-color: #f5f5f5;
+      padding: 10px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .code-tabs {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    
+    .code-tab {
+      padding: 8px 16px;
+      background-color: #ddd;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .code-tab.active {
+      background-color: #fff;
+    }
+    
+    .code-panel {
+      display: none;
+      flex: 1;
+      overflow: auto;
+    }
+    
+    .code-panel.active {
+      display: block;
+    }
+    
+    .code {
+      font-family: monospace;
+      white-space: pre;
+      background-color: white;
+      padding: 10px;
+      border: 1px solid #ddd;
+      height: 100%;
+      overflow: auto;
+    }
+    
+    .footer {
+      background-color: #f0f0f0;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #ddd;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .secondary-button {
+      background-color: #2196F3;
+    }
+    
+    .secondary-button:hover {
+      background-color: #0b7dda;
+    }
+    
+    .danger-button {
+      background-color: #f44336;
+    }
+    
+    .danger-button:hover {
+      background-color: #da190b;
+    }
+    
+    .status {
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">Universal Agents Blockly Integration</h1>
+    <div class="controls">
+      <button id="saveButton" class="secondary-button">Save</button>
+      <button id="loadButton" class="secondary-button">Load</button>
+      <button id="exportButton" class="secondary-button">Export Code</button>
+      <button id="runButton">Run Flow</button>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <div class="blockly-container">
+      <div id="blocklyDiv"></div>
+    </div>
+    
+    <div class="code-container">
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="showTab('js')">JavaScript</button>
+        <button class="code-tab" onclick="showTab('python')">Python</button>
+        <button class="code-tab" onclick="showTab('flow')">Flow Visualization</button>
+      </div>
+      
+      <div id="jsPanel" class="code-panel active">
+        <div id="codeDiv" class="code">// JavaScript code will appear here</div>
+      </div>
+      
+      <div id="pythonPanel" class="code-panel">
+        <div id="pythonCodeDiv" class="code"># Python code will appear here</div>
+      </div>
+      
+      <div id="flowPanel" class="code-panel">
+        <div id="flowVisualization" class="code">
+          Flow visualization will appear here when you run the flow.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <div class="status" id="statusBar">Ready</div>
+    <div>
+      <button id="clearButton" class="danger-button">Clear Workspace</button>
+    </div>
+  </div>
+  
+  <!-- Load custom block definitions -->
+  <script src="basic_node_block_definition.js"></script>
+  <script src="flow_block_definition.js"></script>
+  <script src="model_node_block_definition.js"></script>
+  
+  <!-- Load toolbox configuration -->
+  <script src="toolbox_configuration.js"></script>
+  
+  <script>
+    // Tab switching functionality
+    function showTab(tabName) {
+      // Hide all panels
+      document.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      
+      // Deactivate all tabs
+      document.querySelectorAll('.code-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected panel
+      document.getElementById(tabName + 'Panel').classList.add('active');
+      
+      // Activate selected tab
+      event.currentTarget.classList.add('active');
+    }
+    
+    // Clear workspace button event listener
+    document.getElementById('clearButton').addEventListener('click', function() {
+      if (confirm('Are you sure you want to clear the workspace? This cannot be undone.')) {
+        Blockly.getMainWorkspace().clear();
+        document.getElementById('statusBar').textContent = 'Workspace cleared';
+      }
+    });
+    
+    // Export code button event listener
+    document.getElementById('exportButton').addEventListener('click', function() {
+      var activePanel = document.querySelector('.code-panel.active');
+      var code = activePanel.querySelector('.code').textContent;
+      
+      // Create a temporary element for the download
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(code));
+      
+      // Set the filename based on active tab
+      var filename = 'universal_agents_flow';
+      if (activePanel.id === 'jsPanel') {
+        filename += '.js';
+      } else if (activePanel.id === 'pythonPanel') {
+        filename += '.py';
+      }
+      
+      element.setAttribute('download', filename);
+      
+      // Trigger the download
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      document.getElementById('statusBar').textContent = 'Code exported as ' + filename;
+    });
+  </script>
+</body>
+</html>
