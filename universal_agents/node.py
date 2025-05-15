@@ -100,6 +100,21 @@ class Node:
             Action string indicating the next node to execute
         """
         return "next"
+        
+    def run(self, shared: Dict[str, Any]) -> str:
+        """Run the complete node lifecycle.
+        
+        This method executes the node's prep, exec, and post methods in sequence.
+        
+        Args:
+            shared: Shared state dictionary
+            
+        Returns:
+            Next action to take
+        """
+        prep_data = self.prep(shared)
+        exec_result = self.exec(prep_data)
+        return self.post(shared, prep_data, exec_result)
 
 
 class BatchNode(Node):
