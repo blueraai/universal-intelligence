@@ -156,6 +156,7 @@
       <button id="loadButton" class="secondary-button">Load</button>
       <button id="exportButton" class="secondary-button">Export Code</button>
       <button id="runButton">Run Flow</button>
+      <button id="testButton" style="background-color: #9c27b0;">Run Tests</button>
     </div>
   </div>
   
@@ -388,6 +389,28 @@
     // Initialize
     updateJSCode();
     updatePyCode();
+  </script>
+  
+  <!-- Load test script -->
+  <script src="test.js"></script>
+  
+  <script>
+    // Initialize test button
+    document.getElementById('testButton').addEventListener('click', async function() {
+      this.disabled = true;
+      this.textContent = 'Running Tests...';
+      
+      try {
+        const results = await runBlocklyIntegrationTests();
+        displayTestResults(results);
+      } catch (error) {
+        console.error('Error running tests:', error);
+        alert('Error running tests: ' + error.message);
+      } finally {
+        this.disabled = false;
+        this.textContent = 'Run Tests';
+      }
+    });
   </script>
 </body>
 </html>
