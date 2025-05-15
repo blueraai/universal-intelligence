@@ -155,6 +155,16 @@ A ready-made playground is available to help familiarize yourself with the proto
 python -m playground.example 
 ```
 
+### Universal Agents Blockly Integration
+
+Universal Agents can be visually designed using Google's Blockly editor. Try the interactive demo:
+
+```sh
+python run_blockly_demo.py
+```
+
+This opens a visual editor where you can create Universal Agents flows by dragging and connecting blocks. The demo includes integration tests to verify functionality.
+
 
 ## Protocol Specifications
 

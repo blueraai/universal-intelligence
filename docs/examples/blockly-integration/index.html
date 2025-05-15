@@ -206,12 +206,9 @@
       <block type="text_print"></block>
     </category>
     <category name="Universal Agents" colour="#A65C94">
-      <block type="text_print">
-        <field name="TEXT">Node Block (Placeholder)</field>
-      </block>
-      <block type="text_print">
-        <field name="TEXT">Flow Block (Placeholder)</field>
-      </block>
+      <block type="universal_agents_node"></block>
+      <block type="universal_agents_flow"></block>
+      <block type="universal_model_node"></block>
     </category>
     <category name="Patterns" colour="#5CA694">
       <block type="text_print">
@@ -223,8 +220,15 @@
     </category>
   </xml>
   
+  <!-- Load block definitions -->
+  <script src="basic_node_block_definition.js"></script>
+  <script src="flow_block_definition.js"></script>
+  <script src="model_node_block_definition.js"></script>
+  <script src="toolbox_configuration.js"></script>
+  
+  <!-- The below workspace initialization will be handled by toolbox_configuration.js -->
   <script>
-    // Initialize the Blockly workspace
+    /* Workspace injection is now handled in toolbox_configuration.js
     var workspace = Blockly.inject('blocklyDiv', {
       toolbox: document.getElementById('toolbox'),
       grid: {
@@ -243,6 +247,10 @@
       },
       trashcan: true
     });
+    */
+    
+    // Get the main workspace that was created by toolbox_configuration.js
+    var workspace = Blockly.getMainWorkspace();
 
     // Function to update JavaScript code
     function updateJSCode() {
@@ -395,8 +403,105 @@
   <script src="test.js"></script>
   
   <script>
+    // Browser compatibility check
+    function checkBrowserCompatibility() {
+      const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+      const isFirefox = /Firefox/.test(navigator.userAgent);
+      const isEdge = /Edg/.test(navigator.userAgent);
+      
+      if (!isChrome && !isFirefox && !isEdge) {
+        console.warn('You are using a browser that may not be fully compatible with this demo.');
+        console.warn('For best results, please use Chrome, Firefox, or Edge.');
+        
+        // Show warning message
+        const warning = document.createElement('div');
+        warning.style.position = 'fixed';
+        warning.style.top = '0';
+        warning.style.left = '0';
+        warning.style.right = '0';
+        warning.style.backgroundColor = '#fff3cd';
+        warning.style.borderBottom = '1px solid #ffeeba';
+        warning.style.color = '#856404';
+        warning.style.padding = '10px';
+        warning.style.textAlign = 'center';
+        warning.style.zIndex = '2000';
+        warning.innerHTML = '<strong>Warning:</strong> You are using a browser that may not be fully compatible with this demo. For best results, please use Chrome, Firefox, or Edge. <button id="dismissWarning" style="margin-left: 10px; border: 1px solid #856404; background-color: transparent; padding: 3px 10px; cursor: pointer;">Dismiss</button>';
+        
+        document.body.appendChild(warning);
+        
+        // Add dismiss button handler
+        document.getElementById('dismissWarning').addEventListener('click', function() {
+          document.body.removeChild(warning);
+        });
+      }
+    }
+    
+    // Check Blockly loading
+    function checkBlocklyLoaded() {
+      if (typeof Blockly === 'undefined') {
+        console.error('Blockly is not loaded. This may be due to network issues or content blocking.');
+        
+        // Show error message
+        const error = document.createElement('div');
+        error.style.position = 'fixed';
+        error.style.top = '50%';
+        error.style.left = '50%';
+        error.style.transform = 'translate(-50%, -50%)';
+        error.style.backgroundColor = '#f8d7da';
+        error.style.border = '1px solid #f5c6cb';
+        error.style.borderRadius = '5px';
+        error.style.color = '#721c24';
+        error.style.padding = '20px';
+        error.style.textAlign = 'center';
+        error.style.zIndex = '2000';
+        error.style.width = '80%';
+        error.style.maxWidth = '500px';
+        error.innerHTML = `
+          <h3>Error: Blockly Not Loaded</h3>
+          <p>The Blockly library could not be loaded. This may be due to:</p>
+          <ul style="text-align: left;">
+            <li>Network connectivity issues</li>
+            <li>Content blockers or restrictive firewall settings</li>
+            <li>CDN unavailability</li>
+          </ul>
+          <p>Check your browser console (F12) for more details.</p>
+          <p>Try reloading the page or using a different browser.</p>
+          <button id="dismissError" style="margin-top: 10px; background-color: #721c24; color: white; border: none; padding: 8px 15px; cursor: pointer;">Dismiss</button>
+        `;
+        
+        document.body.appendChild(error);
+        
+        // Add dismiss button handler
+        document.getElementById('dismissError').addEventListener('click', function() {
+          document.body.removeChild(error);
+        });
+        
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // Run on page load
+    window.addEventListener('load', function() {
+      // Check browser compatibility
+      checkBrowserCompatibility();
+      
+      // Check if Blockly loaded successfully
+      const blocklyLoaded = checkBlocklyLoaded();
+      
+      if (blocklyLoaded) {
+        console.log('Blockly loaded successfully');
+      }
+    });
+    
     // Initialize test button
     document.getElementById('testButton').addEventListener('click', async function() {
+      // Check again if Blockly is loaded before running tests
+      if (!checkBlocklyLoaded()) {
+        return;
+      }
+      
       this.disabled = true;
       this.textContent = 'Running Tests...';
       

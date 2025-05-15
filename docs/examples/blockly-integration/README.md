@@ -15,15 +15,70 @@ This directory includes:
 3. **flow_block_definition.js** - Definition of a Universal Agents Flow block
 4. **model_node_block_definition.js** - Definition of a Universal Model Node block
 5. **toolbox_configuration.js** - Configuration of the Blockly toolbox with categories and blocks
+6. **test.js** - Integration tests to verify the Blockly integration functionality
+7. **server.py** - Simple HTTP server for running the demo
 
 ## How to Run the Example
 
-1. Make sure you have a local web server running
-2. Open `index.html` in a web browser
-3. Try building a simple flow by dragging blocks from the toolbox
-4. The generated code will appear in the right panel
-5. You can switch between JavaScript and Python code views
-6. Use the buttons to save, load, export, or run your flow
+### Method 1: Using the Python Server (Recommended)
+
+1. Navigate to this directory:
+   ```bash
+   cd docs/examples/blockly-integration
+   ```
+
+2. Make the server script executable:
+   ```bash
+   chmod +x server.py
+   ```
+
+3. Run the server:
+   ```bash
+   python3 server.py
+   ```
+
+4. Open your browser and navigate to:
+   ```
+   http://localhost:8000/index.html
+   ```
+
+### Method 2: Using a Different HTTP Server
+
+You can use any HTTP server to serve the files in this directory:
+
+1. Using Python's built-in HTTP server:
+   ```bash
+   cd docs/examples/blockly-integration
+   python3 -m http.server 8000
+   ```
+
+2. Using Node.js and http-server:
+   ```bash
+   cd docs/examples/blockly-integration
+   npx http-server -p 8000
+   ```
+
+### After Opening the Example
+
+1. Try building a simple flow by dragging blocks from the toolbox
+2. The generated code will appear in the right panel
+3. You can switch between JavaScript and Python code views
+4. Use the buttons to save, load, export, or run your flow
+5. Click "Run Tests" to check if the integration is working correctly
+
+## Troubleshooting
+
+If you encounter issues with the demo:
+
+1. **Browser Console Errors**: Open your browser's developer tools (F12 or Ctrl+Shift+I) and check the console for errors.
+
+2. **CORS Issues**: If you see errors related to CORS, make sure you're using the provided server.py which handles CORS headers.
+
+3. **Block Loading Problems**: Ensure all the JavaScript files are being loaded correctly. Check the network tab in developer tools.
+
+4. **Running Tests**: The "Run Tests" button runs integration tests that can help diagnose issues. If tests fail, the error messages will indicate what's not working.
+
+5. **Clearing Cache**: Try clearing your browser cache if you've made changes that aren't showing up.
 
 ## Block Types
 
