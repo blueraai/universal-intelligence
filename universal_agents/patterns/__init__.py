@@ -15,6 +15,14 @@ from .multi_agent import (
     SpecialistAgentNode,
     create_multi_agent_flow
 )
+from .workflow import (
+    DecisionNode,
+    ModelDecisionNode,
+    ParallelNode,
+    SequentialWorkflowNode,
+    LoopNode,
+    create_conditional_workflow
+)
 
 __all__ = [
     "create_rag_flow",
@@ -25,5 +33,11 @@ __all__ = [
     "create_map_reduce_flow",
     "AgentCoordinatorNode",
     "SpecialistAgentNode",
-    "create_multi_agent_flow"
+    "create_multi_agent_flow",
+    "DecisionNode",
+    "ModelDecisionNode",
+    "ParallelNode",
+    "SequentialWorkflowNode",
+    "LoopNode",
+    "create_conditional_workflow"
 ]
