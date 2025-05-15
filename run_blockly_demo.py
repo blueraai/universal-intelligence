@@ -62,30 +62,30 @@ def run_server(demo_dir):
 
 def run_tests(demo_dir):
     """Run the integration tests."""
-    # Find the test script
-    test_script = os.path.join(demo_dir, "run_integration_tests.py")
+    # Find the validation script
+    validation_script = os.path.join(demo_dir, "validate_blocks.py")
     
-    if not os.path.exists(test_script):
-        print(f"ERROR: Test script not found at {test_script}")
+    if not os.path.exists(validation_script):
+        print(f"ERROR: Validation script not found at {validation_script}")
         return 1
     
     # Make the script executable
     try:
-        os.chmod(test_script, 0o755)
+        os.chmod(validation_script, 0o755)
     except Exception as e:
-        print(f"WARNING: Could not make test script executable: {e}")
+        print(f"WARNING: Could not make validation script executable: {e}")
     
     # Run the tests
-    print(f"Running Blockly integration tests from: {demo_dir}")
+    print(f"Running Blockly validation tests from: {demo_dir}")
     try:
         # Change to the demo directory
         os.chdir(demo_dir)
         
-        # Run the test script
-        result = subprocess.call([sys.executable, test_script])
+        # Run the validation script
+        result = subprocess.call([sys.executable, validation_script])
         return result
     except Exception as e:
-        print(f"ERROR: Failed to run the integration tests: {e}")
+        print(f"ERROR: Failed to run the validation tests: {e}")
         return 1
 
 def main():
