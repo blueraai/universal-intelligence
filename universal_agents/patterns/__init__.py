@@ -5,7 +5,17 @@ using Universal Agents flows.
 """
 
 from .rag import create_rag_flow
+from .map_reduce import (
+    MapNode, ModelMapNode, 
+    ReduceNode, ModelReduceNode,
+    create_map_reduce_flow
+)
 
 __all__ = [
-    "create_rag_flow"
+    "create_rag_flow",
+    "MapNode",
+    "ModelMapNode",
+    "ReduceNode",
+    "ModelReduceNode",
+    "create_map_reduce_flow"
 ]
