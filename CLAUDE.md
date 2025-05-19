@@ -12,6 +12,131 @@ Universal Intelligence (UIN) is a framework-less protocol that standardizes AI d
 
 The project supports both Python (cloud/desktop) and JavaScript/TypeScript (web/mobile) implementations.
 
+## Current Work: Blockly Integration (May 15, 2025)
+
+### Status: Phase 1 - Core Implementation (In Progress)
+
+Working on integrating Google's Blockly visual programming editor with the Universal Agents framework. Currently debugging code generator registration issues.
+
+### Current Issue
+Blockly blocks load correctly but JavaScript/Python generators fail with error:
+```
+Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node"
+```
+
+### Project Structure
+```
+docs/examples/blockly-integration/
+├── index.html                      # Main demo interface (has generator errors)
+├── index_fixed.html               # Attempted fix with proper script loading
+├── basic_node_block_definition.js  # Universal Agents Node block
+├── flow_block_definition.js        # Flow block definition
+├── model_node_block_definition.js  # Model node block
+├── toolbox_configuration.js        # Minimal toolbox config
+├── server.py                       # Demo server with CORS support
+├── test.js                        # Browser integration tests
+├── validate_blocks.py             # Python validation script
+├── debug_blockly.html             # Step-by-step debugging page
+└── check_generators.html          # Generator testing page
+```
+
+### Key Commands
+```bash
+# Run the demo server
+python run_blockly_demo.py
+
+# Run validation tests
+python run_blockly_demo.py --tests
+
+# Access the demo
+http://localhost:8000/index.html
+http://localhost:8000/index_fixed.html
+```
+
+### Technical Details
+
+**Environment:**
+- Blockly version: 12.0.0
+- Browser: Chrome/Safari on macOS
+- Server: Python HTTP server on port 8000
+
+**Error Details:**
+1. Block definitions load successfully
+2. Generators are defined but not registered properly
+3. Error occurs in updateCode() when calling Blockly.JavaScript.workspaceToCode()
+4. See `localhost-1747612346522.log` for full console output
+
+**Failed Attempts:**
+1. Moving script loading to window.onload
+2. Creating headless integration tests (ES module conflicts)
+3. Reordering script includes
+4. Adding explicit generator registration
+5. Creating fixed HTML with proper load order
+
+### Next Steps
+
+1. **Debug Generator Registration (Priority: High)**
+   - Check Blockly v12 breaking changes
+   - Test with minimal example
+   - Compare with Blockly documentation examples
+   - Consider downgrading to Blockly v11 if needed
+
+2. **Fix Script Loading Order (Priority: High)**
+   - Ensure blocks are defined before workspace init
+   - Verify generators are attached to Blockly namespace
+   - Add console logging for initialization sequence
+
+3. **Test Alternative Approaches (Priority: Medium)**
+   - Try defining generators inline with blocks
+   - Use Blockly's plugin system
+   - Check if we need registerGenerator() calls
+
+4. **Complete Phase 1 Implementation (Priority: Medium)**
+   - Fix all three block types (Node, Flow, ModelNode)
+   - Implement proper code generation
+   - Add connection logic between blocks
+   - Create working example flows
+
+### Phase Plan (from docs/plans/plan-blockly-integration-v1.0.0.md)
+
+**Phase 1: Core Implementation** (Current)
+- ✅ Block definitions for Node, Flow, ModelNode
+- ❌ Code generation (blocked by generator errors)
+- ✅ Basic UI integration
+- ✅ Toolbox configuration
+
+**Phase 2: Pattern Implementation** (Next)
+- Pattern blocks (RAG, Map-Reduce, Multi-Agent)
+- Universal Intelligence integration
+- Advanced flow features
+- Enhanced UI
+
+**Phase 3: Runtime and Debugging** (Future)
+- Live execution
+- Debugging tools
+- State visualization
+- Persistence
+
+**Phase 4: Advanced Features** (Future)
+- Block factory
+- Performance optimization
+- External integrations
+- Documentation
+
+### Important Files for Debugging
+
+1. `blockly-test-errors-1.png` - Screenshot of browser errors
+2. `localhost-1747612346522.log` - Full console log with error traces
+3. `integration_test.mjs` - Failed headless test attempt
+4. Block definition files - Check generator function syntax
+
+### MCP Integration Note
+
+MCP tools are not currently configured. Future work includes:
+- Setting up MCP puppeteer for automated browser testing
+- Implementing time server demo (`time_server.py`)
+- Testing with `test_time_mcp.py`
+
 ## Development Environment Setup
 
 ```bash
