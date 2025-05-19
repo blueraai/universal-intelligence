@@ -62,7 +62,7 @@ Blockly.JavaScript['universal_agents_node'] = function(block) {
   // Get connected action nodes
   var nextNodeCode = Blockly.JavaScript.valueToCode(block, 'ACTION_NEXT', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
   var errorNodeCode = Blockly.JavaScript.valueToCode(block, 'ACTION_ERROR', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
-  var customAction = block.getFieldValue('CUSTOM_ACTION');
+  var customAction = block.getFieldValue('CUSTOM_ACTION') || 'custom';
   var customNodeCode = Blockly.JavaScript.valueToCode(block, 'ACTION_CUSTOM', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
   
   // Generate class definition for the node

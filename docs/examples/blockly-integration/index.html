@@ -220,15 +220,13 @@
     </category>
   </xml>
   
-  <!-- Load block definitions -->
+  <!-- Load block definitions BEFORE workspace initialization -->
   <script src="basic_node_block_definition.js"></script>
   <script src="flow_block_definition.js"></script>
   <script src="model_node_block_definition.js"></script>
-  <script src="toolbox_configuration.js"></script>
   
-  <!-- The below workspace initialization will be handled by toolbox_configuration.js -->
   <script>
-    /* Workspace injection is now handled in toolbox_configuration.js
+    // Initialize workspace with the toolbox
     var workspace = Blockly.inject('blocklyDiv', {
       toolbox: document.getElementById('toolbox'),
       grid: {
@@ -247,10 +245,6 @@
       },
       trashcan: true
     });
-    */
-    
-    // Get the main workspace that was created by toolbox_configuration.js
-    var workspace = Blockly.getMainWorkspace();
 
     // Function to update JavaScript code
     function updateJSCode() {

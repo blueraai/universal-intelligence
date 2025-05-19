@@ -1,0 +1,194 @@
+javascript.ts:31 Uncaught Error: Error: Extension "contextMenu_variableDynamicSetterGetter" is already registered.
+    at $.register$$module$build$src$core$extensions (javascript.ts:31:14)
+    at $.registerMixin$$module$build$src$core$extensions (javascript.ts:31:14)
+    at variables_dynamic.ts:186:12
+    at blocks_compressed.js:10:34
+    at blocks_compressed.js:12:2
+$.register$$module$build$src$core$extensions @ javascript.ts:31
+$.registerMixin$$module$build$src$core$extensions @ javascript.ts:31
+(anonymous) @ variables_dynamic.ts:186
+(anonymous) @ blocks_compressed.js:10
+(anonymous) @ blocks_compressed.js:12
+test.js:17 [DEBUG] Checking environment...
+test.js:17 [DEBUG] Blockly available: true
+test.js:17 [DEBUG] Browser: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+test.js:23 [DEBUG] Blockly object
+test.js:17 [DEBUG] Blockly version: 12.0.0
+index.html:494 Blockly loaded successfully
+math.ts:356 Blockly.Workspace.getAllVariables was deprecated in v12 and will be deleted in v13.
+Use Blockly.Workspace.getVariableMap().getAllVariables instead.
+warn$$module$build$src$core$utils$deprecation @ math.ts:356
+getAllVariables @ javascript.ts:31
+appendInternal$$module$build$src$core$serialization$blocks @ text.ts:264
+createBlock @ javascript.ts:31
+load @ javascript.ts:31
+createFlyoutInfo @ javascript.ts:31
+show @ javascript.ts:31
+updateFlyout_ @ javascript.ts:31
+setSelectedItem @ javascript.ts:31
+onClick_ @ javascript.ts:31
+f @ math.ts:260
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+fireSelectEvent @ javascript.ts:31
+setSelectedItem @ javascript.ts:31
+clearSelection @ javascript.ts:31
+autoHide @ javascript.ts:31
+(anonymous) @ javascript.ts:31
+hideComponents @ javascript.ts:31
+hideChaff @ javascript.ts:31
+createBlock @ javascript.ts:31
+updateIsDraggingFromFlyout @ javascript.ts:31
+updateIsDragging @ javascript.ts:31
+updateFromEvent @ javascript.ts:31
+handleMove @ javascript.ts:31
+f @ math.ts:260
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+fireDragEndEvent @ javascript.ts:31
+endDrag @ javascript.ts:31
+endDrag @ javascript.ts:31
+onDragEnd @ javascript.ts:31
+handleUp @ javascript.ts:31
+f @ math.ts:260
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+fireSelectedEvent$$module$build$src$core$common @ math.ts:181
+unselect @ javascript.ts:31
+onNodeBlur @ javascript.ts:31
+passivelyFocusNode @ javascript.ts:31
+defocusCurrentFocusedNode @ javascript.ts:31
+b @ javascript.ts:31
+(anonymous) @ javascript.ts:31
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+fireSelectedEvent$$module$build$src$core$common @ math.ts:181
+select @ javascript.ts:31
+onNodeFocus @ javascript.ts:31
+activelyFocusNode @ javascript.ts:31
+focusNode @ javascript.ts:31
+b @ javascript.ts:31
+(anonymous) @ javascript.ts:31
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+fireSelectedEvent$$module$build$src$core$common @ math.ts:181
+unselect @ javascript.ts:31
+onNodeBlur @ javascript.ts:31
+passivelyFocusNode @ javascript.ts:31
+defocusCurrentFocusedNode @ javascript.ts:31
+b @ javascript.ts:31
+(anonymous) @ javascript.ts:31
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+maybeFireViewportChangeEvent @ javascript.ts:31
+resize @ javascript.ts:31
+resize @ javascript.ts:31
+svgResize$$module$build$src$core$common @ math.ts:181
+(anonymous) @ javascript.ts:31
+f @ math.ts:260
+javascript.ts:31 Uncaught Error: JavaScript generator does not know how to generate code for block type "universal_agents_node".
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.blockToCode (javascript.ts:31:14)
+    at JavascriptGenerator$$module$build$src$generators$javascript$javascript_generator.workspaceToCode (javascript.ts:31:14)
+    at updateCode (toolbox_configuration.js:192:33)
+    at WorkspaceSvg$$module$build$src$core$workspace_svg.fireChangeListener (javascript.ts:31:14)
+    at fireNow$$module$build$src$core$events$utils (loops.ts:214:41)
+blockToCode @ javascript.ts:31
+workspaceToCode @ javascript.ts:31
+updateCode @ toolbox_configuration.js:192
+fireChangeListener @ javascript.ts:31
+fireNow$$module$build$src$core$events$utils @ loops.ts:214
+setTimeout
+(anonymous) @ loops.ts:184
+requestAnimationFrame
+fireInternal$$module$build$src$core$events$utils @ loops.ts:184
+fire$$module$build$src$core$events$utils @ loops.ts:168
+maybeFireViewportChangeEvent @ javascript.ts:31
+resize @ javascript.ts:31
+resize @ javascript.ts:31
+svgResize$$module$build$src$core$common @ math.ts:181
+(anonymous) @ javascript.ts:31
+f @ math.ts:260

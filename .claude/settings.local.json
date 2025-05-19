@@ -9,7 +9,18 @@
       "Bash(git checkout:*)",
       "Bash(git commit:*)",
       "Bash(python:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:developers.google.com)",
+      "Bash(chmod:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(cp:*)",
+      "Bash(conda create:*)",
+      "Bash(pip install:*)",
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(python run_blockly_demo.py:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Check Blockly Generators</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/en.js"></script>
+</head>
+<body>
+  <h1>Blockly Generator Check</h1>
+  <pre id="output"></pre>
+  
+  <script>
+    const output = document.getElementById('output');
+    
+    // Log helper
+    function log(message) {
+      output.innerHTML += message + '\n';
+      console.log(message);
+    }
+    
+    // Check Blockly
+    log('Blockly version: ' + (Blockly.VERSION || 'unknown'));
+    log('Blockly.JavaScript exists: ' + (typeof Blockly.JavaScript !== 'undefined'));
+    log('Blockly.Python exists: ' + (typeof Blockly.Python !== 'undefined'));
+    
+    // Test basic blocks
+    try {
+      // Create a test workspace
+      const workspace = new Blockly.Workspace();
+      
+      // Create a test block
+      const block = workspace.newBlock('controls_if');
+      
+      // Test JavaScript generation
+      const jsCode = Blockly.JavaScript.blockToCode(block);
+      log('JS generation test: ' + (jsCode ? 'PASS' : 'FAIL'));
+      
+      // Test Python generation
+      const pyCode = Blockly.Python.blockToCode(block);
+      log('Python generation test: ' + (pyCode ? 'PASS' : 'FAIL'));
+      
+    } catch (error) {
+      log('ERROR during test: ' + error.message);
+    }
+    
+    // Test our custom block definition and generator
+    log('\nTesting custom block...');
+    
+    // Define a simple custom block
+    Blockly.Blocks['test_block'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Test Block");
+        this.setColour(160);
+      }
+    };
+    
+    // Define JavaScript generator
+    Blockly.JavaScript['test_block'] = function(block) {
+      return 'console.log("test");';
+    };
+    
+    // Test custom block
+    try {
+      const workspace2 = new Blockly.Workspace();
+      const customBlock = workspace2.newBlock('test_block');
+      const customCode = Blockly.JavaScript.blockToCode(customBlock);
+      log('Custom block generation: ' + (customCode ? 'PASS - ' + customCode : 'FAIL'));
+    } catch (error) {
+      log('ERROR with custom block: ' + error.message);
+    }
+  </script>
+  
+  <!-- Now load our actual block definitions -->
+  <script src="basic_node_block_definition.js"></script>
+  <script src="flow_block_definition.js"></script>
+  <script src="model_node_block_definition.js"></script>
+  
+  <script>
+    log('\nLoading our block definitions...');
+    
+    // Check if our blocks are loaded
+    log('universal_agents_node block exists: ' + (typeof Blockly.Blocks['universal_agents_node'] !== 'undefined'));
+    log('universal_agents_flow block exists: ' + (typeof Blockly.Blocks['universal_agents_flow'] !== 'undefined'));
+    log('universal_model_node block exists: ' + (typeof Blockly.Blocks['universal_model_node'] !== 'undefined'));
+    
+    // Check if generators are loaded
+    log('universal_agents_node JS generator exists: ' + (typeof Blockly.JavaScript['universal_agents_node'] !== 'undefined'));
+    log('universal_agents_node Python generator exists: ' + (typeof Blockly.Python['universal_agents_node'] !== 'undefined'));
+    
+    // Test generation
+    try {
+      const workspace3 = new Blockly.Workspace();
+      const nodeBlock = workspace3.newBlock('universal_agents_node');
+      nodeBlock.setFieldValue('TestNode', 'NODE_NAME');
+      
+      const jsCode = Blockly.JavaScript.blockToCode(nodeBlock);
+      log('\nGenerated JS code: ' + jsCode);
+      
+      const pyCode = Blockly.Python.blockToCode(nodeBlock);
+      log('Generated Python code: ' + pyCode);
+    } catch (error) {
+      log('ERROR generating code: ' + error.message);
+      log('Stack trace: ' + error.stack);
+    }
+  </script>
+</body>
+</html>

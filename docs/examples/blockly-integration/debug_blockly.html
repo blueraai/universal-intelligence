@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Debug Blockly Integration</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/en.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      background-color: #f5f5f5;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+    
+    #blocklyDiv {
+      height: 400px;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+    
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border: 1px solid #ddd;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Debug Blockly Integration</h1>
+  
+  <div id="status"></div>
+  
+  <h2>Step 1: Check Blockly Loaded</h2>
+  <div id="blockly-check" class="status"></div>
+  
+  <h2>Step 2: Load Block Definitions</h2>
+  <div id="block-load-status" class="status"></div>
+  
+  <h2>Step 3: Register Code Generators</h2>
+  <div id="generator-status" class="status"></div>
+  
+  <h2>Step 4: Initialize Workspace</h2>
+  <div id="workspace-status" class="status"></div>
+  
+  <div id="blocklyDiv"></div>
+  
+  <h2>Generated Code</h2>
+  <pre id="codeDiv"></pre>
+  
+  <script>
+    // Debug helper
+    function logStatus(element, message, isSuccess = true) {
+      document.getElementById(element).innerHTML = message;
+      document.getElementById(element).className = 'status ' + (isSuccess ? 'success' : 'error');
+    }
+    
+    // Step 1: Check if Blockly is loaded
+    if (typeof Blockly !== 'undefined') {
+      logStatus('blockly-check', 'Blockly loaded successfully! Version: ' + (Blockly.VERSION || 'unknown'));
+    } else {
+      logStatus('blockly-check', 'ERROR: Blockly is not loaded!', false);
+    }
+    
+    // Step 2: Load block definitions
+    try {
+      Blockly.Blocks['universal_agents_node'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField("Node")
+              .appendField(new Blockly.FieldTextInput("MyNode"), "NODE_NAME");
+          
+          this.appendStatementInput("PREP")
+              .setCheck(null)
+              .appendField("prep");
+          
+          this.appendStatementInput("EXEC")
+              .setCheck(null)
+              .appendField("exec");
+          
+          this.appendStatementInput("POST")
+              .setCheck(null)
+              .appendField("post");
+          
+          this.setOutput(true, "NODE");
+          
+          this.appendDummyInput()
+              .appendField("Actions:");
+          
+          this.appendValueInput("ACTION_NEXT")
+              .setCheck("NODE")
+              .appendField("next →");
+          
+          this.setColour(230);
+          this.setTooltip("Creates a Universal Agents Node");
+        }
+      };
+      
+      logStatus('block-load-status', 'Block definitions loaded successfully!');
+    } catch (error) {
+      logStatus('block-load-status', 'ERROR loading blocks: ' + error.message, false);
+    }
+    
+    // Step 3: Register code generators
+    try {
+      Blockly.JavaScript['universal_agents_node'] = function(block) {
+        var nodeName = block.getFieldValue('NODE_NAME');
+        var prepCode = Blockly.JavaScript.statementToCode(block, 'PREP');
+        var execCode = Blockly.JavaScript.statementToCode(block, 'EXEC');
+        var postCode = Blockly.JavaScript.statementToCode(block, 'POST');
+        
+        var code = `const ${nodeName.toLowerCase()} = new Node("${nodeName}");\n`;
+        return code;
+      };
+      
+      logStatus('generator-status', 'Code generators registered successfully!');
+    } catch (error) {
+      logStatus('generator-status', 'ERROR registering generators: ' + error.message, false);
+    }
+    
+    // Step 4: Initialize workspace
+    try {
+      var workspace = Blockly.inject('blocklyDiv', {
+        toolbox: {
+          kind: 'categoryToolbox',
+          contents: [
+            {
+              kind: 'category',
+              name: 'Universal Agents',
+              colour: '#5C81A6',
+              contents: [
+                {
+                  kind: 'block',
+                  type: 'universal_agents_node'
+                }
+              ]
+            }
+          ]
+        },
+        grid: {
+          spacing: 20,
+          length: 3,
+          colour: '#ccc',
+          snap: true
+        },
+        zoom: {
+          controls: true,
+          wheel: true,
+          startScale: 1.0,
+          maxScale: 3,
+          minScale: 0.3,
+          scaleSpeed: 1.2
+        },
+        trashcan: true
+      });
+      
+      // Add change listener
+      workspace.addChangeListener(function(event) {
+        if (event.type !== Blockly.Events.UI) {
+          try {
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            document.getElementById('codeDiv').textContent = code;
+          } catch (error) {
+            document.getElementById('codeDiv').textContent = 'ERROR: ' + error.message;
+          }
+        }
+      });
+      
+      logStatus('workspace-status', 'Workspace initialized successfully!');
+    } catch (error) {
+      logStatus('workspace-status', 'ERROR initializing workspace: ' + error.message, false);
+    }
+  </script>
+</body>
+</html>
