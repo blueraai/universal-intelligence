@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Universal Agents Blockly Integration</title>
+  <!-- Load Blockly libraries -->
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/en.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .header {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .title {
+      font-size: 1.5em;
+      margin: 0;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .blockly-container {
+      flex: 2;
+      height: 100%;
+      position: relative;
+    }
+    
+    #blocklyDiv {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    
+    .code-container {
+      flex: 1;
+      background-color: #f5f5f5;
+      padding: 10px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .code-tabs {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    
+    .code-tab {
+      padding: 8px 16px;
+      background-color: #ddd;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .code-tab.active {
+      background-color: #fff;
+    }
+    
+    .code-panel {
+      display: none;
+      flex: 1;
+      overflow: auto;
+    }
+    
+    .code-panel.active {
+      display: block;
+    }
+    
+    .code {
+      font-family: monospace;
+      white-space: pre;
+      background-color: white;
+      padding: 10px;
+      border: 1px solid #ddd;
+      height: 100%;
+      overflow: auto;
+    }
+    
+    .footer {
+      background-color: #f0f0f0;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #ddd;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .secondary-button {
+      background-color: #2196F3;
+    }
+    
+    .secondary-button:hover {
+      background-color: #0b7dda;
+    }
+    
+    .danger-button {
+      background-color: #f44336;
+    }
+    
+    .danger-button:hover {
+      background-color: #da190b;
+    }
+    
+    .status {
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">Universal Agents Blockly Integration</h1>
+    <div class="controls">
+      <button id="saveButton" class="secondary-button">Save</button>
+      <button id="loadButton" class="secondary-button">Load</button>
+      <button id="exportButton" class="secondary-button">Export Code</button>
+      <button id="runButton">Run Flow</button>
+      <button id="testButton" style="background-color: #9c27b0;">Run Tests</button>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <div class="blockly-container">
+      <div id="blocklyDiv"></div>
+    </div>
+    
+    <div class="code-container">
+      <div class="code-tabs">
+        <button class="code-tab active" id="jsTab">JavaScript</button>
+        <button class="code-tab" id="pythonTab">Python</button>
+        <button class="code-tab" id="flowTab">Flow Visualization</button>
+      </div>
+      
+      <div id="jsPanel" class="code-panel active">
+        <div id="codeDiv" class="code">// JavaScript code will appear here</div>
+      </div>
+      
+      <div id="pythonPanel" class="code-panel">
+        <div id="pythonCodeDiv" class="code"># Python code will appear here</div>
+      </div>
+      
+      <div id="flowPanel" class="code-panel">
+        <div id="flowVisualization" class="code">
+          Flow visualization will appear here when you run the flow.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <div class="status" id="statusBar">Ready</div>
+    <div>
+      <button id="clearButton" class="danger-button">Clear Workspace</button>
+    </div>
+  </div>
+
+  <script>
+    console.log('Starting to load Blockly and custom blocks...');
+    
+    // Load the Blockly generators for JavaScript and Python
+    const javascript = new Blockly.Generator('JavaScript');
+    const python = new Blockly.Generator('Python');
+    
+    // Function to register block generators
+    function registerBlockGenerators() {
+      console.log('Registering block generators...');
+      
+      // Register JavaScript generators
+      javascript.forBlock['universal_agents_node'] = function(block) {
+        var nodeName = block.getFieldValue('NODE_NAME');
+        var prepCode = javascript.statementToCode(block, 'PREP');
+        var execCode = javascript.statementToCode(block, 'EXEC');
+        var postCode = javascript.statementToCode(block, 'POST');
+        
+        // Get connected action nodes
+        var nextNodeCode = javascript.valueToCode(block, 'ACTION_NEXT', javascript.Order.ATOMIC) || 'null';
+        var errorNodeCode = javascript.valueToCode(block, 'ACTION_ERROR', javascript.Order.ATOMIC) || 'null';
+        var customAction = block.getFieldValue('CUSTOM_ACTION') || 'custom';
+        var customNodeCode = javascript.valueToCode(block, 'ACTION_CUSTOM', javascript.Order.ATOMIC) || 'null';
+        
+        // Generate class definition for the node
+        var code = `
+// Node definition
+class ${nodeName} extends Node {
+  constructor() {
+    super("${nodeName}");
+  }
+  
+  prep(shared) {
+    ${prepCode || '    return null;'}
+  }
+  
+  exec(prepData) {
+    ${execCode || '    return prepData;'}
+  }
+  
+  post(shared, prepData, execResult) {
+    ${postCode || '    return "next";'}
+  }
+}
+
+// Create instance
+const ${nodeName.toLowerCase()} = new ${nodeName}();
+
+// Connect actions
+${nextNodeCode !== 'null' ? `${nodeName.toLowerCase()} - "next" >> ${nextNodeCode};` : ''}
+${errorNodeCode !== 'null' ? `${nodeName.toLowerCase()} - "error" >> ${errorNodeCode};` : ''}
+${customNodeCode !== 'null' ? `${nodeName.toLowerCase()} - "${customAction}" >> ${customNodeCode};` : ''}
+`;
+
+        return [nodeName.toLowerCase(), javascript.Order.ATOMIC];
+      };
+      
+      javascript.forBlock['universal_agents_flow'] = function(block) {
+        var flowName = block.getFieldValue('FLOW_NAME');
+        var startNodeCode = javascript.valueToCode(block, 'START_NODE', javascript.Order.ATOMIC) || 'null';
+        var visualization = block.getFieldValue('VISUALIZATION') === 'TRUE';
+        var vizPath = block.getFieldValue('VIZ_PATH');
+        
+        // Generate flow initialization and execution code
+        var code = `
+// Flow definition
+const ${flowName.toLowerCase()} = new Flow(
+  start=${startNodeCode},
+  name="${flowName}"${visualization ? `,
+  visualization=true,
+  visualization_path="${vizPath}"` : ''}
+);
+
+// Initialize shared state
+const shared = {};
+
+// Run the flow
+const result = ${flowName.toLowerCase()}.run(shared);
+`;
+
+        return [flowName.toLowerCase(), javascript.Order.ATOMIC];
+      };
+      
+      javascript.forBlock['universal_model_node'] = function(block) {
+        var nodeName = block.getFieldValue('NODE_NAME');
+        var model = block.getFieldValue('MODEL');
+        var promptTemplate = block.getFieldValue('PROMPT_TEMPLATE');
+        var inputKeys = block.getFieldValue('INPUT_KEYS').split(',').map(k => k.trim());
+        var outputKey = block.getFieldValue('OUTPUT_KEY');
+        var temperature = block.getFieldValue('TEMPERATURE');
+        var maxTokens = block.getFieldValue('MAX_TOKENS');
+        
+        // Get connected action nodes
+        var nextNodeCode = javascript.valueToCode(block, 'ACTION_NEXT', javascript.Order.ATOMIC) || 'null';
+        var errorNodeCode = javascript.valueToCode(block, 'ACTION_ERROR', javascript.Order.ATOMIC) || 'null';
+        
+        // Generate node initialization code
+        var code = `
+// Model node initialization
+const ${nodeName.toLowerCase()} = new UniversalModelNode(
+  model: ${model},
+  prompt_template: \`${promptTemplate}\`,
+  input_keys: [${inputKeys.map(k => `"${k}"`).join(', ')}],
+  output_key: "${outputKey}",
+  name: "${nodeName}",
+  model_parameters: {
+    temperature: ${temperature},
+    max_tokens: ${maxTokens}
+  }
+);
+
+// Connect actions
+${nextNodeCode !== 'null' ? `${nodeName.toLowerCase()} - "next" >> ${nextNodeCode};` : ''}
+${errorNodeCode !== 'null' ? `${nodeName.toLowerCase()} - "error" >> ${errorNodeCode};` : ''}
+`;
+
+        return [nodeName.toLowerCase(), javascript.Order.ATOMIC];
+      };
+      
+      // Register Python generators
+      python.forBlock['universal_agents_node'] = function(block) {
+        var nodeName = block.getFieldValue('NODE_NAME');
+        var prepCode = python.statementToCode(block, 'PREP');
+        var execCode = python.statementToCode(block, 'EXEC');
+        var postCode = python.statementToCode(block, 'POST');
+        
+        // Get connected action nodes
+        var nextNodeCode = python.valueToCode(block, 'ACTION_NEXT', python.Order.ATOMIC) || 'None';
+        var errorNodeCode = python.valueToCode(block, 'ACTION_ERROR', python.Order.ATOMIC) || 'None';
+        var customAction = block.getFieldValue('CUSTOM_ACTION');
+        var customNodeCode = python.valueToCode(block, 'ACTION_CUSTOM', python.Order.ATOMIC) || 'None';
+        
+        // Generate class definition for the node
+        var code = `
+# Node definition
+class ${nodeName}(Node):
+    def __init__(self):
+        super().__init__("${nodeName}")
+    
+    def prep(self, shared):
+${prepCode || '        return None'}
+    
+    def exec(self, prep_data):
+${execCode || '        return prep_data'}
+    
+    def post(self, shared, prep_data, exec_result):
+${postCode || '        return "next"'}
+
+# Create instance
+${nodeName.toLowerCase()} = ${nodeName}()
+
+# Connect actions
+${nextNodeCode !== 'None' ? `${nodeName.toLowerCase()} - "next" >> ${nextNodeCode}` : ''}
+${errorNodeCode !== 'None' ? `${nodeName.toLowerCase()} - "error" >> ${errorNodeCode}` : ''}
+${customNodeCode !== 'None' ? `${nodeName.toLowerCase()} - "${customAction}" >> ${customNodeCode}` : ''}
+`;
+
+        return [nodeName.toLowerCase(), python.Order.ATOMIC];
+      };
+      
+      python.forBlock['universal_agents_flow'] = function(block) {
+        var flowName = block.getFieldValue('FLOW_NAME');
+        var startNodeCode = python.valueToCode(block, 'START_NODE', python.Order.ATOMIC) || 'None';
+        var visualization = block.getFieldValue('VISUALIZATION') === 'TRUE';
+        var vizPath = block.getFieldValue('VIZ_PATH');
+        
+        // Generate flow initialization and execution code
+        var code = `
+# Flow definition
+${flowName.toLowerCase()} = Flow(
+    start=${startNodeCode},
+    name="${flowName}"${visualization ? `,
+    visualization=True,
+    visualization_path="${vizPath}"` : ''}
+)
+
+# Initialize shared state
+shared = {}
+
+# Run the flow
+result = ${flowName.toLowerCase()}.run(shared)
+`;
+
+        return [flowName.toLowerCase(), python.Order.ATOMIC];
+      };
+      
+      python.forBlock['universal_model_node'] = function(block) {
+        var nodeName = block.getFieldValue('NODE_NAME');
+        var model = block.getFieldValue('MODEL');
+        var promptTemplate = block.getFieldValue('PROMPT_TEMPLATE');
+        var inputKeys = block.getFieldValue('INPUT_KEYS').split(',').map(k => k.trim());
+        var outputKey = block.getFieldValue('OUTPUT_KEY');
+        var temperature = block.getFieldValue('TEMPERATURE');
+        var maxTokens = block.getFieldValue('MAX_TOKENS');
+        
+        // Get connected action nodes
+        var nextNodeCode = python.valueToCode(block, 'ACTION_NEXT', python.Order.ATOMIC) || 'None';
+        var errorNodeCode = python.valueToCode(block, 'ACTION_ERROR', python.Order.ATOMIC) || 'None';
+        
+        // Generate node initialization code
+        var code = `
+# Model node initialization
+${nodeName.toLowerCase()} = UniversalModelNode(
+    model=${model},
+    prompt_template="""${promptTemplate}""",
+    input_keys=[${inputKeys.map(k => `"${k}"`).join(', ')}],
+    output_key="${outputKey}",
+    name="${nodeName}",
+    model_parameters={
+        "temperature": ${temperature},
+        "max_tokens": ${maxTokens}
+    }
+)
+
+# Connect actions
+${nextNodeCode !== 'None' ? `${nodeName.toLowerCase()} - "next" >> ${nextNodeCode}` : ''}
+${errorNodeCode !== 'None' ? `${nodeName.toLowerCase()} - "error" >> ${errorNodeCode}` : ''}
+`;
+
+        return [nodeName.toLowerCase(), python.Order.ATOMIC];
+      };
+      
+      console.log('Block generators registered successfully');
+    }
+    
+    // Load block definitions and initialize workspace
+    async function initBlockly() {
+      try {
+        console.log('Initializing Blockly...');
+        
+        // Define blocks
+        Blockly.Blocks['universal_agents_node'] = {
+          init: function() {
+            this.appendDummyInput()
+                .appendField("Node")
+                .appendField(new Blockly.FieldTextInput("MyNode"), "NODE_NAME");
+            
+            // Add input for the prep method
+            this.appendStatementInput("PREP")
+                .setCheck(null)
+                .appendField("prep");
+            
+            // Add input for the exec method
+            this.appendStatementInput("EXEC")
+                .setCheck(null)
+                .appendField("exec");
+            
+            // Add input for the post method
+            this.appendStatementInput("POST")
+                .setCheck(null)
+                .appendField("post");
+            
+            // Add a value output for connecting to flows
+            this.setOutput(true, "NODE");
+            
+            // Add action connection points
+            this.appendDummyInput()
+                .appendField("Actions:");
+            
+            this.appendValueInput("ACTION_NEXT")
+                .setCheck("NODE")
+                .appendField("next →");
+            
+            this.appendValueInput("ACTION_ERROR")
+                .setCheck("NODE")
+                .appendField("error →");
+            
+            this.appendValueInput("ACTION_CUSTOM")
+                .setCheck("NODE")
+                .appendField(new Blockly.FieldTextInput("custom"), "CUSTOM_ACTION")
+                .appendField("→");
+            
+            this.setColour(230);
+            this.setTooltip("Creates a Universal Agents Node with lifecycle methods");
+            this.setHelpUrl("https://github.com/google/blockly");
+          }
+        };
+        
+        Blockly.Blocks['universal_agents_flow'] = {
+          init: function() {
+            this.appendDummyInput()
+                .appendField("Flow")
+                .appendField(new Blockly.FieldTextInput("MyFlow"), "FLOW_NAME");
+            
+            // Add input for the starting node
+            this.appendValueInput("START_NODE")
+                .setCheck("NODE")
+                .appendField("start");
+            
+            // Add checkbox for visualization
+            this.appendDummyInput()
+                .appendField("visualization")
+                .appendField(new Blockly.FieldCheckbox("FALSE"), "VISUALIZATION");
+            
+            // Add input for visualization path (optional)
+            this.appendDummyInput()
+                .appendField("path")
+                .appendField(new Blockly.FieldTextInput("visualizations"), "VIZ_PATH");
+            
+            // Add a value output to allow this flow to be referenced
+            this.setOutput(true, "FLOW");
+            
+            // Set the appearance of the block
+            this.setColour(160);
+            this.setTooltip("Creates a Universal Agents Flow with the specified start node");
+            this.setHelpUrl("https://github.com/google/blockly");
+          }
+        };
+        
+        Blockly.Blocks['universal_model_node'] = {
+          init: function() {
+            this.appendDummyInput()
+                .appendField("ModelNode")
+                .appendField(new Blockly.FieldTextInput("MyModelNode"), "NODE_NAME");
+            
+            // Add model selection dropdown
+            // In a real implementation, this would be populated with available models
+            this.appendDummyInput()
+                .appendField("model")
+                .appendField(new Blockly.FieldDropdown([
+                  ["Default", "UniversalModel()"],
+                  ["Llama3-8B", "Llama3Model()"],
+                  ["Qwen2-7B", "Qwen2Model()"],
+                  ["CustomModel", "CustomModel()"]
+                ]), "MODEL");
+            
+            // Add prompt template input
+            this.appendDummyInput()
+                .appendField("prompt template:");
+            this.appendDummyInput()
+                .appendField(new Blockly.FieldMultilineInput("Please answer the following question:\n\nQuestion: {question}\n\nAnswer:"), "PROMPT_TEMPLATE");
+            
+            // Add input keys
+            this.appendDummyInput()
+                .appendField("input keys:")
+                .appendField(new Blockly.FieldTextInput("question"), "INPUT_KEYS");
+            
+            // Add output key
+            this.appendDummyInput()
+                .appendField("output key:")
+                .appendField(new Blockly.FieldTextInput("answer"), "OUTPUT_KEY");
+            
+            // Add parameters
+            this.appendDummyInput()
+                .appendField("parameters:");
+            this.appendDummyInput()
+                .appendField("temperature:")
+                .appendField(new Blockly.FieldNumber(0.7, 0, 2, 0.1), "TEMPERATURE");
+            this.appendDummyInput()
+                .appendField("max tokens:")
+                .appendField(new Blockly.FieldNumber(1000, 0, 10000, 1), "MAX_TOKENS");
+            
+            // Add a value output for connecting to flows
+            this.setOutput(true, "NODE");
+            
+            // Add action connection points
+            this.appendDummyInput()
+                .appendField("Actions:");
+            
+            this.appendValueInput("ACTION_NEXT")
+                .setCheck("NODE")
+                .appendField("next →");
+            
+            this.appendValueInput("ACTION_ERROR")
+                .setCheck("NODE")
+                .appendField("error →");
+            
+            // Set the appearance of the block
+            this.setColour(290);
+            this.setTooltip("Creates a Universal Model Node for using language models");
+            this.setHelpUrl("https://github.com/google/blockly");
+          }
+        };
+        
+        // Register the generators
+        registerBlockGenerators();
+        
+        // Create the toolbox
+        const toolboxJson = {
+          "kind": "categoryToolbox",
+          "contents": [
+            {
+              "kind": "category",
+              "name": "Core",
+              "colour": "#5C81A6",
+              "contents": [
+                {"kind": "block", "type": "controls_if"},
+                {"kind": "block", "type": "logic_compare"},
+                {"kind": "block", "type": "controls_repeat_ext"},
+                {"kind": "block", "type": "math_number"},
+                {"kind": "block", "type": "math_arithmetic"},
+                {"kind": "block", "type": "text"},
+                {"kind": "block", "type": "text_print"}
+              ]
+            },
+            {
+              "kind": "category",
+              "name": "Universal Agents",
+              "colour": "#A65C94",
+              "contents": [
+                {"kind": "block", "type": "universal_agents_node"},
+                {"kind": "block", "type": "universal_agents_flow"},
+                {"kind": "block", "type": "universal_model_node"}
+              ]
+            },
+            {
+              "kind": "category",
+              "name": "Patterns",
+              "colour": "#5CA694",
+              "contents": [
+                {
+                  "kind": "block",
+                  "type": "text_print",
+                  "fields": {"TEXT": "RAG Pattern (Placeholder)"}
+                },
+                {
+                  "kind": "block",
+                  "type": "text_print",
+                  "fields": {"TEXT": "Map-Reduce Pattern (Placeholder)"}
+                }
+              ]
+            }
+          ]
+        };
+        
+        // Initialize the workspace
+        const workspace = Blockly.inject('blocklyDiv', {
+          toolbox: toolboxJson,
+          grid: {
+            spacing: 20,
+            length: 3,
+            colour: '#ccc',
+            snap: true
+          },
+          zoom: {
+            controls: true,
+            wheel: true,
+            startScale: 1.0,
+            maxScale: 3,
+            minScale: 0.3,
+            scaleSpeed: 1.2
+          },
+          trashcan: true
+        });
+        
+        // Function to update code
+        function updateCode() {
+          try {
+            // Update JavaScript code
+            const jsCode = javascript.workspaceToCode(workspace);
+            document.getElementById('codeDiv').textContent = jsCode || '// JavaScript code will appear here';
+            
+            // Update Python code
+            const pyCode = python.workspaceToCode(workspace);
+            document.getElementById('pythonCodeDiv').textContent = pyCode || '# Python code will appear here';
+          } catch (error) {
+            console.error('Error generating code:', error);
+            document.getElementById('statusBar').textContent = 'Error: ' + error.message;
+          }
+        }
+        
+        // Add change listener
+        workspace.addChangeListener(function(event) {
+          if (event.type !== Blockly.Events.UI) {
+            updateCode();
+          }
+        });
+        
+        // Set up UI event handlers
+        document.getElementById('jsTab').addEventListener('click', function() {
+          document.querySelectorAll('.code-panel').forEach(function(panel) {
+            panel.classList.remove('active');
+          });
+          document.querySelectorAll('.code-tab').forEach(function(tab) {
+            tab.classList.remove('active');
+          });
+          document.getElementById('jsPanel').classList.add('active');
+          this.classList.add('active');
+        });
+        
+        document.getElementById('pythonTab').addEventListener('click', function() {
+          document.querySelectorAll('.code-panel').forEach(function(panel) {
+            panel.classList.remove('active');
+          });
+          document.querySelectorAll('.code-tab').forEach(function(tab) {
+            tab.classList.remove('active');
+          });
+          document.getElementById('pythonPanel').classList.add('active');
+          this.classList.add('active');
+        });
+        
+        document.getElementById('flowTab').addEventListener('click', function() {
+          document.querySelectorAll('.code-panel').forEach(function(panel) {
+            panel.classList.remove('active');
+          });
+          document.querySelectorAll('.code-tab').forEach(function(tab) {
+            tab.classList.remove('active');
+          });
+          document.getElementById('flowPanel').classList.add('active');
+          this.classList.add('active');
+        });
+        
+        // Save and load functions
+        document.getElementById('saveButton').addEventListener('click', function() {
+          const state = Blockly.serialization.workspaces.save(workspace);
+          localStorage.setItem('universalAgentsBlocks', JSON.stringify(state));
+          document.getElementById('statusBar').textContent = 'Workspace saved to local storage';
+        });
+        
+        document.getElementById('loadButton').addEventListener('click', function() {
+          const stored = localStorage.getItem('universalAgentsBlocks');
+          if (stored) {
+            const state = JSON.parse(stored);
+            Blockly.serialization.workspaces.load(state, workspace);
+            document.getElementById('statusBar').textContent = 'Workspace loaded from local storage';
+          } else {
+            document.getElementById('statusBar').textContent = 'No saved workspace found in local storage';
+          }
+        });
+        
+        // Run button
+        document.getElementById('runButton').addEventListener('click', function() {
+          // Simulate running the flow
+          const blocks = workspace.getAllBlocks(false);
+          document.getElementById('statusBar').textContent = 'Running flow with ' + blocks.length + ' blocks';
+          
+          // Simple visualization
+          document.getElementById('flowVisualization').innerHTML = 
+            'Flow execution started with ' + blocks.length + ' blocks.<br>' +
+            'Execution path: ' + blocks.map(function(block) {
+              return block.type;
+            }).join(' → ');
+          
+          // Highlight blocks in sequence
+          highlightBlocks(blocks);
+        });
+        
+        // Highlight blocks one by one
+        function highlightBlocks(blocks) {
+          let i = 0;
+          function highlightNext() {
+            // Reset all blocks
+            blocks.forEach(function(block) {
+              block.setHighlighted(false);
+            });
+            
+            if (i < blocks.length) {
+              blocks[i].setHighlighted(true);
+              i++;
+              setTimeout(highlightNext, 500);
+            }
+          }
+          highlightNext();
+        }
+        
+        // Clear workspace
+        document.getElementById('clearButton').addEventListener('click', function() {
+          if (confirm('Are you sure you want to clear the workspace?')) {
+            workspace.clear();
+            updateCode();
+            document.getElementById('statusBar').textContent = 'Workspace cleared';
+          }
+        });
+        
+        // Export code
+        document.getElementById('exportButton').addEventListener('click', function() {
+          let code, filename;
+          
+          if (document.getElementById('jsPanel').classList.contains('active')) {
+            code = document.getElementById('codeDiv').textContent;
+            filename = 'universal_agents_flow.js';
+          } else if (document.getElementById('pythonPanel').classList.contains('active')) {
+            code = document.getElementById('pythonCodeDiv').textContent;
+            filename = 'universal_agents_flow.py';
+          } else {
+            return;
+          }
+          
+          const blob = new Blob([code], {type: 'text/plain'});
+          const a = document.createElement('a');
+          a.download = filename;
+          a.href = URL.createObjectURL(blob);
+          a.click();
+          
+          document.getElementById('statusBar').textContent = 'Code exported as ' + filename;
+        });
+        
+        console.log('Blockly initialized successfully');
+        
+        // Update code initially
+        updateCode();
+        
+        // Store references globally for testing
+        window.workspace = workspace;
+        window.javascript = javascript;
+        window.python = python;
+        
+      } catch (error) {
+        console.error('Error initializing Blockly:', error);
+        document.getElementById('statusBar').textContent = 'Error: ' + error.message;
+      }
+    }
+    
+    // Initialize when page loads
+    window.addEventListener('load', initBlockly);
+    
+    // Test button handler
+    document.getElementById('testButton').addEventListener('click', function() {
+      console.log('Running tests...');
+      
+      // Simple test to check if generators are working
+      if (window.workspace && window.javascript && window.python) {
+        const blocks = window.workspace.getAllBlocks(false);
+        console.log('Number of blocks:', blocks.length);
+        
+        try {
+          const jsCode = window.javascript.workspaceToCode(window.workspace);
+          console.log('JavaScript generator works!');
+          console.log('JS code length:', jsCode.length);
+          
+          const pyCode = window.python.workspaceToCode(window.workspace);
+          console.log('Python generator works!');
+          console.log('Python code length:', pyCode.length);
+          
+          alert('Tests passed! Check console for details.');
+        } catch (error) {
+          console.error('Test failed:', error);
+          alert('Test failed! Error: ' + error.message);
+        }
+      } else {
+        console.error('Workspace or generators not initialized');
+        alert('Workspace or generators not initialized!');
+      }
+    });
+  </script>
+</body>
+</html>

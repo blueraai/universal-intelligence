@@ -4,6 +4,14 @@
  * represents a Node in the Universal Agents framework.
  */
 
+// For Blockly v12, we need to register generators properly
+if (!Blockly.JavaScript) {
+  Blockly.JavaScript = new Blockly.Generator('JavaScript');
+}
+if (!Blockly.Python) {
+  Blockly.Python = new Blockly.Generator('Python');
+}
+
 // Define the block for a Universal Agents Node
 Blockly.Blocks['universal_agents_node'] = {
   init: function() {
