@@ -1122,7 +1122,7 @@ If you'd like to support to `universal-intelligence` here are a few ways to do s
 - 👽 Tell your friends and collegues
 - 📰 Support this project on social medias (e.g. LinkedIn, Youtube, Medium, Reddit)
 - ✅ Adopt the `⚪ Universal Intelligence` specification
-- 💪 Use the [Community Components](https://pypi.org/project/universal-intelligence/)
+- 💪 Use the [Community Components](https://www.npmjs.com/package/universalintelligence)
 - 💡 Help surfacing/resolving issues
 - 💭 Help shape the `⚪ Universal Intelligence` specification
 - 🔧 Help maintain, test, enhance and create [Community Components](https://github.com/blueraai/universal-intelligence/blob/main/universal_intelligence/www/community/)
