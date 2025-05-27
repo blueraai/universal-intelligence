@@ -1,64 +1,71 @@
 // Centralized logger configuration for the Blockly playground
 import pino from 'pino';
 
-// Create a single logger instance with browser-friendly configuration
-const logger = pino({
-    level: 'debug',
-    browser: {
-        serialize: true,
-        asObject: false,
-        transmit: {
-            send: function (level, logEvent) {
-                const msg = logEvent.messages.join(' ');
-                const levelStyles = {
-                    10: 'color: #999', // trace - gray
-                    20: 'color: #0088cc', // debug - blue
-                    30: 'color: #44bb44', // info - green
-                    40: 'color: #ff8800', // warn - orange
-                    50: 'color: #ff4444', // error - red
-                    60: 'color: #ff00ff'  // fatal - magenta
-                };
-                const levelNames = {
-                    10: 'TRACE',
-                    20: 'DEBUG',
-                    30: 'INFO',
-                    40: 'WARN',
-                    50: 'ERROR',
-                    60: 'FATAL'
-                };
-                const style = levelStyles[logEvent.level] || '';
-                const timestamp = new Date().toISOString().split('T')[1].slice(0, -1); // Just time, not full date
-                
-                // Use console methods that match the log level for better browser integration
-                const consoleMethods = {
-                    10: 'debug',
-                    20: 'debug',
-                    30: 'info',
-                    40: 'warn',
-                    50: 'error',
-                    60: 'error'
-                };
-                const method = consoleMethods[logEvent.level] || 'log';
-                
-                console[method](
-                    `%c${levelNames[logEvent.level]} %c[${timestamp}]%c ${msg}`,
-                    `${style}; font-weight: bold; padding: 2px 4px; border-radius: 2px; background: ${style.replace('color:', '')}22`,
-                    'color: #666; font-size: 0.9em',
-                    'color: inherit'
-                );
+// For browser environments, we need to use CSS styling since ANSI codes don't work
+const isBrowser = typeof window !== 'undefined';
+
+// Create appropriate logger based on environment
+const logger = isBrowser ? 
+    // Browser logger with CSS styling
+    pino({
+        level: 'debug',
+        browser: {
+            serialize: false,
+            asObject: false,
+            formatters: {
+                level (label, number) {
+                    return { level: number }
+                }
+            },
+            write: {
+                trace: function (o) {
+                    const args = Array.from(arguments).slice(1);
+                    console.log('%c[TRACE]%c', 'color: #999; font-weight: bold', '', ...args);
+                },
+                debug: function (o) {
+                    const args = Array.from(arguments).slice(1);
+                    console.log('%c[DEBUG]%c', 'color: #0099ff; font-weight: bold', '', ...args);
+                },
+                info: function (o) {
+                    const args = Array.from(arguments).slice(1);
+                    console.log('%c[INFO]%c', 'color: #00cc00; font-weight: bold', '', ...args);
+                },
+                warn: function (o) {
+                    const args = Array.from(arguments).slice(1);
+                    console.warn('%c[WARN]%c', 'color: #ff9900; font-weight: bold', '', ...args);
+                },
+                error: function (o) {
+                    const args = Array.from(arguments).slice(1);
+                    console.error('%c[ERROR]%c', 'color: #ff0000; font-weight: bold', '', ...args);
+                },
+                fatal: function (o) {
+                    const args = Array.from(arguments).slice(1);
+                    console.error('%c[FATAL]%c', 'color: #ff00ff; font-weight: bold', '', ...args);
+                }
             }
         }
-    }
-});
+    }) :
+    // Node.js logger with pino-pretty
+    pino({
+        level: 'debug',
+        transport: {
+            target: 'pino-pretty',
+            options: {
+                colorize: true,
+                translateTime: 'HH:MM:ss',
+                ignore: 'pid,hostname'
+            }
+        }
+    });
 
 // Create a fallback logger for non-module contexts (like custom-blocks.js)
 export const createFallbackLogger = (prefix = '') => ({
-    trace: (...args) => console.debug('%cTRACE%c', 'color: #999; font-weight: bold', 'color: inherit', prefix, ...args),
-    debug: (...args) => console.debug('%cDEBUG%c', 'color: #0088cc; font-weight: bold', 'color: inherit', prefix, ...args),
-    info: (...args) => console.info('%cINFO%c', 'color: #44bb44; font-weight: bold', 'color: inherit', prefix, ...args),
-    warn: (...args) => console.warn('%cWARN%c', 'color: #ff8800; font-weight: bold', 'color: inherit', prefix, ...args),
-    error: (...args) => console.error('%cERROR%c', 'color: #ff4444; font-weight: bold', 'color: inherit', prefix, ...args),
-    fatal: (...args) => console.error('%cFATAL%c', 'color: #ff00ff; font-weight: bold', 'color: inherit', prefix, ...args)
+    trace: (...args) => console.log('%c[TRACE]%c', 'color: #999; font-weight: bold', '', prefix, ...args),
+    debug: (...args) => console.log('%c[DEBUG]%c', 'color: #0099ff; font-weight: bold', '', prefix, ...args),
+    info: (...args) => console.log('%c[INFO]%c', 'color: #00cc00; font-weight: bold', '', prefix, ...args),
+    warn: (...args) => console.warn('%c[WARN]%c', 'color: #ff9900; font-weight: bold', '', prefix, ...args),
+    error: (...args) => console.error('%c[ERROR]%c', 'color: #ff0000; font-weight: bold', '', prefix, ...args),
+    fatal: (...args) => console.error('%c[FATAL]%c', 'color: #ff00ff; font-weight: bold', '', prefix, ...args)
 });
 
 // Export the logger as default
