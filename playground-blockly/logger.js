@@ -29,11 +29,9 @@ const logger = isBrowser ?
                 
                 const level = levelStyles[o.level] || { label: 'LOG', color: '#666', method: 'log' };
                 const msg = o.msg || '';
-                const time = o.time ? new Date(o.time).toLocaleTimeString() : '';
                 
                 // Build the message parts
                 const parts = [];
-                if (time) parts.push(`[${time}]`);
                 if (msg) parts.push(msg);
                 
                 // Add any extra fields
