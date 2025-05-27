@@ -357,7 +357,8 @@ function initializeGenerators() {
       var input = Blockly.JavaScript.valueToCode(block, 'INPUT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
       var remember = block.getFieldValue('REMEMBER') === 'TRUE';
       
-      var code = `await ${model}.process(${input}, { remember: ${remember} })`;
+      // Model.process returns [result, logs] tuple, we want just the result
+      var code = `(await ${model}.process(${input}, { remember: ${remember} }))[0]`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
@@ -366,8 +367,9 @@ function initializeGenerators() {
       var code = `(() => {
         const tool = new Tool();
         tool.printText = function(params) {
-          const text = params?.text || params;
-          console.log(text);
+          // Handle both object with text property and direct text
+          const text = typeof params === 'object' && params.text ? params.text : params;
+          console.log('🖨️ Output:', text);
           return [text, { printed: true }];
         };
         return tool;
@@ -407,6 +409,7 @@ function initializeGenerators() {
       // Remove quotes from method name
       method = method.replace(/['"]/g, '');
       
+      // Tool methods also return [result, logs] tuple
       var code = `await ${tool}.${method}(${params})`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };

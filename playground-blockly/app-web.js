@@ -332,15 +332,16 @@ function addDefaultBlocks() {
             }
         });
 
-        // Create a simple example using local model
+        // Create a simple example: model processes text and printer displays output
         const xmlText = `
         <xml xmlns="https://developers.google.com/blockly/xml">
             <variables>
                 <variable id="modelVar">model</variable>
-                <variable id="toolVar">tool</variable>
-                <variable id="agentVar">agent</variable>
-                <variable id="resultVar">result</variable>
+                <variable id="inputVar">userInput</variable>
+                <variable id="outputVar">modelOutput</variable>
+                <variable id="printerVar">printer</variable>
             </variables>
+            <!-- Create the model -->
             <block type="variables_set" x="20" y="20">
                 <field name="VAR" id="modelVar">model</field>
                 <value name="VALUE">
@@ -350,40 +351,60 @@ function addDefaultBlocks() {
                     </block>
                 </value>
                 <next>
+                    <!-- Set the user input text -->
                     <block type="variables_set">
-                        <field name="VAR" id="toolVar">tool</field>
+                        <field name="VAR" id="inputVar">userInput</field>
                         <value name="VALUE">
-                            <block type="uin_tool_printer"></block>
+                            <block type="text">
+                                <field name="TEXT">Hello! Tell me a short joke about programming.</field>
+                            </block>
                         </value>
                         <next>
+                            <!-- Process the input through the model -->
                             <block type="variables_set">
-                                <field name="VAR" id="agentVar">agent</field>
+                                <field name="VAR" id="outputVar">modelOutput</field>
                                 <value name="VALUE">
-                                    <block type="uin_agent_create">
+                                    <block type="uin_model_process">
+                                        <field name="REMEMBER">FALSE</field>
                                         <value name="MODEL">
                                             <block type="variables_get">
                                                 <field name="VAR" id="modelVar">model</field>
                                             </block>
                                         </value>
-                                        <value name="TOOLS">
-                                            <block type="lists_create_with">
-                                                <mutation items="1"></mutation>
-                                                <value name="ADD0">
-                                                    <block type="variables_get">
-                                                        <field name="VAR" id="toolVar">tool</field>
-                                                    </block>
-                                                </value>
+                                        <value name="INPUT">
+                                            <block type="variables_get">
+                                                <field name="VAR" id="inputVar">userInput</field>
                                             </block>
                                         </value>
                                     </block>
                                 </value>
                                 <next>
-                                    <block type="text_print">
-                                        <value name="TEXT">
-                                            <block type="text">
-                                                <field name="TEXT">Agent created! Add a Model Process or Agent Process block to use it.</field>
-                                            </block>
+                                    <!-- Create printer tool -->
+                                    <block type="variables_set">
+                                        <field name="VAR" id="printerVar">printer</field>
+                                        <value name="VALUE">
+                                            <block type="uin_tool_printer"></block>
                                         </value>
+                                        <next>
+                                            <!-- Print the model output -->
+                                            <block type="uin_tool_call">
+                                                <value name="TOOL">
+                                                    <block type="variables_get">
+                                                        <field name="VAR" id="printerVar">printer</field>
+                                                    </block>
+                                                </value>
+                                                <value name="METHOD">
+                                                    <block type="text">
+                                                        <field name="TEXT">printText</field>
+                                                    </block>
+                                                </value>
+                                                <value name="PARAMS">
+                                                    <block type="variables_get">
+                                                        <field name="VAR" id="outputVar">modelOutput</field>
+                                                    </block>
+                                                </value>
+                                            </block>
+                                        </next>
                                     </block>
                                 </next>
                             </block>
