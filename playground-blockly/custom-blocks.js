@@ -510,9 +510,22 @@ function initializeGenerators() {
         method = method.slice(1, -1);
       }
       
-      // If params is not an object literal, wrap it
-      if (!params.startsWith('{')) {
-        params = `{ text: ${params} }`;
+      // Handle params - if it's a string containing JSON, we need to parse it
+      // If it's already an object literal or a variable, use it as-is
+      if (params.startsWith('"') || params.startsWith("'")) {
+        // It's a string literal - check if it contains JSON
+        const paramStr = params.slice(1, -1);
+        if (paramStr.startsWith('{') && paramStr.endsWith('}')) {
+          // It's a JSON string, use it directly
+          params = paramStr;
+        } else {
+          // It's a regular string, wrap it
+          params = `{ text: ${params} }`;
+        }
+      }
+      // If params doesn't start with { and isn't a string, it's likely a variable
+      else if (!params.startsWith('{')) {
+        // Leave variables as-is, they should already be objects
       }
       
       // Tool methods return [result, logs] tuple, we usually want just the result
