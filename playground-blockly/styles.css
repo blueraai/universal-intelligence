@@ -133,10 +133,16 @@ pre {
     color: white;
 }
 
-.run-btn:hover {
+.run-btn:hover:not(:disabled) {
     background: #38a169;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.run-btn:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .copy-btn {

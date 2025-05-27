@@ -247,14 +247,7 @@ function initializeWorkspace() {
             log.debug('languageButton.click()', 'currentLanguage set to:', currentLanguage);
             
             // Update run button state based on language
-            const runBtn = document.getElementById('runCode');
-            if (currentLanguage === 'python') {
-                runBtn.disabled = true;
-                runBtn.innerHTML = '▶ Run in Browser (JavaScript only)';
-            } else {
-                runBtn.disabled = false;
-                runBtn.innerHTML = '▶ Run in Browser';
-            }
+            updateRunButtonState();
             
             if (generatorsReady) {
                 log.debug('languageButton.click()', 'generators ready, updating code');
@@ -262,6 +255,21 @@ function initializeWorkspace() {
             }
         });
     });
+    
+    // Function to update run button state
+    function updateRunButtonState() {
+        const runBtn = document.getElementById('runCode');
+        if (currentLanguage === 'python') {
+            runBtn.disabled = true;
+            runBtn.innerHTML = '▶ Run in Browser (JavaScript only)';
+        } else {
+            runBtn.disabled = false;
+            runBtn.innerHTML = '▶ Run in Browser';
+        }
+    }
+    
+    // Set initial run button state
+    updateRunButtonState();
 
     // Set up run button
     document.getElementById('runCode').addEventListener('click', runCode);
