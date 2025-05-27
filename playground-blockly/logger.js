@@ -10,7 +10,6 @@ const logger = pino({
             colorize: true,
             translateTime: false,
             ignore: 'pid,hostname',
-            messageFormat: '{msg}',
             singleLine: true
         }
     }
