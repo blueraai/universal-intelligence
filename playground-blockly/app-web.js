@@ -9,13 +9,13 @@ const log = pino({
         transmit: {
             send: function (level, logEvent) {
                 const msg = logEvent.messages.join(' ');
-                const levelColors = {
-                    10: '\x1b[90m', // trace - gray
-                    20: '\x1b[36m', // debug - cyan
-                    30: '\x1b[32m', // info - green
-                    40: '\x1b[33m', // warn - yellow
-                    50: '\x1b[31m', // error - red
-                    60: '\x1b[35m'  // fatal - magenta
+                const levelStyles = {
+                    10: 'color: gray', // trace
+                    20: 'color: cyan', // debug
+                    30: 'color: green', // info
+                    40: 'color: orange', // warn
+                    50: 'color: red', // error
+                    60: 'color: magenta' // fatal
                 };
                 const levelNames = {
                     10: 'TRACE',
@@ -25,10 +25,9 @@ const log = pino({
                     50: 'ERROR',
                     60: 'FATAL'
                 };
-                const color = levelColors[logEvent.level] || '';
-                const reset = '\x1b[0m';
+                const style = levelStyles[logEvent.level] || '';
                 const timestamp = new Date().toISOString();
-                console.log(`${color}[${timestamp}] ${levelNames[logEvent.level]}${reset} ${msg}`);
+                console.log(`%c[${timestamp}] ${levelNames[logEvent.level]}%c ${msg}`, style + '; font-weight: bold', 'color: inherit');
             }
         }
     }
@@ -45,13 +44,13 @@ window.customBlocksLogger = pino({
         transmit: {
             send: function (level, logEvent) {
                 const msg = logEvent.messages.join(' ');
-                const levelColors = {
-                    10: '\x1b[90m', // trace - gray
-                    20: '\x1b[36m', // debug - cyan
-                    30: '\x1b[32m', // info - green
-                    40: '\x1b[33m', // warn - yellow
-                    50: '\x1b[31m', // error - red
-                    60: '\x1b[35m'  // fatal - magenta
+                const levelStyles = {
+                    10: 'color: gray', // trace
+                    20: 'color: cyan', // debug
+                    30: 'color: green', // info
+                    40: 'color: orange', // warn
+                    50: 'color: red', // error
+                    60: 'color: magenta' // fatal
                 };
                 const levelNames = {
                     10: 'TRACE',
@@ -61,10 +60,9 @@ window.customBlocksLogger = pino({
                     50: 'ERROR',
                     60: 'FATAL'
                 };
-                const color = levelColors[logEvent.level] || '';
-                const reset = '\x1b[0m';
+                const style = levelStyles[logEvent.level] || '';
                 const timestamp = new Date().toISOString();
-                console.log(`${color}[${timestamp}] ${levelNames[logEvent.level]} [custom-blocks]${reset} ${msg}`);
+                console.log(`%c[${timestamp}] ${levelNames[logEvent.level]} [custom-blocks]%c ${msg}`, style + '; font-weight: bold', 'color: inherit');
             }
         }
     }

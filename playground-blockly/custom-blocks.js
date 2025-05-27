@@ -3,10 +3,10 @@
 // Since this is loaded as a non-module script, we need to access Pino from the global scope
 // The app-web.js module should expose it globally
 const blockLog = window.customBlocksLogger || {
-    debug: (...args) => console.log('\x1b[36m[DEBUG]\x1b[0m custom-blocks.js:', ...args),
-    info: (...args) => console.log('\x1b[32m[INFO]\x1b[0m custom-blocks.js:', ...args),
-    warn: (...args) => console.log('\x1b[33m[WARN]\x1b[0m custom-blocks.js:', ...args),
-    error: (...args) => console.log('\x1b[31m[ERROR]\x1b[0m custom-blocks.js:', ...args)
+    debug: (...args) => console.log('%c[DEBUG]%c custom-blocks.js:', 'color: cyan; font-weight: bold', 'color: inherit', ...args),
+    info: (...args) => console.log('%c[INFO]%c custom-blocks.js:', 'color: green; font-weight: bold', 'color: inherit', ...args),
+    warn: (...args) => console.log('%c[WARN]%c custom-blocks.js:', 'color: orange; font-weight: bold', 'color: inherit', ...args),
+    error: (...args) => console.log('%c[ERROR]%c custom-blocks.js:', 'color: red; font-weight: bold', 'color: inherit', ...args)
 };
 
 blockLog.info('initializing custom blocks');
