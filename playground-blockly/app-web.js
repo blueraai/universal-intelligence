@@ -404,7 +404,7 @@ function addDefaultBlocks() {
       <block type="variables_set">
         <field name="VAR" id="inputVar">userInput</field>
         <value name="VALUE">
-          <block type="text_multiline">
+          <block type="text">
             <field name="TEXT">Hello! I'm learning about Universal Intelligence.
 
 Can you:
@@ -633,7 +633,7 @@ function getBasicExample() {
       <block type="variables_set">
         <field name="VAR" id="inputVar">userInput</field>
         <value name="VALUE">
-          <block type="text_multiline">
+          <block type="text">
             <field name="TEXT">Hello! I'm learning about Universal Intelligence.
 
 Can you:
@@ -906,7 +906,7 @@ function getMultiToolExample() {
                           </block>
                         </value>
                         <value name="INPUT">
-                          <block type="text_multiline">
+                          <block type="text">
                             <field name="TEXT">Please do the following:
 1. Fetch data from https://api.github.com/users/github
 2. Print the user's name and bio

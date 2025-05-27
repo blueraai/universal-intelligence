@@ -220,17 +220,8 @@ Blockly.Blocks['uin_agent_connect'] = {
 // Don't initialize immediately - wait for a signal from app-web.js
 blockLog.info('custom-blocks.js loaded, waiting for initialization signal');
 
-// Multi-line text block
-blockLog.debug('defining block', 'text_multiline');
-Blockly.Blocks['text_multiline'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldMultilineInput('Enter text...'), 'TEXT');
-    this.setOutput(true, 'String');
-    this.setColour(160);
-    this.setTooltip('Multi-line text input');
-  }
-};
+// Note: Using built-in text block for multi-line text
+// Users can enter \n for newlines
 
 // Expose initialization function globally
 window.initializeBlocklyGenerators = initializeGenerators;
@@ -597,20 +588,7 @@ function initializeGenerators() {
       return code;
     };
     
-    // Multi-line text generator
-    Blockly.JavaScript.forBlock['text_multiline'] = function(block) {
-      var text = block.getFieldValue('TEXT');
-      // Escape the text properly for JavaScript
-      var code = Blockly.JavaScript.quote_(text);
-      return [code, Blockly.JavaScript.ORDER_ATOMIC];
-    };
-    
-    Blockly.Python.forBlock['text_multiline'] = function(block) {
-      var text = block.getFieldValue('TEXT');
-      // Escape the text properly for Python
-      var code = Blockly.Python.quote_(text);
-      return [code, Blockly.Python.ORDER_ATOMIC];
-    };
+    // Note: Using built-in text block generators
     
     // Set a global flag to indicate generators are ready
     window.uinGeneratorsReady = true;
