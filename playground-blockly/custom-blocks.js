@@ -515,8 +515,8 @@ function initializeGenerators() {
         params = `{ text: ${params} }`;
       }
       
-      // Tool methods return [result, logs] tuple
-      var code = `await ${tool}.${method}(${params})`;
+      // Tool methods return [result, logs] tuple, we usually want just the result
+      var code = `(await ${tool}.${method}(${params}))[0]`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
@@ -562,7 +562,8 @@ function initializeGenerators() {
         args.push(objStr);
       }
       
-      var code = `await ${agent}.process(${args.join(', ')})`;
+      // Agent.process returns [result, logs] tuple, we usually want just the result
+      var code = `(await ${agent}.process(${args.join(', ')}))[0]`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
