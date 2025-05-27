@@ -335,8 +335,7 @@ function addDefaultBlocks() {
         const variablesToCreate = [
             { name: 'model', id: 'modelVar' },
             { name: 'userInput', id: 'inputVar' },
-            { name: 'modelOutput', id: 'outputVar' },
-            { name: 'printer', id: 'printerVar' }
+            { name: 'modelOutput', id: 'outputVar' }
         ];
         
         variablesToCreate.forEach(varInfo => {
@@ -344,13 +343,12 @@ function addDefaultBlocks() {
             variableMap.createVariable(varInfo.name, null, varInfo.id);
         });
 
-        // Create a simple example: model processes text and printer displays output
+        // Create a simple example: model processes text and displays output
         const xmlText = `<xml xmlns="https://developers.google.com/blockly/xml">
   <variables>
     <variable id="modelVar">model</variable>
     <variable id="inputVar">userInput</variable>
     <variable id="outputVar">modelOutput</variable>
-    <variable id="printerVar">printer</variable>
   </variables>
   <block type="variables_set" x="20" y="20">
     <field name="VAR" id="modelVar">model</field>
@@ -387,30 +385,12 @@ function addDefaultBlocks() {
               </block>
             </value>
             <next>
-              <block type="variables_set">
-                <field name="VAR" id="printerVar">printer</field>
-                <value name="VALUE">
-                  <block type="uin_tool_printer"></block>
-                </value>
-                <next>
-                  <block type="uin_tool_call">
-                    <value name="TOOL">
-                      <block type="variables_get">
-                        <field name="VAR" id="printerVar">printer</field>
-                      </block>
-                    </value>
-                    <value name="METHOD">
-                      <block type="text">
-                        <field name="TEXT">printText</field>
-                      </block>
-                    </value>
-                    <value name="PARAMS">
-                      <block type="variables_get">
-                        <field name="VAR" id="outputVar">modelOutput</field>
-                      </block>
-                    </value>
+              <block type="text_print">
+                <value name="TEXT">
+                  <block type="variables_get">
+                    <field name="VAR" id="outputVar">modelOutput</field>
                   </block>
-                </next>
+                </value>
               </block>
             </next>
           </block>
