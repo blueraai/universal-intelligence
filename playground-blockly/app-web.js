@@ -566,7 +566,12 @@ async function runCode() {
                 console.log('🔧 Tool:', typeof Tool);
                 
                 try {
+                    // Show initialization message
+                    console.log('🚀 Starting execution...');
+                    
                     ${code}
+                    
+                    console.log('✅ Execution completed');
                 } catch (innerError) {
                     console.error('❌ Execution error:', innerError.message);
                     console.error('Stack:', innerError.stack);
@@ -932,12 +937,12 @@ function getMultiToolExample() {
                         <field name="VAR" id="promptVar">agentPrompt</field>
                         <value name="VALUE">
                           <block type="text_join">
-                            <mutation items="3"></mutation>
+                            <mutation items="5"></mutation>
                             <value name="ADD0">
                               <block type="text">
                                 <field name="TEXT">You are analyzing a GitHub repository. Please perform the following tasks:
 
-1. Fetch repository data from: https://api.github.com/repos/</field>
+1. First, fetch repository metadata from: https://api.github.com/repos/</field>
                               </block>
                             </value>
                             <value name="ADD1">
@@ -949,16 +954,30 @@ function getMultiToolExample() {
                               <block type="text">
                                 <field name="TEXT">
 
-2. Use the printer tool to display:
+2. Then fetch the README.md file from: https://raw.githubusercontent.com/</field>
+                              </block>
+                            </value>
+                            <value name="ADD3">
+                              <block type="variables_get">
+                                <field name="VAR" id="repoPathVar">githubRepoPath</field>
+                              </block>
+                            </value>
+                            <value name="ADD4">
+                              <block type="text">
+                                <field name="TEXT">/main/README.md (or /master/README.md if main branch doesn't exist)
+
+3. Use the printer tool to display:
    - Repository name and description
    - Primary programming language
    - Number of stars and forks
    - Creation date
+   - Key features from the README
 
-3. Analyze the repository and provide insights about:
-   - The project's purpose and significance
+4. Analyze the repository and provide insights about:
+   - The project's purpose and significance (using both metadata and README)
    - Its popularity relative to similar projects
-   - Any interesting patterns in the repository statistics
+   - The quality of documentation
+   - Any interesting patterns or notable aspects
 
 Please be thorough but concise in your analysis.</field>
                               </block>

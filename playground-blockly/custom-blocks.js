@@ -403,12 +403,22 @@ function initializeGenerators() {
       
       // According to README_WEB.md, we can use new Model() with no parameters for default
       if (engine === 'AUTO' && quantization === 'AUTO') {
-        var code = `new Model()`;
+        var code = `await (async () => {
+          console.log('🤖 Initializing local model...');
+          const model = new Model();
+          console.log('✅ Model ready');
+          return model;
+        })()`;
       } else {
         var options = {};
         if (engine !== 'AUTO') options.engine = engine.toLowerCase();
         if (quantization !== 'AUTO') options.quantization = quantization;
-        var code = `new Model(${JSON.stringify(options)})`;
+        var code = `await (async () => {
+          console.log('🤖 Initializing local model with options:', ${JSON.stringify(options)});
+          const model = new Model(${JSON.stringify(options)});
+          console.log('✅ Model ready');
+          return model;
+        })()`;
       }
       
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
