@@ -77,33 +77,49 @@ let generatorsReady = false;
 
 log.debug('initializeGlobals()', 'workspace:', workspace, 'currentLanguage:', currentLanguage, 'generatorsReady:', generatorsReady);
 
-// Custom console output capture
+// Store the original console for internal logging
+const originalConsole = window.console;
+
+// Custom console output capture (without internal logging to avoid recursion)
 const outputConsole = {
     logs: [],
     log: function(...args) {
-        log.debug('outputConsole.log()', 'args:', args);
         const message = args.map(arg => {
             if (typeof arg === 'object') {
-                return JSON.stringify(arg, null, 2);
+                try {
+                    return JSON.stringify(arg, null, 2);
+                } catch (e) {
+                    return '[object]';
+                }
             }
             return String(arg);
         }).join(' ');
-        log.debug('outputConsole.log()', 'formatted message:', message);
         this.logs.push(message);
         updateOutput();
     },
+    error: function(...args) {
+        this.log('ERROR:', ...args);
+    },
+    warn: function(...args) {
+        this.log('WARN:', ...args);
+    },
+    info: function(...args) {
+        this.log('INFO:', ...args);
+    },
+    debug: function(...args) {
+        this.log('DEBUG:', ...args);
+    },
     clear: function() {
-        log.debug('outputConsole.clear()', 'previous logs length:', this.logs.length);
         this.logs = [];
         updateOutput();
     }
 };
 
 function updateOutput() {
-    log.debug('updateOutput()', 'logs length:', outputConsole.logs.length);
+    // Use original console for internal logging
+    originalConsole.debug('updateOutput()', 'logs length:', outputConsole.logs.length);
     const output = document.getElementById('resultOutput').querySelector('code');
     const content = outputConsole.logs.join('\n') || 'Ready to run...';
-    log.debug('updateOutput()', 'setting content:', content);
     output.textContent = content;
 }
 
@@ -506,11 +522,13 @@ async function runCode() {
         
         // Execute with our custom console available globally
         log.info('runCode()', 'executing user code');
-        const originalConsole = window.console;
+        
+        // Temporarily replace console
         window.console = outputConsole;
         try {
             await eval(asyncCode);
         } finally {
+            // Restore original console
             window.console = originalConsole;
         }
         
