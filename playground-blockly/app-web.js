@@ -560,7 +560,18 @@ async function runCode() {
                 const Agent = window.Agent;
                 const Tool = window.Tool;
                 
-                ${code}
+                // Add debug logging
+                console.log('🔧 Model:', typeof Model);
+                console.log('🔧 Agent:', typeof Agent);
+                console.log('🔧 Tool:', typeof Tool);
+                
+                try {
+                    ${code}
+                } catch (innerError) {
+                    console.error('❌ Execution error:', innerError.message);
+                    console.error('Stack:', innerError.stack);
+                    throw innerError;
+                }
             })()
         `;
         
@@ -853,87 +864,136 @@ function getResearchExample() {
 function getMultiToolExample() {
     return `<xml xmlns="https://developers.google.com/blockly/xml">
   <variables>
+    <variable id="repoPathVar">githubRepoPath</variable>
     <variable id="modelVar">model</variable>
     <variable id="fetchVar">fetchTool</variable>
     <variable id="printerVar">printerTool</variable>
     <variable id="agentVar">multiAgent</variable>
+    <variable id="promptVar">agentPrompt</variable>
     <variable id="resultVar">result</variable>
   </variables>
   <block type="variables_set" x="20" y="20">
-    <field name="VAR" id="modelVar">model</field>
+    <field name="VAR" id="repoPathVar">githubRepoPath</field>
     <value name="VALUE">
-      <block type="uin_model_local">
-        <field name="ENGINE">AUTO</field>
-        <field name="QUANTIZATION">AUTO</field>
+      <block type="text">
+        <field name="TEXT">blueraai/universal-intelligence</field>
       </block>
     </value>
     <next>
       <block type="variables_set">
-        <field name="VAR" id="fetchVar">fetchTool</field>
+        <field name="VAR" id="modelVar">model</field>
         <value name="VALUE">
-          <block type="uin_tool_fetch"></block>
+          <block type="uin_model_local">
+            <field name="ENGINE">AUTO</field>
+            <field name="QUANTIZATION">AUTO</field>
+          </block>
         </value>
         <next>
           <block type="variables_set">
-            <field name="VAR" id="printerVar">printerTool</field>
+            <field name="VAR" id="fetchVar">fetchTool</field>
             <value name="VALUE">
-              <block type="uin_tool_printer"></block>
+              <block type="uin_tool_fetch"></block>
             </value>
             <next>
               <block type="variables_set">
-                <field name="VAR" id="agentVar">multiAgent</field>
+                <field name="VAR" id="printerVar">printerTool</field>
                 <value name="VALUE">
-                  <block type="uin_agent_create">
-                    <value name="MODEL">
-                      <block type="variables_get">
-                        <field name="VAR" id="modelVar">model</field>
-                      </block>
-                    </value>
-                    <value name="TOOLS">
-                      <block type="lists_create_with">
-                        <mutation items="2"></mutation>
-                        <value name="ADD0">
-                          <block type="variables_get">
-                            <field name="VAR" id="fetchVar">fetchTool</field>
-                          </block>
-                        </value>
-                        <value name="ADD1">
-                          <block type="variables_get">
-                            <field name="VAR" id="printerVar">printerTool</field>
-                          </block>
-                        </value>
-                      </block>
-                    </value>
-                  </block>
+                  <block type="uin_tool_printer"></block>
                 </value>
                 <next>
                   <block type="variables_set">
-                    <field name="VAR" id="resultVar">result</field>
+                    <field name="VAR" id="agentVar">multiAgent</field>
                     <value name="VALUE">
-                      <block type="uin_agent_process">
-                        <field name="REMEMBER">TRUE</field>
-                        <value name="AGENT">
+                      <block type="uin_agent_create">
+                        <value name="MODEL">
                           <block type="variables_get">
-                            <field name="VAR" id="agentVar">multiAgent</field>
+                            <field name="VAR" id="modelVar">model</field>
                           </block>
                         </value>
-                        <value name="INPUT">
-                          <block type="text">
-                            <field name="TEXT">Please do the following:
-1. Fetch data from https://api.github.com/users/github
-2. Print the user's name and bio
-3. Tell me an interesting fact about the number of public repos they have</field>
+                        <value name="TOOLS">
+                          <block type="lists_create_with">
+                            <mutation items="2"></mutation>
+                            <value name="ADD0">
+                              <block type="variables_get">
+                                <field name="VAR" id="fetchVar">fetchTool</field>
+                              </block>
+                            </value>
+                            <value name="ADD1">
+                              <block type="variables_get">
+                                <field name="VAR" id="printerVar">printerTool</field>
+                              </block>
+                            </value>
                           </block>
                         </value>
                       </block>
                     </value>
                     <next>
-                      <block type="text_pretty_print">
-                        <value name="TEXT">
-                          <block type="variables_get">
-                            <field name="VAR" id="resultVar">result</field>
+                      <block type="variables_set">
+                        <field name="VAR" id="promptVar">agentPrompt</field>
+                        <value name="VALUE">
+                          <block type="text_join">
+                            <mutation items="3"></mutation>
+                            <value name="ADD0">
+                              <block type="text">
+                                <field name="TEXT">You are analyzing a GitHub repository. Please perform the following tasks:
+
+1. Fetch repository data from: https://api.github.com/repos/</field>
+                              </block>
+                            </value>
+                            <value name="ADD1">
+                              <block type="variables_get">
+                                <field name="VAR" id="repoPathVar">githubRepoPath</field>
+                              </block>
+                            </value>
+                            <value name="ADD2">
+                              <block type="text">
+                                <field name="TEXT">
+
+2. Use the printer tool to display:
+   - Repository name and description
+   - Primary programming language
+   - Number of stars and forks
+   - Creation date
+
+3. Analyze the repository and provide insights about:
+   - The project's purpose and significance
+   - Its popularity relative to similar projects
+   - Any interesting patterns in the repository statistics
+
+Please be thorough but concise in your analysis.</field>
+                              </block>
+                            </value>
                           </block>
                         </value>
+                        <next>
+                          <block type="variables_set">
+                            <field name="VAR" id="resultVar">result</field>
+                            <value name="VALUE">
+                              <block type="uin_agent_process">
+                                <field name="REMEMBER">TRUE</field>
+                                <value name="AGENT">
+                                  <block type="variables_get">
+                                    <field name="VAR" id="agentVar">multiAgent</field>
+                                  </block>
+                                </value>
+                                <value name="INPUT">
+                                  <block type="variables_get">
+                                    <field name="VAR" id="promptVar">agentPrompt</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="text_pretty_print">
+                                <value name="TEXT">
+                                  <block type="variables_get">
+                                    <field name="VAR" id="resultVar">result</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
                       </block>
                     </next>
                   </block>
