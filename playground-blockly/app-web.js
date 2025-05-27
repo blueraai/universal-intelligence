@@ -727,8 +727,17 @@ function getFetchExample() {
                   </block>
                 </value>
                 <value name="ADD1">
-                  <block type="variables_get">
-                    <field name="VAR" id="resultVar">result</field>
+                  <block type="object_get_property">
+                    <value name="OBJECT">
+                      <block type="variables_get">
+                        <field name="VAR" id="resultVar">result</field>
+                      </block>
+                    </value>
+                    <value name="PROPERTY">
+                      <block type="text">
+                        <field name="TEXT">stargazers_count</field>
+                      </block>
+                    </value>
                   </block>
                 </value>
               </block>

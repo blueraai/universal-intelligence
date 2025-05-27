@@ -223,6 +223,20 @@ blockLog.info('custom-blocks.js loaded, waiting for initialization signal');
 // Note: Using built-in text block for multi-line text
 // Users can enter \n for newlines
 
+// Object property access block
+blockLog.debug('defining block', 'object_get_property');
+Blockly.Blocks['object_get_property'] = {
+  init: function() {
+    this.appendValueInput('OBJECT')
+        .appendField('get property');
+    this.appendValueInput('PROPERTY')
+        .appendField('from');
+    this.setOutput(true, null);
+    this.setColour(230);
+    this.setTooltip('Get a property from an object');
+  }
+};
+
 // Expose initialization function globally
 window.initializeBlocklyGenerators = initializeGenerators;
 
@@ -600,6 +614,21 @@ function initializeGenerators() {
       
       var code = `await ${agent}.connect(${args.join('')});\n`;
       return code;
+    };
+    
+    // Object property access generator
+    Blockly.JavaScript.forBlock['object_get_property'] = function(block) {
+      var object = Blockly.JavaScript.valueToCode(block, 'OBJECT', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
+      var property = Blockly.JavaScript.valueToCode(block, 'PROPERTY', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      
+      // If property is a string literal, use bracket notation
+      if (property.startsWith('"') || property.startsWith("'")) {
+        var code = `${object}[${property}]`;
+      } else {
+        // If it's a variable, also use bracket notation
+        var code = `${object}[${property}]`;
+      }
+      return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
     
     // Note: Using built-in text block generators
