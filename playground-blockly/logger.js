@@ -8,12 +8,13 @@ const isBrowser = typeof window !== 'undefined';
 const logger = isBrowser ? 
     // Browser logger with CSS styling
     pino({
-        level: 'debug',
+        level: 'trace',  // Set to trace to ensure all levels are captured
         browser: {
             serialize: true,
             asObject: false,
             transmit: {
                 send: function (level, logEvent) {
+                    // level.value contains the numeric level
                     const levelStyles = {
                         10: { label: 'TRACE', color: '#999', method: 'log' },
                         20: { label: 'DEBUG', color: '#0099ff', method: 'log' },
@@ -23,7 +24,7 @@ const logger = isBrowser ?
                         60: { label: 'FATAL', color: '#ff00ff', method: 'error' }
                     };
                     
-                    const style = levelStyles[logEvent.level] || { label: 'LOG', color: '#666', method: 'log' };
+                    const style = levelStyles[level.value] || { label: 'LOG', color: '#666', method: 'log' };
                     const args = logEvent.messages || [];
                     
                     console[style.method](
