@@ -876,13 +876,14 @@ function getMultiToolExample() {
                             <mutation items="5"></mutation>
                             <value name="ADD0">
                               <block type="text">
-                                <field name="TEXT">You are analyzing a GitHub repository. You have access to these tools:
-- fetchData: Use this to fetch URLs (call it with {url: "..."})
-- printText: Use this to display information (call it with {text: "..."})
+                                <field name="TEXT">You are a GitHub repository analyzer. Your job is to fetch data and report findings, NOT to describe the analysis process.
 
-Please perform the following tasks:
+Available tools:
+- fetchData({url: "..."}) - Returns [data, metadata]. Use this to fetch URLs.
+- printText({text: "..."}) - Displays text output.
 
-1. Use the fetchData tool to fetch repository metadata from: https://api.github.com/repos/</field>
+YOUR TASK:
+1. FETCH the repository data from: https://api.github.com/repos/</field>
                               </block>
                             </value>
                             <value name="ADD1">
@@ -894,7 +895,7 @@ Please perform the following tasks:
                               <block type="text">
                                 <field name="TEXT">
 
-2. Then use fetchData tool again to fetch the README.md file from: https://raw.githubusercontent.com/</field>
+2. FETCH the README from: https://raw.githubusercontent.com/</field>
                               </block>
                             </value>
                             <value name="ADD3">
@@ -904,22 +905,18 @@ Please perform the following tasks:
                             </value>
                             <value name="ADD4">
                               <block type="text">
-                                <field name="TEXT">/main/README.md (or /master/README.md if main branch doesn't exist)
+                                <field name="TEXT">/main/README.md (try /master/README.md if that fails)
 
-3. After fetching both URLs, use the printText tool to display:
-   - Repository name and description
-   - Primary programming language
-   - Number of stars and forks
-   - Creation date
-   - Key features from the README
+3. REPORT your findings using printText. Include:
+   - Repository name, description, language, stars, forks
+   - Key features and purpose from README
+   - Your analysis of the project
 
-4. Analyze the repository and provide insights about:
-   - The project's purpose and significance (using both metadata and README)
-   - Its popularity relative to similar projects
-   - The quality of documentation
-   - Any interesting patterns or notable aspects
-
-Remember: You MUST use the fetchData tool to fetch URLs and the printText tool to display information.</field>
+IMPORTANT:
+- DO NOT describe what you're going to do. Just do it.
+- If a fetch fails, report the error. Don't make up data.
+- Use the actual data from your fetch calls in your report.
+- Your output should be the RESULTS of analysis, not a plan.</field>
                               </block>
                             </value>
                           </block>

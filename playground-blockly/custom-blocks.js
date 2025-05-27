@@ -404,9 +404,14 @@ function initializeGenerators() {
       if (engine === 'AUTO' && quantization === 'AUTO') {
         var code = `await (async () => {
           console.log('🤖 Initializing local model...');
-          const model = new Model();
-          console.log('✅ Model ready');
-          return model;
+          try {
+            const model = new Model();
+            console.log('✅ Model ready:', model);
+            return model;
+          } catch (error) {
+            console.error('❌ Model initialization failed:', error);
+            throw error;
+          }
         })()`;
       } else {
         var options = {};
@@ -414,9 +419,14 @@ function initializeGenerators() {
         if (quantization !== 'AUTO') options.quantization = quantization;
         var code = `await (async () => {
           console.log('🤖 Initializing local model with options:', ${JSON.stringify(options)});
-          const model = new Model(${JSON.stringify(options)});
-          console.log('✅ Model ready');
-          return model;
+          try {
+            const model = new Model(${JSON.stringify(options)});
+            console.log('✅ Model ready:', model);
+            return model;
+          } catch (error) {
+            console.error('❌ Model initialization failed:', error);
+            throw error;
+          }
         })()`;
       }
       
