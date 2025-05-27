@@ -115,17 +115,20 @@ Blockly.Blocks['uin_tool_fetch'] = {
   }
 };
 
-blockLog.debug('defining block', 'uin_tool_research');
-Blockly.Blocks['uin_tool_research'] = {
+blockLog.debug('defining block', 'uin_agent_research');
+Blockly.Blocks['uin_agent_research'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Create Research Tool 🔍");
+        .appendField("Create Research Agent 🔬");
+    this.appendValueInput("MODEL")
+        .setCheck("Model")
+        .appendField("model");
     this.appendValueInput("SOURCES")
         .setCheck("Array")
         .appendField("sources");
-    this.setOutput(true, "Tool");
-    this.setColour(120);
-    this.setTooltip("Create a research tool that fetches and analyzes multiple sources");
+    this.setOutput(true, "Agent");
+    this.setColour(30);
+    this.setTooltip("Create a research agent that uses a fetch tool to analyze multiple sources");
   }
 };
 
@@ -222,6 +225,19 @@ blockLog.info('custom-blocks.js loaded, waiting for initialization signal');
 
 // Note: Using built-in text block for multi-line text
 // Users can enter \n for newlines
+
+// Pretty print block with modal output
+blockLog.debug('defining block', 'text_pretty_print');
+Blockly.Blocks['text_pretty_print'] = {
+  init: function() {
+    this.appendValueInput('TEXT')
+        .appendField('🎨 Pretty Print');
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(160);
+    this.setTooltip('Display text in a modern modal dialog');
+  }
+};
 
 // Object property access block
 blockLog.debug('defining block', 'object_get_property');
@@ -367,6 +383,18 @@ function initializeGenerators() {
       var code = `${agent}.connect(${args.join(', ')})\n`;
       return code;
     };
+    
+    Blockly.Python.forBlock['uin_agent_research'] = function(block) {
+      var model = Blockly.Python.valueToCode(block, 'MODEL', Blockly.Python.ORDER_ATOMIC) || 'Model()';
+      var sources = Blockly.Python.valueToCode(block, 'SOURCES', Blockly.Python.ORDER_ATOMIC) || '[]';
+      
+      var code = `# Research Agent with fetch tool\n` +
+                 `fetch_tool = Tool()\n` +
+                 `# Configure fetch_tool with URL fetching capability\n` +
+                 `research_agent = Agent(model=${model}, expand_tools=[fetch_tool])\n` +
+                 `# Sources: ${sources}`;
+      return [code, Blockly.Python.ORDER_ATOMIC];
+    };
 
     // JavaScript Code Generators
     Blockly.JavaScript.forBlock['uin_model_local'] = function(block) {
@@ -469,38 +497,61 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
     
-    Blockly.JavaScript.forBlock['uin_tool_research'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_agent_research'] = function(block) {
+      var model = Blockly.JavaScript.valueToCode(block, 'MODEL', Blockly.JavaScript.ORDER_ATOMIC) || 'new Model()';
       var sources = Blockly.JavaScript.valueToCode(block, 'SOURCES', Blockly.JavaScript.ORDER_ATOMIC) || '[]';
       
       var code = `(() => {
-        const tool = new Tool();
-        tool.research = async function(params) {
-          const sources = params.sources || ${sources};
-          const query = params.query || '';
-          console.log('🔍 Researching:', query, 'from', sources.length, 'sources');
-          
-          const results = [];
-          for (const source of sources) {
-            try {
-              const response = await fetch(source);
-              const text = await response.text();
-              results.push({ source, content: text, success: true });
-            } catch (error) {
-              results.push({ source, error: error.message, success: false });
+        // Create a fetch tool for the research agent
+        const fetchTool = new Tool();
+        fetchTool.fetchUrl = async function(params) {
+          const url = params.url;
+          console.log('🌍 Fetching:', url);
+          try {
+            const response = await fetch(url);
+            const contentType = response.headers.get('content-type');
+            let data;
+            if (contentType && contentType.includes('application/json')) {
+              data = await response.json();
+            } else {
+              data = await response.text();
             }
+            return [data, { status: response.status, url: url }];
+          } catch (error) {
+            return [null, { error: error.message, url: url }];
           }
-          
-          const summary = {
-            query: query,
-            sourcesChecked: sources.length,
-            successfulFetches: results.filter(r => r.success).length,
-            results: results
-          };
-          
-          console.log('✅ Research complete');
-          return [summary, { timestamp: new Date().toISOString() }];
         };
-        return tool;
+        
+        // Create a summary tool
+        const summaryTool = new Tool();
+        summaryTool.summarizeContent = function(params) {
+          const content = params.content || '';
+          const wordCount = content.split(/\\s+/).length;
+          const sentences = content.match(/[^.!?]+[.!?]+/g) || [];
+          return [{
+            wordCount: wordCount,
+            sentenceCount: sentences.length,
+            preview: content.substring(0, 200) + (content.length > 200 ? '...' : '')
+          }, { analyzed: true }];
+        };
+        
+        // Create the research agent with the fetch tool
+        const researchAgent = new Agent({
+          model: ${model},
+          expandTools: [fetchTool, summaryTool]
+        });
+        
+        // Add a research method that uses the sources
+        researchAgent._sources = ${sources};
+        researchAgent.research = async function(query) {
+          const prompt = 'You are a research assistant. You have access to fetchUrl and summarizeContent tools. ' +
+                        'Sources to research: ' + JSON.stringify(this._sources) + '. ' +
+                        'Research query: ' + query + '. ' +
+                        'Please fetch and analyze each source, then provide a comprehensive summary.';
+          return await this.process(prompt);
+        };
+        
+        return researchAgent;
       })()`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
@@ -613,6 +664,13 @@ function initializeGenerators() {
       }
       
       var code = `await ${agent}.connect(${args.join('')});\n`;
+      return code;
+    };
+    
+    // Pretty print generator
+    Blockly.JavaScript.forBlock['text_pretty_print'] = function(block) {
+      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var code = `window.showPrettyPrint(${text});\n`;
       return code;
     };
     

@@ -440,7 +440,7 @@ Can you:
               </block>
             </value>
             <next>
-              <block type="text_print">
+              <block type="text_pretty_print">
                 <value name="TEXT">
                   <block type="variables_get">
                     <field name="VAR" id="outputVar">modelOutput</field>
@@ -680,7 +680,7 @@ Can you:
               </block>
             </value>
             <next>
-              <block type="text_print">
+              <block type="text_pretty_print">
                 <value name="TEXT">
                   <block type="variables_get">
                     <field name="VAR" id="outputVar">modelOutput</field>
@@ -736,7 +736,7 @@ function getFetchExample() {
           </block>
         </value>
         <next>
-          <block type="text_print">
+          <block type="text_pretty_print">
             <value name="TEXT">
               <block type="text_join">
                 <mutation items="2"></mutation>
@@ -773,8 +773,7 @@ function getResearchExample() {
     return `<xml xmlns="https://developers.google.com/blockly/xml">
   <variables>
     <variable id="modelVar">model</variable>
-    <variable id="researchVar">researchTool</variable>
-    <variable id="agentVar">researchAgent</variable>
+    <variable id="researchAgentVar">researchAgent</variable>
     <variable id="resultVar">result</variable>
   </variables>
   <block type="variables_set" x="20" y="20">
@@ -787,9 +786,14 @@ function getResearchExample() {
     </value>
     <next>
       <block type="variables_set">
-        <field name="VAR" id="researchVar">researchTool</field>
+        <field name="VAR" id="researchAgentVar">researchAgent</field>
         <value name="VALUE">
-          <block type="uin_tool_research">
+          <block type="uin_agent_research">
+            <value name="MODEL">
+              <block type="variables_get">
+                <field name="VAR" id="modelVar">model</field>
+              </block>
+            </value>
             <value name="SOURCES">
               <block type="lists_create_with">
                 <mutation items="2"></mutation>
@@ -809,53 +813,33 @@ function getResearchExample() {
         </value>
         <next>
           <block type="variables_set">
-            <field name="VAR" id="agentVar">researchAgent</field>
+            <field name="VAR" id="resultVar">result</field>
             <value name="VALUE">
-              <block type="uin_agent_create">
-                <value name="MODEL">
+              <block type="uin_tool_call">
+                <value name="TOOL">
                   <block type="variables_get">
-                    <field name="VAR" id="modelVar">model</field>
+                    <field name="VAR" id="researchAgentVar">researchAgent</field>
                   </block>
                 </value>
-                <value name="TOOLS">
-                  <block type="lists_create_with">
-                    <mutation items="1"></mutation>
-                    <value name="ADD0">
-                      <block type="variables_get">
-                        <field name="VAR" id="researchVar">researchTool</field>
-                      </block>
-                    </value>
+                <value name="METHOD">
+                  <block type="text">
+                    <field name="TEXT">research</field>
+                  </block>
+                </value>
+                <value name="PARAMS">
+                  <block type="text">
+                    <field name="TEXT">Analyze the purpose and key features of these GitHub repositories</field>
                   </block>
                 </value>
               </block>
             </value>
             <next>
-              <block type="variables_set">
-                <field name="VAR" id="resultVar">result</field>
-                <value name="VALUE">
-                  <block type="uin_agent_process">
-                    <field name="REMEMBER">FALSE</field>
-                    <value name="AGENT">
-                      <block type="variables_get">
-                        <field name="VAR" id="agentVar">researchAgent</field>
-                      </block>
-                    </value>
-                    <value name="INPUT">
-                      <block type="text">
-                        <field name="TEXT">Research these GitHub repositories and summarize their purpose and key features</field>
-                      </block>
-                    </value>
+              <block type="text_pretty_print">
+                <value name="TEXT">
+                  <block type="variables_get">
+                    <field name="VAR" id="resultVar">result</field>
                   </block>
                 </value>
-                <next>
-                  <block type="text_print">
-                    <value name="TEXT">
-                      <block type="variables_get">
-                        <field name="VAR" id="resultVar">result</field>
-                      </block>
-                    </value>
-                  </block>
-                </next>
               </block>
             </next>
           </block>
@@ -944,7 +928,7 @@ function getMultiToolExample() {
                       </block>
                     </value>
                     <next>
-                      <block type="text_print">
+                      <block type="text_pretty_print">
                         <value name="TEXT">
                           <block type="variables_get">
                             <field name="VAR" id="resultVar">result</field>
@@ -1016,6 +1000,68 @@ function saveWorkspace() {
     
     log.debug('saveWorkspace()', 'XML generated, length:', xmlText.length);
     return xmlText;
+}
+
+// Modal handling for pretty print
+function setupModal() {
+    const modal = document.getElementById('printModal');
+    const modalClose = modal.querySelector('.modal-close');
+    const modalDismiss = modal.querySelector('.modal-dismiss');
+    const modalOutput = document.getElementById('modalOutput').querySelector('code');
+    
+    // Show modal function
+    window.showPrettyPrint = function(content) {
+        log.debug('showPrettyPrint()', 'content:', content);
+        
+        // Format the content nicely
+        let displayContent = content;
+        if (typeof content === 'object') {
+            try {
+                displayContent = JSON.stringify(content, null, 2);
+            } catch (e) {
+                displayContent = String(content);
+            }
+        }
+        
+        modalOutput.textContent = displayContent;
+        modal.classList.add('show');
+        
+        // Focus on dismiss button for accessibility
+        modalDismiss.focus();
+    };
+    
+    // Close modal function
+    function closeModal() {
+        modal.classList.remove('show');
+        log.debug('closeModal()', 'modal closed');
+    }
+    
+    // Event handlers
+    modalClose.addEventListener('click', closeModal);
+    modalDismiss.addEventListener('click', closeModal);
+    
+    // Close on background click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Close on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('show')) {
+            closeModal();
+        }
+    });
+    
+    log.debug('setupModal()', 'modal handlers initialized');
+}
+
+// Initialize modal when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupModal);
+} else {
+    setupModal();
 }
 
 log.info('app-web.js', 'initialization complete');

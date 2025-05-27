@@ -107,12 +107,12 @@
             <block type="uin_tool_printer"></block>
             <block type="uin_tool_api"></block>
             <block type="uin_tool_fetch"></block>
-            <block type="uin_tool_research"></block>
             <block type="uin_tool_call"></block>
         </category>
         
         <category name="Agents 🤖" colour="#A6745C">
             <block type="uin_agent_create"></block>
+            <block type="uin_agent_research"></block>
             <block type="uin_agent_process"></block>
             <block type="uin_agent_connect"></block>
         </category>
@@ -140,6 +140,7 @@
             <block type="text"></block>
             <block type="text_join"></block>
             <block type="text_print"></block>
+            <block type="text_pretty_print"></block>
         </category>
         
         <category name="Lists" colour="#745CA6">
@@ -152,6 +153,22 @@
             <block type="object_get_property"></block>
         </category>
     </xml>
+    
+    <!-- Modal for pretty print output -->
+    <div id="printModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Output</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="modalOutput"><code></code></pre>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-dismiss">Dismiss</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Load custom blocks after Blockly is ready -->
     <script>
