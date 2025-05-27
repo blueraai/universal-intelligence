@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Intelligence - Blockly Playground</title>
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
+    
+    <!-- Import Universal Intelligence Web -->
+    <script type="module">
+        // Import UIN components and make them globally available
+        import { Model, RemoteModel, Agent, Tool } from 'universalintelligence';
+        
+        // For now, we'll use the basic Tool as SimplePrinterTool
+        // TODO: Import specific tool implementations when available
+        const SimplePrinterTool = Tool;
+        const APITool = Tool;
+        
+        // Make them available globally for the generated code
+        window.UIN = {
+            Model,
+            RemoteModel,
+            Agent,
+            Tool,
+            SimplePrinterTool,
+            APITool
+        };
+        
+        // Signal that UIN is loaded
+        window.UINLoaded = true;
+        window.dispatchEvent(new Event('uin-loaded'));
+    </script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧩 Universal Intelligence - Visual Builder</h1>
+            <p>Build AI applications by connecting blocks - runs entirely in your browser!</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="blockly-container">
+                <div id="blocklyDiv"></div>
+            </div>
+            
+            <div class="output-panel">
+                <div class="code-section">
+                    <h3>Generated Code</h3>
+                    <div class="language-selector">
+                        <button class="lang-btn" data-lang="python">Python</button>
+                        <button class="lang-btn active" data-lang="javascript">JavaScript</button>
+                    </div>
+                    <pre id="codeOutput"><code></code></pre>
+                </div>
+                
+                <div class="action-section">
+                    <button id="runCode" class="run-btn">▶ Run in Browser</button>
+                    <button id="copyCode" class="copy-btn">📋 Copy Code</button>
+                    <button id="clearOutput" class="clear-btn">🗑️ Clear Output</button>
+                </div>
+                
+                <div class="result-section">
+                    <h3>Output</h3>
+                    <pre id="resultOutput"><code>Ready to run...</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Define the toolbox -->
+    <xml id="toolbox" style="display: none">
+        <category name="Models 🧠" colour="#5C81A6">
+            <block type="uin_model_local"></block>
+            <block type="uin_model_remote"></block>
+            <block type="uin_model_process"></block>
+        </category>
+        
+        <category name="Tools 🔧" colour="#5CA65C">
+            <block type="uin_tool_printer"></block>
+            <block type="uin_tool_api"></block>
+            <block type="uin_tool_call"></block>
+        </category>
+        
+        <category name="Agents 🤖" colour="#A6745C">
+            <block type="uin_agent_create"></block>
+            <block type="uin_agent_process"></block>
+            <block type="uin_agent_connect"></block>
+        </category>
+        
+        <category name="Logic" colour="#5C68A6">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+            <block type="logic_operation"></block>
+            <block type="logic_boolean"></block>
+        </category>
+        
+        <category name="Loops" colour="#5CA658">
+            <block type="controls_repeat_ext"></block>
+            <block type="controls_for"></block>
+            <block type="controls_forEach"></block>
+            <block type="controls_whileUntil"></block>
+        </category>
+        
+        <category name="Variables" colour="#A65C81">
+            <block type="variables_get"></block>
+            <block type="variables_set"></block>
+        </category>
+        
+        <category name="Text" colour="#5C9E9E">
+            <block type="text"></block>
+            <block type="text_join"></block>
+            <block type="text_print"></block>
+        </category>
+        
+        <category name="Lists" colour="#745CA6">
+            <block type="lists_create_with"></block>
+            <block type="lists_getIndex"></block>
+            <block type="lists_setIndex"></block>
+        </category>
+    </xml>
+
+    <script src="custom-blocks.js"></script>
+    <script src="app-web.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.blockly-container {
+    flex: 1.5;
+    position: relative;
+    background: white;
+    border-right: 1px solid #e0e0e0;
+}
+
+#blocklyDiv {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.output-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    overflow-y: auto;
+}
+
+.code-section, .result-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.code-section h3, .result-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #555;
+}
+
+.language-selector {
+    margin-bottom: 1rem;
+}
+
+.lang-btn {
+    background: #f0f0f0;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.lang-btn:hover {
+    background: #e0e0e0;
+}
+
+.lang-btn.active {
+    background: #667eea;
+    color: white;
+}
+
+pre {
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.action-section {
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    background: #f8f8f8;
+}
+
+.run-btn, .copy-btn, .clear-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.run-btn {
+    background: #48bb78;
+    color: white;
+}
+
+.run-btn:hover {
+    background: #38a169;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.copy-btn {
+    background: #4299e1;
+    color: white;
+}
+
+.copy-btn:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+}
+
+.copy-btn.copied {
+    background: #38a169;
+}
+
+.clear-btn {
+    background: #e53e3e;
+    color: white;
+}
+
+.clear-btn:hover {
+    background: #c53030;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+}
+
+#resultOutput {
+    min-height: 100px;
+    background: #f8f8f8;
+}
+
+#resultOutput.error {
+    color: #e53e3e;
+}
+
+#resultOutput.success {
+    color: #38a169;
+}
+
+/* Blockly customizations */
+.blocklyToolboxDiv {
+    background-color: #f8f8f8 !important;
+}
+
+.blocklyTreeRow {
+    padding: 5px 10px !important;
+    margin: 2px 0 !important;
+}
+
+.blocklyTreeRow:hover {
+    background-color: #e0e0e0 !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .blockly-container {
+        height: 50vh;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .output-panel {
+        height: 50vh;
+    }
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

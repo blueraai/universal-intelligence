@@ -1,0 +1,18 @@
+{
+  "name": "universal-intelligence-blockly-playground",
+  "version": "1.0.0",
+  "description": "Blockly visual programming interface for Universal Intelligence",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pino": "^8.16.0",
+    "pino-pretty": "^10.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
