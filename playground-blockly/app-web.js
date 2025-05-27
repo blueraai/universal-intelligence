@@ -876,9 +876,13 @@ function getMultiToolExample() {
                             <mutation items="5"></mutation>
                             <value name="ADD0">
                               <block type="text">
-                                <field name="TEXT">You are analyzing a GitHub repository. Please perform the following tasks:
+                                <field name="TEXT">You are analyzing a GitHub repository. You have access to these tools:
+- fetchData: Use this to fetch URLs (call it with {url: "..."})
+- printText: Use this to display information (call it with {text: "..."})
 
-1. First, fetch repository metadata from: https://api.github.com/repos/</field>
+Please perform the following tasks:
+
+1. Use the fetchData tool to fetch repository metadata from: https://api.github.com/repos/</field>
                               </block>
                             </value>
                             <value name="ADD1">
@@ -890,7 +894,7 @@ function getMultiToolExample() {
                               <block type="text">
                                 <field name="TEXT">
 
-2. Then fetch the README.md file from: https://raw.githubusercontent.com/</field>
+2. Then use fetchData tool again to fetch the README.md file from: https://raw.githubusercontent.com/</field>
                               </block>
                             </value>
                             <value name="ADD3">
@@ -902,7 +906,7 @@ function getMultiToolExample() {
                               <block type="text">
                                 <field name="TEXT">/main/README.md (or /master/README.md if main branch doesn't exist)
 
-3. Use the printer tool to display:
+3. After fetching both URLs, use the printText tool to display:
    - Repository name and description
    - Primary programming language
    - Number of stars and forks
@@ -915,7 +919,7 @@ function getMultiToolExample() {
    - The quality of documentation
    - Any interesting patterns or notable aspects
 
-Please be thorough but concise in your analysis.</field>
+Remember: You MUST use the fetchData tool to fetch URLs and the printText tool to display information.</field>
                               </block>
                             </value>
                           </block>
