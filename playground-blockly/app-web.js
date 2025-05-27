@@ -317,6 +317,12 @@ function updateCode() {
 function addDefaultBlocks() {
     log.info('addDefaultBlocks()', 'starting');
     
+    // Check if workspace exists
+    if (!workspace) {
+        log.error('addDefaultBlocks()', 'workspace is null or undefined!');
+        return;
+    }
+    
     try {
         // Create variables first using the new API
         const variableMap = workspace.getVariableMap();
@@ -333,86 +339,80 @@ function addDefaultBlocks() {
         });
 
         // Create a simple example: model processes text and printer displays output
-        const xmlText = `
-        <xml xmlns="https://developers.google.com/blockly/xml">
-            <variables>
-                <variable id="modelVar">model</variable>
-                <variable id="inputVar">userInput</variable>
-                <variable id="outputVar">modelOutput</variable>
-                <variable id="printerVar">printer</variable>
-            </variables>
-            <!-- Create the model -->
-            <block type="variables_set" x="20" y="20">
-                <field name="VAR" id="modelVar">model</field>
+        const xmlText = `<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="modelVar">model</variable>
+    <variable id="inputVar">userInput</variable>
+    <variable id="outputVar">modelOutput</variable>
+    <variable id="printerVar">printer</variable>
+  </variables>
+  <block type="variables_set" x="20" y="20">
+    <field name="VAR" id="modelVar">model</field>
+    <value name="VALUE">
+      <block type="uin_model_local">
+        <field name="ENGINE">AUTO</field>
+        <field name="QUANTIZATION">AUTO</field>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set">
+        <field name="VAR" id="inputVar">userInput</field>
+        <value name="VALUE">
+          <block type="text">
+            <field name="TEXT">Hello! Tell me a short joke about programming.</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="outputVar">modelOutput</field>
+            <value name="VALUE">
+              <block type="uin_model_process">
+                <field name="REMEMBER">FALSE</field>
+                <value name="MODEL">
+                  <block type="variables_get">
+                    <field name="VAR" id="modelVar">model</field>
+                  </block>
+                </value>
+                <value name="INPUT">
+                  <block type="variables_get">
+                    <field name="VAR" id="inputVar">userInput</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="printerVar">printer</field>
                 <value name="VALUE">
-                    <block type="uin_model_local">
-                        <field name="ENGINE">AUTO</field>
-                        <field name="QUANTIZATION">AUTO</field>
-                    </block>
+                  <block type="uin_tool_printer"></block>
                 </value>
                 <next>
-                    <!-- Set the user input text -->
-                    <block type="variables_set">
-                        <field name="VAR" id="inputVar">userInput</field>
-                        <value name="VALUE">
-                            <block type="text">
-                                <field name="TEXT">Hello! Tell me a short joke about programming.</field>
-                            </block>
-                        </value>
-                        <next>
-                            <!-- Process the input through the model -->
-                            <block type="variables_set">
-                                <field name="VAR" id="outputVar">modelOutput</field>
-                                <value name="VALUE">
-                                    <block type="uin_model_process">
-                                        <field name="REMEMBER">FALSE</field>
-                                        <value name="MODEL">
-                                            <block type="variables_get">
-                                                <field name="VAR" id="modelVar">model</field>
-                                            </block>
-                                        </value>
-                                        <value name="INPUT">
-                                            <block type="variables_get">
-                                                <field name="VAR" id="inputVar">userInput</field>
-                                            </block>
-                                        </value>
-                                    </block>
-                                </value>
-                                <next>
-                                    <!-- Create printer tool -->
-                                    <block type="variables_set">
-                                        <field name="VAR" id="printerVar">printer</field>
-                                        <value name="VALUE">
-                                            <block type="uin_tool_printer"></block>
-                                        </value>
-                                        <next>
-                                            <!-- Print the model output -->
-                                            <block type="uin_tool_call">
-                                                <value name="TOOL">
-                                                    <block type="variables_get">
-                                                        <field name="VAR" id="printerVar">printer</field>
-                                                    </block>
-                                                </value>
-                                                <value name="METHOD">
-                                                    <block type="text">
-                                                        <field name="TEXT">printText</field>
-                                                    </block>
-                                                </value>
-                                                <value name="PARAMS">
-                                                    <block type="variables_get">
-                                                        <field name="VAR" id="outputVar">modelOutput</field>
-                                                    </block>
-                                                </value>
-                                            </block>
-                                        </next>
-                                    </block>
-                                </next>
-                            </block>
-                        </next>
-                    </block>
+                  <block type="uin_tool_call">
+                    <value name="TOOL">
+                      <block type="variables_get">
+                        <field name="VAR" id="printerVar">printer</field>
+                      </block>
+                    </value>
+                    <value name="METHOD">
+                      <block type="text">
+                        <field name="TEXT">printText</field>
+                      </block>
+                    </value>
+                    <value name="PARAMS">
+                      <block type="variables_get">
+                        <field name="VAR" id="outputVar">modelOutput</field>
+                      </block>
+                    </value>
+                  </block>
                 </next>
-            </block>
-        </xml>`;
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
         
         log.debug('addDefaultBlocks()', 'parsing XML, length:', xmlText.length);
         
@@ -421,10 +421,51 @@ function addDefaultBlocks() {
         const xml = parser.parseFromString(xmlText, 'text/xml');
         log.debug('addDefaultBlocks()', 'XML parsed successfully');
         
-        Blockly.Xml.clearWorkspaceAndLoadFromXml(xml.documentElement, workspace);
+        // Check for parser errors
+        const parserError = xml.querySelector('parsererror');
+        if (parserError) {
+            log.error('addDefaultBlocks()', 'XML parser error:', parserError.textContent);
+            throw new Error('XML parsing failed');
+        }
+        
+        // Use the newer Blockly serialization API if available
+        if (Blockly.serialization && Blockly.serialization.workspaces) {
+            log.debug('addDefaultBlocks()', 'using new serialization API');
+            const state = Blockly.Xml.domToWorkspace(xml.documentElement, workspace);
+        } else {
+            log.debug('addDefaultBlocks()', 'using legacy XML API');
+            Blockly.Xml.clearWorkspaceAndLoadFromXml(xml.documentElement, workspace);
+        }
         log.info('addDefaultBlocks()', 'blocks loaded successfully');
+        
+        // Force a workspace render
+        workspace.render();
+        log.debug('addDefaultBlocks()', 'workspace rendered');
     } catch (error) {
         log.error('addDefaultBlocks()', 'error:', error.message, 'stack:', error.stack);
+        
+        // Try a simpler default block as fallback
+        try {
+            log.info('addDefaultBlocks()', 'trying simple fallback block');
+            const simpleXml = `<xml xmlns="https://developers.google.com/blockly/xml">
+              <block type="variables_set" x="20" y="20">
+                <field name="VAR">model</field>
+                <value name="VALUE">
+                  <block type="uin_model_local">
+                    <field name="ENGINE">AUTO</field>
+                    <field name="QUANTIZATION">AUTO</field>
+                  </block>
+                </value>
+              </block>
+            </xml>`;
+            
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(simpleXml, 'text/xml');
+            Blockly.Xml.domToWorkspace(xml.documentElement, workspace);
+            log.info('addDefaultBlocks()', 'simple fallback loaded');
+        } catch (fallbackError) {
+            log.error('addDefaultBlocks()', 'fallback also failed:', fallbackError.message);
+        }
     }
 }
 
