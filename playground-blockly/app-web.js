@@ -474,6 +474,11 @@ Can you:
         // Force a workspace render
         workspace.render();
         log.debug('addDefaultBlocks()', 'workspace rendered');
+        
+        // Clear output for fresh start
+        outputConsole.clear();
+        const resultOutput = document.getElementById('resultOutput');
+        resultOutput.classList.remove('error', 'success');
     } catch (error) {
         log.error('addDefaultBlocks()', 'error:', error.message, 'stack:', error.stack);
         
@@ -608,6 +613,12 @@ function loadExample(exampleName) {
         const xml = parser.parseFromString(xmlText, 'text/xml');
         Blockly.Xml.clearWorkspaceAndLoadFromXml(xml.documentElement, workspace);
         log.info('loadExample()', 'example loaded successfully');
+        
+        // Clear the output when loading a new example
+        outputConsole.clear();
+        const resultOutput = document.getElementById('resultOutput');
+        resultOutput.classList.remove('error', 'success');
+        log.debug('loadExample()', 'output cleared');
     } catch (error) {
         log.error('loadExample()', 'error loading example:', error);
     }
