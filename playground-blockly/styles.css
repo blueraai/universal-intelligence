@@ -167,15 +167,26 @@ pre {
 
 #resultOutput {
     min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
     background: #f8f8f8;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#resultOutput code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 #resultOutput.error {
     color: #e53e3e;
+    background: #fff5f5;
 }
 
 #resultOutput.success {
     color: #38a169;
+    background: #f0fff4;
 }
 
 /* Blockly customizations */

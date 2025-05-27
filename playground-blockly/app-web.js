@@ -121,6 +121,10 @@ function updateOutput() {
     const output = document.getElementById('resultOutput').querySelector('code');
     const content = outputConsole.logs.join('\n') || 'Ready to run...';
     output.textContent = content;
+    
+    // Auto-scroll to bottom
+    const container = document.getElementById('resultOutput');
+    container.scrollTop = container.scrollHeight;
 }
 
 // Check if generators are initialized
@@ -241,6 +245,17 @@ function initializeWorkspace() {
             this.classList.add('active');
             currentLanguage = this.dataset.lang;
             log.debug('languageButton.click()', 'currentLanguage set to:', currentLanguage);
+            
+            // Update run button state based on language
+            const runBtn = document.getElementById('runCode');
+            if (currentLanguage === 'python') {
+                runBtn.disabled = true;
+                runBtn.innerHTML = '▶ Run in Browser (JavaScript only)';
+            } else {
+                runBtn.disabled = false;
+                runBtn.innerHTML = '▶ Run in Browser';
+            }
+            
             if (generatorsReady) {
                 log.debug('languageButton.click()', 'generators ready, updating code');
                 updateCode();
