@@ -10,24 +10,28 @@ const logger = isBrowser ?
     pino({
         level: 'debug',
         browser: {
-            write: {
-                trace: function (o) {
-                    console.log('%c[TRACE]%c', 'color: #999; font-weight: bold', '', o.msg);
-                },
-                debug: function (o) {
-                    console.log('%c[DEBUG]%c', 'color: #0099ff; font-weight: bold', '', o.msg);
-                },
-                info: function (o) {
-                    console.log('%c[INFO]%c', 'color: #00cc00; font-weight: bold', '', o.msg);
-                },
-                warn: function (o) {
-                    console.warn('%c[WARN]%c', 'color: #ff9900; font-weight: bold', '', o.msg);
-                },
-                error: function (o) {
-                    console.error('%c[ERROR]%c', 'color: #ff0000; font-weight: bold', '', o.msg);
-                },
-                fatal: function (o) {
-                    console.error('%c[FATAL]%c', 'color: #ff00ff; font-weight: bold', '', o.msg);
+            serialize: true,
+            asObject: false,
+            transmit: {
+                send: function (level, logEvent) {
+                    const levelStyles = {
+                        10: { label: 'TRACE', color: '#999', method: 'log' },
+                        20: { label: 'DEBUG', color: '#0099ff', method: 'log' },
+                        30: { label: 'INFO', color: '#00cc00', method: 'log' },
+                        40: { label: 'WARN', color: '#ff9900', method: 'warn' },
+                        50: { label: 'ERROR', color: '#ff0000', method: 'error' },
+                        60: { label: 'FATAL', color: '#ff00ff', method: 'error' }
+                    };
+                    
+                    const style = levelStyles[logEvent.level] || { label: 'LOG', color: '#666', method: 'log' };
+                    const args = logEvent.messages || [];
+                    
+                    console[style.method](
+                        `%c[${style.label}]%c`,
+                        `color: ${style.color}; font-weight: bold`,
+                        '',
+                        ...args
+                    );
                 }
             }
         }
