@@ -17,31 +17,40 @@ const logger = isBrowser ?
                     return { level: number }
                 }
             },
-            write: {
-                trace: function (o) {
-                    const args = Array.from(arguments).slice(1);
-                    console.log('%c[TRACE]%c', 'color: #999; font-weight: bold', '', ...args);
-                },
-                debug: function (o) {
-                    const args = Array.from(arguments).slice(1);
-                    console.log('%c[DEBUG]%c', 'color: #0099ff; font-weight: bold', '', ...args);
-                },
-                info: function (o) {
-                    const args = Array.from(arguments).slice(1);
-                    console.log('%c[INFO]%c', 'color: #00cc00; font-weight: bold', '', ...args);
-                },
-                warn: function (o) {
-                    const args = Array.from(arguments).slice(1);
-                    console.warn('%c[WARN]%c', 'color: #ff9900; font-weight: bold', '', ...args);
-                },
-                error: function (o) {
-                    const args = Array.from(arguments).slice(1);
-                    console.error('%c[ERROR]%c', 'color: #ff0000; font-weight: bold', '', ...args);
-                },
-                fatal: function (o) {
-                    const args = Array.from(arguments).slice(1);
-                    console.error('%c[FATAL]%c', 'color: #ff00ff; font-weight: bold', '', ...args);
+            write: function (o) {
+                const levelStyles = {
+                    10: { label: 'TRACE', color: '#999', method: 'log' },
+                    20: { label: 'DEBUG', color: '#0099ff', method: 'log' },
+                    30: { label: 'INFO', color: '#00cc00', method: 'log' },
+                    40: { label: 'WARN', color: '#ff9900', method: 'warn' },
+                    50: { label: 'ERROR', color: '#ff0000', method: 'error' },
+                    60: { label: 'FATAL', color: '#ff00ff', method: 'error' }
+                };
+                
+                const level = levelStyles[o.level] || { label: 'LOG', color: '#666', method: 'log' };
+                const msg = o.msg || '';
+                const time = o.time ? new Date(o.time).toLocaleTimeString() : '';
+                
+                // Build the message parts
+                const parts = [];
+                if (time) parts.push(`[${time}]`);
+                if (msg) parts.push(msg);
+                
+                // Add any extra fields
+                const extras = Object.keys(o).filter(k => !['level', 'time', 'msg', 'pid', 'hostname'].includes(k));
+                if (extras.length > 0) {
+                    extras.forEach(key => {
+                        if (o[key] !== undefined) {
+                            parts.push(`${key}:`, o[key]);
+                        }
+                    });
                 }
+                
+                console[level.method](
+                    `%c[${level.label}]%c ${parts.join(' ')}`,
+                    `color: ${level.color}; font-weight: bold`,
+                    ''
+                );
             }
         }
     }) :
