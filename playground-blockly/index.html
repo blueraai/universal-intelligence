@@ -12,27 +12,44 @@
     
     <!-- Import Universal Intelligence Web -->
     <script type="module">
-        // Import UIN components and make them globally available
-        import { Model, RemoteModel, Agent, Tool } from 'universalintelligence';
+        // Import UIN as default export per README_WEB.md
+        import universalintelligence from 'universalintelligence';
         
-        // For now, we'll use the basic Tool as SimplePrinterTool
-        // TODO: Import specific tool implementations when available
+        // Destructure the classes from the default export
+        const { Model, Agent, Tool } = universalintelligence;
+        
+        // For now, we'll use the basic Tool for different purposes
+        // Note: RemoteModel might be a specific model configuration
+        const RemoteModel = Model; // Will use credentials in constructor
         const SimplePrinterTool = Tool;
         const APITool = Tool;
+        const MCPTool = Tool;
         
         // Make them available globally for the generated code
+        window.Model = Model;
+        window.RemoteModel = RemoteModel;
+        window.Agent = Agent;
+        window.Tool = Tool;
+        window.SimplePrinterTool = SimplePrinterTool;
+        window.APITool = APITool;
+        window.MCPTool = MCPTool;
+        
+        // Keep the UIN namespace for compatibility
         window.UIN = {
             Model,
             RemoteModel,
             Agent,
             Tool,
             SimplePrinterTool,
-            APITool
+            APITool,
+            MCPTool
         };
         
         // Signal that UIN is loaded
         window.UINLoaded = true;
         window.dispatchEvent(new Event('uin-loaded'));
+        
+        console.log('Universal Intelligence loaded:', universalintelligence);
     </script>
     
     <link rel="stylesheet" href="styles.css">
@@ -125,7 +142,28 @@
         </category>
     </xml>
 
-    <script src="custom-blocks.js"></script>
+    <!-- Load custom blocks after Blockly is ready -->
+    <script>
+        // Wait for Blockly to be fully loaded before loading custom blocks
+        window.customBlocksLoaded = false;
+        function loadCustomBlocks() {
+            if (typeof Blockly !== 'undefined' && 
+                typeof Blockly.JavaScript !== 'undefined' && 
+                typeof Blockly.Python !== 'undefined') {
+                const script = document.createElement('script');
+                script.src = './custom-blocks.js';
+                script.onload = function() {
+                    console.log('custom-blocks.js loaded');
+                    window.customBlocksLoaded = true;
+                    window.dispatchEvent(new Event('custom-blocks-loaded'));
+                };
+                document.body.appendChild(script);
+            } else {
+                setTimeout(loadCustomBlocks, 100);
+            }
+        }
+        loadCustomBlocks();
+    </script>
     <script src="app-web.js" type="module"></script>
 </body>
 </html>

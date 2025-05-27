@@ -1,7 +1,8 @@
 // Custom block definitions for Universal Intelligence components
 
-// Simple console logger for custom blocks (since we can't use ES modules here)
-const blockLog = {
+// Since this is loaded as a non-module script, we need to access Pino from the global scope
+// The app-web.js module should expose it globally
+const blockLog = window.customBlocksLogger || {
     debug: (...args) => console.log('\x1b[36m[DEBUG]\x1b[0m custom-blocks.js:', ...args),
     info: (...args) => console.log('\x1b[32m[INFO]\x1b[0m custom-blocks.js:', ...args),
     warn: (...args) => console.log('\x1b[33m[WARN]\x1b[0m custom-blocks.js:', ...args),
@@ -188,24 +189,22 @@ Blockly.Blocks['uin_agent_connect'] = {
   }
 };
 
-// Wait for DOM and generators to be ready before defining code generators
-if (document.readyState === 'loading') {
-    blockLog.debug('DOM loading, adding DOMContentLoaded listener');
-    document.addEventListener('DOMContentLoaded', initializeGenerators);
-} else {
-    // DOM is already loaded
-    blockLog.debug('DOM already loaded, scheduling generator initialization');
-    setTimeout(initializeGenerators, 100);
-}
+// Don't initialize immediately - wait for a signal from app-web.js
+blockLog.info('custom-blocks.js loaded, waiting for initialization signal');
+
+// Expose initialization function globally
+window.initializeBlocklyGenerators = initializeGenerators;
 
 function initializeGenerators() {
     blockLog.debug('initializeGenerators()', 'checking if generators are available');
     
     // Check if generators are available
-    if (typeof Blockly.Python === 'undefined' || typeof Blockly.JavaScript === 'undefined') {
-        blockLog.debug('initializeGenerators()', 'generators not available yet, retrying in 100ms');
-        setTimeout(initializeGenerators, 100);
-        return;
+    if (typeof Blockly === 'undefined' || typeof Blockly.Python === 'undefined' || typeof Blockly.JavaScript === 'undefined') {
+        blockLog.error('initializeGenerators()', 'Blockly generators not available!', 
+            'Blockly:', typeof Blockly,
+            'Blockly.Python:', typeof Blockly?.Python,
+            'Blockly.JavaScript:', typeof Blockly?.JavaScript);
+        return false;
     }
 
     blockLog.info('initializeGenerators()', 'Blockly generators available, initializing UIN code generators');
@@ -214,8 +213,16 @@ function initializeGenerators() {
     window.uinGeneratorsInitializing = true;
     blockLog.debug('initializeGenerators()', 'set window.uinGeneratorsInitializing = true');
 
+    // Initialize forBlock objects if they don't exist
+    if (!Blockly.Python.forBlock) {
+        Blockly.Python.forBlock = {};
+    }
+    if (!Blockly.JavaScript.forBlock) {
+        Blockly.JavaScript.forBlock = {};
+    }
+    
     // Code Generators for Python
-    Blockly.Python['uin_model_local'] = function(block) {
+    Blockly.Python.forBlock['uin_model_local'] = function(block) {
       var engine = block.getFieldValue('ENGINE');
       var quantization = block.getFieldValue('QUANTIZATION');
       
@@ -226,7 +233,7 @@ function initializeGenerators() {
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_model_remote'] = function(block) {
+    Blockly.Python.forBlock['uin_model_remote'] = function(block) {
       var credentials = Blockly.Python.valueToCode(block, 'CREDENTIALS', Blockly.Python.ORDER_ATOMIC) || '""';
       var provider = block.getFieldValue('PROVIDER');
       
@@ -234,7 +241,7 @@ function initializeGenerators() {
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_model_process'] = function(block) {
+    Blockly.Python.forBlock['uin_model_process'] = function(block) {
       var model = Blockly.Python.valueToCode(block, 'MODEL', Blockly.Python.ORDER_ATOMIC) || 'None';
       var input = Blockly.Python.valueToCode(block, 'INPUT', Blockly.Python.ORDER_ATOMIC) || '""';
       var remember = block.getFieldValue('REMEMBER') === 'TRUE';
@@ -243,23 +250,23 @@ function initializeGenerators() {
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_tool_printer'] = function(block) {
+    Blockly.Python.forBlock['uin_tool_printer'] = function(block) {
       var code = 'Tool()  # Configure with print_text method';
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_tool_api'] = function(block) {
+    Blockly.Python.forBlock['uin_tool_api'] = function(block) {
       var code = 'Tool()  # Configure with API methods';
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_tool_mcp'] = function(block) {
+    Blockly.Python.forBlock['uin_tool_mcp'] = function(block) {
       var server = Blockly.Python.valueToCode(block, 'SERVER', Blockly.Python.ORDER_ATOMIC) || '""';
       var code = `MCPTool(server=${server})`;
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_tool_call'] = function(block) {
+    Blockly.Python.forBlock['uin_tool_call'] = function(block) {
       var tool = Blockly.Python.valueToCode(block, 'TOOL', Blockly.Python.ORDER_ATOMIC) || 'None';
       var method = Blockly.Python.valueToCode(block, 'METHOD', Blockly.Python.ORDER_ATOMIC) || '""';
       var params = Blockly.Python.valueToCode(block, 'PARAMS', Blockly.Python.ORDER_ATOMIC) || '{}';
@@ -271,7 +278,7 @@ function initializeGenerators() {
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_agent_create'] = function(block) {
+    Blockly.Python.forBlock['uin_agent_create'] = function(block) {
       var model = Blockly.Python.valueToCode(block, 'MODEL', Blockly.Python.ORDER_ATOMIC);
       var tools = Blockly.Python.valueToCode(block, 'TOOLS', Blockly.Python.ORDER_ATOMIC);
       var team = Blockly.Python.valueToCode(block, 'TEAM', Blockly.Python.ORDER_ATOMIC);
@@ -285,7 +292,7 @@ function initializeGenerators() {
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_agent_process'] = function(block) {
+    Blockly.Python.forBlock['uin_agent_process'] = function(block) {
       var agent = Blockly.Python.valueToCode(block, 'AGENT', Blockly.Python.ORDER_ATOMIC) || 'None';
       var input = Blockly.Python.valueToCode(block, 'INPUT', Blockly.Python.ORDER_ATOMIC) || '""';
       var extraTools = Blockly.Python.valueToCode(block, 'EXTRA_TOOLS', Blockly.Python.ORDER_ATOMIC);
@@ -299,7 +306,7 @@ function initializeGenerators() {
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
-    Blockly.Python['uin_agent_connect'] = function(block) {
+    Blockly.Python.forBlock['uin_agent_connect'] = function(block) {
       var agent = Blockly.Python.valueToCode(block, 'AGENT', Blockly.Python.ORDER_ATOMIC) || 'None';
       var tools = Blockly.Python.valueToCode(block, 'TOOLS', Blockly.Python.ORDER_ATOMIC);
       var agents = Blockly.Python.valueToCode(block, 'AGENTS', Blockly.Python.ORDER_ATOMIC);
@@ -313,26 +320,35 @@ function initializeGenerators() {
     };
 
     // JavaScript Code Generators
-    Blockly.JavaScript['uin_model_local'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_model_local'] = function(block) {
       var engine = block.getFieldValue('ENGINE');
       var quantization = block.getFieldValue('QUANTIZATION');
       
-      var options = {};
-      if (engine !== 'AUTO') options.engine = engine.toLowerCase();
-      if (quantization !== 'AUTO') options.quantization = quantization;
+      // According to README_WEB.md, we can use new Model() with no parameters for default
+      if (engine === 'AUTO' && quantization === 'AUTO') {
+        var code = `new Model()`;
+      } else {
+        var options = {};
+        if (engine !== 'AUTO') options.engine = engine.toLowerCase();
+        if (quantization !== 'AUTO') options.quantization = quantization;
+        var code = `new Model(${JSON.stringify(options)})`;
+      }
       
-      var code = `new Model(${JSON.stringify(options)})`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_model_remote'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_model_remote'] = function(block) {
+      blockLog.debug('uin_model_remote generator called');
       var credentials = Blockly.JavaScript.valueToCode(block, 'CREDENTIALS', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var provider = block.getFieldValue('PROVIDER');
       
-      var code = `new RemoteModel({ credentials: ${credentials} })`;
+      // RemoteModel might just be Model with credentials
+      var code = `new Model({ credentials: ${credentials}, provider: "${provider.toLowerCase()}" })`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
+    blockLog.info('initializeGenerators()', 'uin_model_remote generator registered');
 
-    Blockly.JavaScript['uin_model_process'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_model_process'] = function(block) {
       var model = Blockly.JavaScript.valueToCode(block, 'MODEL', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
       var input = Blockly.JavaScript.valueToCode(block, 'INPUT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
       var remember = block.getFieldValue('REMEMBER') === 'TRUE';
@@ -341,7 +357,7 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_tool_printer'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_tool_printer'] = function(block) {
       // Create a Tool with a printText method
       var code = `(() => {
         const tool = new Tool();
@@ -355,7 +371,7 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_tool_api'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_tool_api'] = function(block) {
       // Create a Tool with API calling capabilities
       var code = `(() => {
         const tool = new Tool();
@@ -373,13 +389,13 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_tool_mcp'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_tool_mcp'] = function(block) {
       var server = Blockly.JavaScript.valueToCode(block, 'SERVER', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var code = `new MCPTool({ server: ${server} })`;
+      var code = `new Tool({ server: ${server} })`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_tool_call'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_tool_call'] = function(block) {
       var tool = Blockly.JavaScript.valueToCode(block, 'TOOL', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
       var method = Blockly.JavaScript.valueToCode(block, 'METHOD', Blockly.JavaScript.ORDER_ATOMIC) || '""';
       var params = Blockly.JavaScript.valueToCode(block, 'PARAMS', Blockly.JavaScript.ORDER_ATOMIC) || '{}';
@@ -391,7 +407,7 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_agent_create'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_agent_create'] = function(block) {
       var model = Blockly.JavaScript.valueToCode(block, 'MODEL', Blockly.JavaScript.ORDER_ATOMIC);
       var tools = Blockly.JavaScript.valueToCode(block, 'TOOLS', Blockly.JavaScript.ORDER_ATOMIC);
       var team = Blockly.JavaScript.valueToCode(block, 'TEAM', Blockly.JavaScript.ORDER_ATOMIC);
@@ -415,7 +431,7 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_agent_process'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_agent_process'] = function(block) {
       var agent = Blockly.JavaScript.valueToCode(block, 'AGENT', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
       var input = Blockly.JavaScript.valueToCode(block, 'INPUT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
       var extraTools = Blockly.JavaScript.valueToCode(block, 'EXTRA_TOOLS', Blockly.JavaScript.ORDER_ATOMIC);
@@ -437,7 +453,7 @@ function initializeGenerators() {
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
 
-    Blockly.JavaScript['uin_agent_connect'] = function(block) {
+    Blockly.JavaScript.forBlock['uin_agent_connect'] = function(block) {
       var agent = Blockly.JavaScript.valueToCode(block, 'AGENT', Blockly.JavaScript.ORDER_ATOMIC) || 'null';
       var tools = Blockly.JavaScript.valueToCode(block, 'TOOLS', Blockly.JavaScript.ORDER_ATOMIC);
       var agents = Blockly.JavaScript.valueToCode(block, 'AGENTS', Blockly.JavaScript.ORDER_ATOMIC);
@@ -463,4 +479,13 @@ function initializeGenerators() {
     window.uinGeneratorsReady = true;
     blockLog.info('initializeGenerators()', 'code generators initialized successfully');
     blockLog.debug('initializeGenerators()', 'set window.uinGeneratorsReady = true');
+    
+    // Test that a generator exists
+    if (typeof Blockly.JavaScript.forBlock['uin_model_remote'] === 'function') {
+        blockLog.info('initializeGenerators()', 'verified uin_model_remote generator exists');
+    } else {
+        blockLog.error('initializeGenerators()', 'uin_model_remote generator NOT found!');
+    }
+    
+    return true;
 }

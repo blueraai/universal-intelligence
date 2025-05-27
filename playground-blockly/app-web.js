@@ -36,6 +36,40 @@ const log = pino({
 
 log.info('app-web.js', 'initializing');
 
+// Create a logger for custom-blocks.js (which can't import modules)
+window.customBlocksLogger = pino({
+    level: 'debug',
+    browser: {
+        serialize: true,
+        asObject: false,
+        transmit: {
+            send: function (level, logEvent) {
+                const msg = logEvent.messages.join(' ');
+                const levelColors = {
+                    10: '\x1b[90m', // trace - gray
+                    20: '\x1b[36m', // debug - cyan
+                    30: '\x1b[32m', // info - green
+                    40: '\x1b[33m', // warn - yellow
+                    50: '\x1b[31m', // error - red
+                    60: '\x1b[35m'  // fatal - magenta
+                };
+                const levelNames = {
+                    10: 'TRACE',
+                    20: 'DEBUG',
+                    30: 'INFO',
+                    40: 'WARN',
+                    50: 'ERROR',
+                    60: 'FATAL'
+                };
+                const color = levelColors[logEvent.level] || '';
+                const reset = '\x1b[0m';
+                const timestamp = new Date().toISOString();
+                console.log(`${color}[${timestamp}] ${levelNames[logEvent.level]} [custom-blocks]${reset} ${msg}`);
+            }
+        }
+    }
+});
+
 // Initialize Blockly for web execution
 let workspace;
 let currentLanguage = 'javascript'; // Default to JavaScript for web
@@ -78,8 +112,26 @@ function checkGeneratorsReady() {
     log.debug('checkGeneratorsReady()', 'checking conditions');
     const uinGeneratorsReady = window.uinGeneratorsReady === true;
     const uinLoaded = window.UINLoaded === true;
-    const result = uinGeneratorsReady && uinLoaded;
-    log.debug('checkGeneratorsReady()', 'uinGeneratorsReady:', uinGeneratorsReady, 'uinLoaded:', uinLoaded, 'result:', result);
+    const customBlocksLoaded = window.customBlocksLoaded === true;
+    
+    // Also check if a test generator exists
+    let generatorExists = false;
+    try {
+        generatorExists = typeof Blockly !== 'undefined' && 
+                         typeof Blockly.JavaScript !== 'undefined' &&
+                         typeof Blockly.JavaScript.forBlock !== 'undefined' &&
+                         typeof Blockly.JavaScript.forBlock['uin_model_remote'] === 'function';
+    } catch (e) {
+        log.debug('checkGeneratorsReady()', 'error checking generator:', e);
+    }
+    
+    const result = uinGeneratorsReady && uinLoaded && customBlocksLoaded && generatorExists;
+    log.debug('checkGeneratorsReady()', 
+        'uinGeneratorsReady:', uinGeneratorsReady, 
+        'uinLoaded:', uinLoaded,
+        'customBlocksLoaded:', customBlocksLoaded,
+        'generatorExists:', generatorExists,
+        'result:', result);
     return result;
 }
 
@@ -99,14 +151,26 @@ function waitForReady(callback) {
 // Initialize workspace when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     log.info('DOMContentLoaded', 'event fired');
-    // Also wait for UIN to load
-    if (!window.UINLoaded) {
-        log.debug('DOMContentLoaded', 'UIN not loaded, adding event listener');
-        window.addEventListener('uin-loaded', initializeWorkspace);
-    } else {
-        log.debug('DOMContentLoaded', 'UIN already loaded, initializing workspace');
+    
+    // Wait for both UIN and custom blocks to load
+    function checkAndInitialize() {
+        if (!window.UINLoaded) {
+            log.debug('checkAndInitialize', 'waiting for UIN...');
+            window.addEventListener('uin-loaded', checkAndInitialize, { once: true });
+            return;
+        }
+        
+        if (!window.customBlocksLoaded) {
+            log.debug('checkAndInitialize', 'waiting for custom blocks...');
+            window.addEventListener('custom-blocks-loaded', checkAndInitialize, { once: true });
+            return;
+        }
+        
+        log.info('checkAndInitialize', 'both UIN and custom blocks loaded, initializing workspace');
         initializeWorkspace();
     }
+    
+    checkAndInitialize();
 });
 
 function initializeWorkspace() {
@@ -132,6 +196,26 @@ function initializeWorkspace() {
     });
     
     log.debug('initializeWorkspace()', 'workspace created:', workspace);
+    
+    // Initialize custom block generators now that workspace exists
+    if (typeof window.initializeBlocklyGenerators === 'function') {
+        log.info('initializeWorkspace()', 'initializing custom block generators');
+        const success = window.initializeBlocklyGenerators();
+        if (success) {
+            log.info('initializeWorkspace()', 'custom block generators initialized successfully');
+            // Set the flag immediately
+            generatorsReady = true;
+            window.uinGeneratorsReady = true;
+        } else {
+            log.error('initializeWorkspace()', 'custom block generators initialization failed!');
+            return; // Don't continue if generators failed
+        }
+    } else {
+        log.error('initializeWorkspace()', 'initializeBlocklyGenerators not found!');
+        // Try again in 100ms
+        setTimeout(() => initializeWorkspace(), 100);
+        return;
+    }
 
     // Set up language selector
     document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -163,30 +247,44 @@ function initializeWorkspace() {
     });
     log.debug('initializeWorkspace()', 'clear button listener added');
 
-    // Wait for everything to be ready
-    waitForReady(() => {
-        log.info('waitForReady.callback()', 'everything ready, adding default blocks');
-        addDefaultBlocks();
-        
-        // Add change listener after blocks are loaded
-        workspace.addChangeListener(() => {
-            log.debug('workspace.changeListener()', 'change detected, generatorsReady:', generatorsReady);
-            if (generatorsReady) {
-                updateCode();
-            }
-        });
-        
-        // Initial code update
-        log.debug('waitForReady.callback()', 'performing initial code update');
-        updateCode();
+    // Add change listener
+    workspace.addChangeListener(() => {
+        log.debug('workspace.changeListener()', 'change detected, generatorsReady:', generatorsReady);
+        if (generatorsReady && window.uinGeneratorsReady) {
+            updateCode();
+        } else {
+            log.warn('workspace.changeListener()', 'skipping updateCode - generators not ready');
+        }
     });
+    
+    // Add default blocks
+    log.info('initializeWorkspace()', 'adding default blocks');
+    addDefaultBlocks();
+    
+    // Initial code update
+    log.debug('initializeWorkspace()', 'performing initial code update');
+    updateCode();
 }
 
 function updateCode() {
-    log.debug('updateCode()', 'generatorsReady:', generatorsReady, 'currentLanguage:', currentLanguage);
+    log.debug('updateCode()', 'generatorsReady:', generatorsReady, 'currentLanguage:', currentLanguage, 'window.uinGeneratorsReady:', window.uinGeneratorsReady);
     
-    if (!generatorsReady) {
-        log.warn('updateCode()', 'generators not ready yet');
+    // Check if generators exist
+    const generatorExists = typeof Blockly?.JavaScript?.forBlock?.['uin_model_remote'] === 'function';
+    log.debug('updateCode()', 'uin_model_remote generator exists:', generatorExists);
+    
+    // Check both flags and generator existence
+    if (!generatorsReady || !window.uinGeneratorsReady || !generatorExists) {
+        log.warn('updateCode()', 'generators not ready yet', 
+            'generatorsReady:', generatorsReady, 
+            'window.uinGeneratorsReady:', window.uinGeneratorsReady,
+            'generatorExists:', generatorExists);
+        
+        // Try to initialize if not ready
+        if (!generatorExists && typeof window.initializeBlocklyGenerators === 'function') {
+            log.info('updateCode()', 'attempting to initialize generators');
+            window.initializeBlocklyGenerators();
+        }
         return;
     }
     
@@ -326,6 +424,14 @@ async function runCode() {
         return;
     }
     
+    // Check if generators are ready
+    if (!window.uinGeneratorsReady) {
+        log.warn('runCode()', 'generators not ready yet');
+        resultOutput.classList.add('error');
+        resultOutput.querySelector('code').textContent = 'Code generators are still loading. Please try again in a moment.';
+        return;
+    }
+    
     // Update UI
     log.debug('runCode()', 'updating UI state');
     runBtn.disabled = true;
@@ -338,21 +444,22 @@ async function runCode() {
         log.debug('runCode()', 'generated code length:', code.length);
         log.debug('runCode()', 'code:', code);
         
-        // Create a function that captures console.log
+        // Create a function that uses global UIN components
         log.debug('runCode()', 'creating execution function');
-        const executeCode = new Function('console', 'Model', 'RemoteModel', 'Agent', 'Tool', `
+        // Make sure the classes are available globally
+        const executeCode = new Function('console', `
+            // Use the global UIN components
+            const Model = window.Model;
+            const RemoteModel = window.RemoteModel;
+            const Agent = window.Agent;
+            const Tool = window.Tool;
+            
             ${code}
         `);
         
-        // Execute with our custom console and UIN components
+        // Execute with our custom console
         log.info('runCode()', 'executing user code');
-        await executeCode(
-            outputConsole,
-            window.UIN.Model,
-            window.UIN.RemoteModel,
-            window.UIN.Agent,
-            window.UIN.Tool
-        );
+        await executeCode(outputConsole);
         
         log.debug('runCode()', 'execution completed successfully');
         resultOutput.classList.add('success');
