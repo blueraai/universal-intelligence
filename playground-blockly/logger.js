@@ -13,23 +13,29 @@ const logger = isBrowser ?
             serialize: true,
             asObject: false,
             write: {
-                trace: (o) => {
-                    console.log('%c[TRACE]%c', 'color: #999; font-weight: bold', '', ...o);
+                trace: function() {
+                    const args = Array.from(arguments);
+                    console.log('%c[TRACE]%c', 'color: #999; font-weight: bold', '', ...args);
                 },
-                debug: (o) => {
-                    console.log('%c[DEBUG]%c', 'color: #0099ff; font-weight: bold', '', ...o);
+                debug: function() {
+                    const args = Array.from(arguments);
+                    console.log('%c[DEBUG]%c', 'color: #0099ff; font-weight: bold', '', ...args);
                 },
-                info: (o) => {
-                    console.log('%c[INFO]%c', 'color: #00cc00; font-weight: bold', '', ...o);
+                info: function() {
+                    const args = Array.from(arguments);
+                    console.log('%c[INFO]%c', 'color: #00cc00; font-weight: bold', '', ...args);
                 },
-                warn: (o) => {
-                    console.warn('%c[WARN]%c', 'color: #ff9900; font-weight: bold', '', ...o);
+                warn: function() {
+                    const args = Array.from(arguments);
+                    console.warn('%c[WARN]%c', 'color: #ff9900; font-weight: bold', '', ...args);
                 },
-                error: (o) => {
-                    console.error('%c[ERROR]%c', 'color: #ff0000; font-weight: bold', '', ...o);
+                error: function() {
+                    const args = Array.from(arguments);
+                    console.error('%c[ERROR]%c', 'color: #ff0000; font-weight: bold', '', ...args);
                 },
-                fatal: (o) => {
-                    console.error('%c[FATAL]%c', 'color: #ff00ff; font-weight: bold', '', ...o);
+                fatal: function() {
+                    const args = Array.from(arguments);
+                    console.error('%c[FATAL]%c', 'color: #ff00ff; font-weight: bold', '', ...args);
                 }
             }
         }
