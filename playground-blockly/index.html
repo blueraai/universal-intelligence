@@ -15,8 +15,11 @@
         // Import UIN with named exports per the actual module structure
         import universalintelligence, { Model, Agent, Tool, RemoteModel } from 'universalintelligence';
         
-        console.log('universalintelligence default:', universalintelligence);
-        console.log('Model:', Model, 'Agent:', Agent, 'Tool:', Tool, 'RemoteModel:', RemoteModel);
+        // Log initialization info
+        if (window.console && window.console.log) {
+            console.log('[UIN] Default export:', universalintelligence);
+            console.log('[UIN] Components:', { Model, Agent, Tool, RemoteModel });
+        }
         
         // For now, we'll use the basic Tool for different purposes
         const SimplePrinterTool = Tool;
@@ -47,7 +50,9 @@
         window.UINLoaded = true;
         window.dispatchEvent(new Event('uin-loaded'));
         
-        console.log('Universal Intelligence loaded:', universalintelligence);
+        if (window.console && window.console.log) {
+            console.log('[UIN] Initialization complete');
+        }
     </script>
     
     <link rel="stylesheet" href="styles.css">
@@ -181,7 +186,9 @@
                 const script = document.createElement('script');
                 script.src = './custom-blocks.js';
                 script.onload = function() {
-                    console.log('custom-blocks.js loaded');
+                    if (window.console && window.console.log) {
+                        console.log('[Blockly] custom-blocks.js loaded');
+                    }
                     window.customBlocksLoaded = true;
                     window.dispatchEvent(new Event('custom-blocks-loaded'));
                 };

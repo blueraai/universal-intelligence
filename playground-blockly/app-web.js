@@ -560,7 +560,7 @@ async function runCode() {
                 const Agent = window.Agent;
                 const Tool = window.Tool;
                 
-                // Add debug logging
+                // Add debug logging (these will be captured by outputConsole)
                 console.log('🔧 Model:', typeof Model);
                 console.log('🔧 Agent:', typeof Agent);
                 console.log('🔧 Tool:', typeof Tool);
