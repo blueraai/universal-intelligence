@@ -328,14 +328,20 @@ function addDefaultBlocks() {
         const variableMap = workspace.getVariableMap();
         log.debug('addDefaultBlocks()', 'got variableMap:', variableMap);
         
-        const variablesToCreate = ['model', 'tool', 'agent', 'result'];
-        variablesToCreate.forEach(varName => {
-            if (!variableMap.getVariable(varName)) {
-                log.debug('addDefaultBlocks()', 'creating variable:', varName);
-                variableMap.createVariable(varName, null, varName + 'Var');
-            } else {
-                log.debug('addDefaultBlocks()', 'variable already exists:', varName);
-            }
+        // Clear any existing variables first
+        workspace.getVariableMap().clear();
+        
+        // Create the variables we need with specific IDs
+        const variablesToCreate = [
+            { name: 'model', id: 'modelVar' },
+            { name: 'userInput', id: 'inputVar' },
+            { name: 'modelOutput', id: 'outputVar' },
+            { name: 'printer', id: 'printerVar' }
+        ];
+        
+        variablesToCreate.forEach(varInfo => {
+            log.debug('addDefaultBlocks()', 'creating variable:', varInfo.name, 'with id:', varInfo.id);
+            variableMap.createVariable(varInfo.name, null, varInfo.id);
         });
 
         // Create a simple example: model processes text and printer displays output
@@ -502,22 +508,31 @@ async function runCode() {
         log.debug('runCode()', 'generated code length:', code.length);
         log.debug('runCode()', 'code:', code);
         
-        // Create a function that uses global UIN components
+        // Create an async function that uses global UIN components
         log.debug('runCode()', 'creating execution function');
-        // Make sure the classes are available globally
-        const executeCode = new Function('console', `
-            // Use the global UIN components
-            const Model = window.Model;
-            const RemoteModel = window.RemoteModel;
-            const Agent = window.Agent;
-            const Tool = window.Tool;
-            
-            ${code}
-        `);
         
-        // Execute with our custom console
+        // Wrap the code in an async function since it contains await
+        const asyncCode = `
+            (async function() {
+                // Use the global UIN components
+                const Model = window.Model;
+                const RemoteModel = window.RemoteModel;
+                const Agent = window.Agent;
+                const Tool = window.Tool;
+                
+                ${code}
+            })()
+        `;
+        
+        // Execute with our custom console available globally
         log.info('runCode()', 'executing user code');
-        await executeCode(outputConsole);
+        const originalConsole = window.console;
+        window.console = outputConsole;
+        try {
+            await eval(asyncCode);
+        } finally {
+            window.console = originalConsole;
+        }
         
         log.debug('runCode()', 'execution completed successfully');
         resultOutput.classList.add('success');

@@ -406,10 +406,20 @@ function initializeGenerators() {
       var method = Blockly.JavaScript.valueToCode(block, 'METHOD', Blockly.JavaScript.ORDER_ATOMIC) || '""';
       var params = Blockly.JavaScript.valueToCode(block, 'PARAMS', Blockly.JavaScript.ORDER_ATOMIC) || '{}';
       
-      // Remove quotes from method name
-      method = method.replace(/['"]/g, '');
+      // Debug log
+      blockLog.debug('uin_tool_call generator', 'tool:', tool, 'method:', method, 'params:', params);
       
-      // Tool methods also return [result, logs] tuple
+      // Remove quotes from method name if it's a string literal
+      if (method.startsWith('"') || method.startsWith("'")) {
+        method = method.slice(1, -1);
+      }
+      
+      // If params is not an object literal, wrap it
+      if (!params.startsWith('{')) {
+        params = `{ text: ${params} }`;
+      }
+      
+      // Tool methods return [result, logs] tuple
       var code = `await ${tool}.${method}(${params})`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
