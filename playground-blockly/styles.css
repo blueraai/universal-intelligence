@@ -165,6 +165,24 @@ pre {
     box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
 }
 
+.example-select {
+    padding: 10px 15px;
+    background: #805ad5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.example-select:hover {
+    background: #6b46c1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(128, 90, 213, 0.3);
+}
+
 #resultOutput {
     min-height: 100px;
     max-height: 300px;

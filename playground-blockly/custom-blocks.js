@@ -101,6 +101,34 @@ Blockly.Blocks['uin_tool_api'] = {
   }
 };
 
+blockLog.debug('defining block', 'uin_tool_fetch');
+Blockly.Blocks['uin_tool_fetch'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Create Fetch Tool 🌍");
+    this.appendValueInput("URL")
+        .setCheck("String")
+        .appendField("default URL");
+    this.setOutput(true, "Tool");
+    this.setColour(120);
+    this.setTooltip("Create a tool that fetches data from URLs");
+  }
+};
+
+blockLog.debug('defining block', 'uin_tool_research');
+Blockly.Blocks['uin_tool_research'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Create Research Tool 🔍");
+    this.appendValueInput("SOURCES")
+        .setCheck("Array")
+        .appendField("sources");
+    this.setOutput(true, "Tool");
+    this.setColour(120);
+    this.setTooltip("Create a research tool that fetches and analyzes multiple sources");
+  }
+};
+
 Blockly.Blocks['uin_tool_mcp'] = {
   init: function() {
     this.appendDummyInput()
@@ -191,6 +219,18 @@ Blockly.Blocks['uin_agent_connect'] = {
 
 // Don't initialize immediately - wait for a signal from app-web.js
 blockLog.info('custom-blocks.js loaded, waiting for initialization signal');
+
+// Multi-line text block
+blockLog.debug('defining block', 'text_multiline');
+Blockly.Blocks['text_multiline'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldMultilineInput('Enter text...'), 'TEXT');
+    this.setOutput(true, 'String');
+    this.setColour(160);
+    this.setTooltip('Multi-line text input');
+  }
+};
 
 // Expose initialization function globally
 window.initializeBlocklyGenerators = initializeGenerators;
@@ -394,6 +434,71 @@ function initializeGenerators() {
       })()`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
+    
+    Blockly.JavaScript.forBlock['uin_tool_fetch'] = function(block) {
+      var defaultUrl = Blockly.JavaScript.valueToCode(block, 'URL', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      
+      var code = `(() => {
+        const tool = new Tool();
+        tool.fetchData = async function(params) {
+          const url = params.url || ${defaultUrl};
+          console.log('🌍 Fetching:', url);
+          try {
+            const response = await fetch(url);
+            const contentType = response.headers.get('content-type');
+            let data;
+            if (contentType && contentType.includes('application/json')) {
+              data = await response.json();
+            } else {
+              data = await response.text();
+            }
+            console.log('✅ Fetched successfully');
+            return [data, { status: response.status, url: url }];
+          } catch (error) {
+            console.error('❌ Fetch error:', error.message);
+            return [null, { error: error.message, url: url }];
+          }
+        };
+        return tool;
+      })()`;
+      return [code, Blockly.JavaScript.ORDER_ATOMIC];
+    };
+    
+    Blockly.JavaScript.forBlock['uin_tool_research'] = function(block) {
+      var sources = Blockly.JavaScript.valueToCode(block, 'SOURCES', Blockly.JavaScript.ORDER_ATOMIC) || '[]';
+      
+      var code = `(() => {
+        const tool = new Tool();
+        tool.research = async function(params) {
+          const sources = params.sources || ${sources};
+          const query = params.query || '';
+          console.log('🔍 Researching:', query, 'from', sources.length, 'sources');
+          
+          const results = [];
+          for (const source of sources) {
+            try {
+              const response = await fetch(source);
+              const text = await response.text();
+              results.push({ source, content: text, success: true });
+            } catch (error) {
+              results.push({ source, error: error.message, success: false });
+            }
+          }
+          
+          const summary = {
+            query: query,
+            sourcesChecked: sources.length,
+            successfulFetches: results.filter(r => r.success).length,
+            results: results
+          };
+          
+          console.log('✅ Research complete');
+          return [summary, { timestamp: new Date().toISOString() }];
+        };
+        return tool;
+      })()`;
+      return [code, Blockly.JavaScript.ORDER_ATOMIC];
+    };
 
     Blockly.JavaScript.forBlock['uin_tool_mcp'] = function(block) {
       var server = Blockly.JavaScript.valueToCode(block, 'SERVER', Blockly.JavaScript.ORDER_ATOMIC) || '""';
@@ -490,6 +595,21 @@ function initializeGenerators() {
       
       var code = `await ${agent}.connect(${args.join('')});\n`;
       return code;
+    };
+    
+    // Multi-line text generator
+    Blockly.JavaScript.forBlock['text_multiline'] = function(block) {
+      var text = block.getFieldValue('TEXT');
+      // Escape the text properly for JavaScript
+      var code = Blockly.JavaScript.quote_(text);
+      return [code, Blockly.JavaScript.ORDER_ATOMIC];
+    };
+    
+    Blockly.Python.forBlock['text_multiline'] = function(block) {
+      var text = block.getFieldValue('TEXT');
+      // Escape the text properly for Python
+      var code = Blockly.Python.quote_(text);
+      return [code, Blockly.Python.ORDER_ATOMIC];
     };
     
     // Set a global flag to indicate generators are ready

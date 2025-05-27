@@ -78,6 +78,13 @@
                     <button id="runCode" class="run-btn">▶ Run in Browser</button>
                     <button id="copyCode" class="copy-btn">📋 Copy Code</button>
                     <button id="clearOutput" class="clear-btn">🗑️ Clear Output</button>
+                    <select id="exampleSelect" class="example-select">
+                        <option value="">Load Example...</option>
+                        <option value="basic">Basic Model + Output</option>
+                        <option value="fetch">Fetch Tool Demo</option>
+                        <option value="research">Research Agent</option>
+                        <option value="multi-tool">Multi-Tool Agent</option>
+                    </select>
                 </div>
                 
                 <div class="result-section">
@@ -99,6 +106,8 @@
         <category name="Tools 🔧" colour="#5CA65C">
             <block type="uin_tool_printer"></block>
             <block type="uin_tool_api"></block>
+            <block type="uin_tool_fetch"></block>
+            <block type="uin_tool_research"></block>
             <block type="uin_tool_call"></block>
         </category>
         
@@ -129,6 +138,7 @@
         
         <category name="Text" colour="#5C9E9E">
             <block type="text"></block>
+            <block type="text_multiline"></block>
             <block type="text_join"></block>
             <block type="text_print"></block>
         </category>

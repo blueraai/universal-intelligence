@@ -277,6 +277,17 @@ function initializeWorkspace() {
         outputConsole.clear();
     });
     log.debug('initializeWorkspace()', 'clear button listener added');
+    
+    // Set up example selector
+    document.getElementById('exampleSelect').addEventListener('change', function() {
+        const example = this.value;
+        log.info('exampleSelect.change()', 'loading example:', example);
+        if (example) {
+            loadExample(example);
+            this.value = ''; // Reset selector
+        }
+    });
+    log.debug('initializeWorkspace()', 'example selector listener added');
 
     // Add change listener
     workspace.addChangeListener(() => {
@@ -393,8 +404,13 @@ function addDefaultBlocks() {
       <block type="variables_set">
         <field name="VAR" id="inputVar">userInput</field>
         <value name="VALUE">
-          <block type="text">
-            <field name="TEXT">Hello! Tell me a short joke about programming.</field>
+          <block type="text_multiline">
+            <field name="TEXT">Hello! I'm learning about Universal Intelligence.
+
+Can you:
+1. Tell me a short joke about programming
+2. Explain what makes it funny
+3. Rate the joke from 1-10</field>
           </block>
         </value>
         <next>
@@ -562,6 +578,362 @@ async function runCode() {
         runBtn.disabled = false;
         runBtn.innerHTML = '▶ Run in Browser';
     }
+}
+
+function loadExample(exampleName) {
+    log.info('loadExample()', 'loading example:', exampleName);
+    
+    let xmlText = '';
+    
+    switch(exampleName) {
+        case 'basic':
+            xmlText = getBasicExample();
+            break;
+        case 'fetch':
+            xmlText = getFetchExample();
+            break;
+        case 'research':
+            xmlText = getResearchExample();
+            break;
+        case 'multi-tool':
+            xmlText = getMultiToolExample();
+            break;
+        default:
+            log.warn('loadExample()', 'unknown example:', exampleName);
+            return;
+    }
+    
+    try {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlText, 'text/xml');
+        Blockly.Xml.clearWorkspaceAndLoadFromXml(xml.documentElement, workspace);
+        log.info('loadExample()', 'example loaded successfully');
+    } catch (error) {
+        log.error('loadExample()', 'error loading example:', error);
+    }
+}
+
+function getBasicExample() {
+    // This is our current default example
+    return `<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="modelVar">model</variable>
+    <variable id="inputVar">userInput</variable>
+    <variable id="outputVar">modelOutput</variable>
+  </variables>
+  <block type="variables_set" x="20" y="20">
+    <field name="VAR" id="modelVar">model</field>
+    <value name="VALUE">
+      <block type="uin_model_local">
+        <field name="ENGINE">AUTO</field>
+        <field name="QUANTIZATION">AUTO</field>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set">
+        <field name="VAR" id="inputVar">userInput</field>
+        <value name="VALUE">
+          <block type="text_multiline">
+            <field name="TEXT">Hello! I'm learning about Universal Intelligence.
+
+Can you:
+1. Tell me a short joke about programming
+2. Explain what makes it funny
+3. Rate the joke from 1-10</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="outputVar">modelOutput</field>
+            <value name="VALUE">
+              <block type="uin_model_process">
+                <field name="REMEMBER">FALSE</field>
+                <value name="MODEL">
+                  <block type="variables_get">
+                    <field name="VAR" id="modelVar">model</field>
+                  </block>
+                </value>
+                <value name="INPUT">
+                  <block type="variables_get">
+                    <field name="VAR" id="inputVar">userInput</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="text_print">
+                <value name="TEXT">
+                  <block type="variables_get">
+                    <field name="VAR" id="outputVar">modelOutput</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
+}
+
+function getFetchExample() {
+    return `<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="fetchVar">fetchTool</variable>
+    <variable id="resultVar">result</variable>
+  </variables>
+  <block type="variables_set" x="20" y="20">
+    <field name="VAR" id="fetchVar">fetchTool</field>
+    <value name="VALUE">
+      <block type="uin_tool_fetch">
+        <value name="URL">
+          <block type="text">
+            <field name="TEXT">https://api.github.com/repos/blueraai/universal-intelligence</field>
+          </block>
+        </value>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set">
+        <field name="VAR" id="resultVar">result</field>
+        <value name="VALUE">
+          <block type="uin_tool_call">
+            <value name="TOOL">
+              <block type="variables_get">
+                <field name="VAR" id="fetchVar">fetchTool</field>
+              </block>
+            </value>
+            <value name="METHOD">
+              <block type="text">
+                <field name="TEXT">fetchData</field>
+              </block>
+            </value>
+            <value name="PARAMS">
+              <block type="text">
+                <field name="TEXT">{}</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="text_print">
+            <value name="TEXT">
+              <block type="text_join">
+                <mutation items="2"></mutation>
+                <value name="ADD0">
+                  <block type="text">
+                    <field name="TEXT">Repository Stars: </field>
+                  </block>
+                </value>
+                <value name="ADD1">
+                  <block type="variables_get">
+                    <field name="VAR" id="resultVar">result</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
+}
+
+function getResearchExample() {
+    return `<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="modelVar">model</variable>
+    <variable id="researchVar">researchTool</variable>
+    <variable id="agentVar">researchAgent</variable>
+    <variable id="resultVar">result</variable>
+  </variables>
+  <block type="variables_set" x="20" y="20">
+    <field name="VAR" id="modelVar">model</field>
+    <value name="VALUE">
+      <block type="uin_model_local">
+        <field name="ENGINE">AUTO</field>
+        <field name="QUANTIZATION">AUTO</field>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set">
+        <field name="VAR" id="researchVar">researchTool</field>
+        <value name="VALUE">
+          <block type="uin_tool_research">
+            <value name="SOURCES">
+              <block type="lists_create_with">
+                <mutation items="2"></mutation>
+                <value name="ADD0">
+                  <block type="text">
+                    <field name="TEXT">https://api.github.com/repos/blueraai/universal-intelligence</field>
+                  </block>
+                </value>
+                <value name="ADD1">
+                  <block type="text">
+                    <field name="TEXT">https://api.github.com/repos/google/blockly</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="agentVar">researchAgent</field>
+            <value name="VALUE">
+              <block type="uin_agent_create">
+                <value name="MODEL">
+                  <block type="variables_get">
+                    <field name="VAR" id="modelVar">model</field>
+                  </block>
+                </value>
+                <value name="TOOLS">
+                  <block type="lists_create_with">
+                    <mutation items="1"></mutation>
+                    <value name="ADD0">
+                      <block type="variables_get">
+                        <field name="VAR" id="researchVar">researchTool</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="resultVar">result</field>
+                <value name="VALUE">
+                  <block type="uin_agent_process">
+                    <field name="REMEMBER">FALSE</field>
+                    <value name="AGENT">
+                      <block type="variables_get">
+                        <field name="VAR" id="agentVar">researchAgent</field>
+                      </block>
+                    </value>
+                    <value name="INPUT">
+                      <block type="text">
+                        <field name="TEXT">Research these GitHub repositories and summarize their purpose and key features</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <next>
+                  <block type="text_print">
+                    <value name="TEXT">
+                      <block type="variables_get">
+                        <field name="VAR" id="resultVar">result</field>
+                      </block>
+                    </value>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
+}
+
+function getMultiToolExample() {
+    return `<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="modelVar">model</variable>
+    <variable id="fetchVar">fetchTool</variable>
+    <variable id="printerVar">printerTool</variable>
+    <variable id="agentVar">multiAgent</variable>
+    <variable id="resultVar">result</variable>
+  </variables>
+  <block type="variables_set" x="20" y="20">
+    <field name="VAR" id="modelVar">model</field>
+    <value name="VALUE">
+      <block type="uin_model_local">
+        <field name="ENGINE">AUTO</field>
+        <field name="QUANTIZATION">AUTO</field>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set">
+        <field name="VAR" id="fetchVar">fetchTool</field>
+        <value name="VALUE">
+          <block type="uin_tool_fetch"></block>
+        </value>
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="printerVar">printerTool</field>
+            <value name="VALUE">
+              <block type="uin_tool_printer"></block>
+            </value>
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="agentVar">multiAgent</field>
+                <value name="VALUE">
+                  <block type="uin_agent_create">
+                    <value name="MODEL">
+                      <block type="variables_get">
+                        <field name="VAR" id="modelVar">model</field>
+                      </block>
+                    </value>
+                    <value name="TOOLS">
+                      <block type="lists_create_with">
+                        <mutation items="2"></mutation>
+                        <value name="ADD0">
+                          <block type="variables_get">
+                            <field name="VAR" id="fetchVar">fetchTool</field>
+                          </block>
+                        </value>
+                        <value name="ADD1">
+                          <block type="variables_get">
+                            <field name="VAR" id="printerVar">printerTool</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set">
+                    <field name="VAR" id="resultVar">result</field>
+                    <value name="VALUE">
+                      <block type="uin_agent_process">
+                        <field name="REMEMBER">TRUE</field>
+                        <value name="AGENT">
+                          <block type="variables_get">
+                            <field name="VAR" id="agentVar">multiAgent</field>
+                          </block>
+                        </value>
+                        <value name="INPUT">
+                          <block type="text_multiline">
+                            <field name="TEXT">Please do the following:
+1. Fetch data from https://api.github.com/users/github
+2. Print the user's name and bio
+3. Tell me an interesting fact about the number of public repos they have</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="text_print">
+                        <value name="TEXT">
+                          <block type="variables_get">
+                            <field name="VAR" id="resultVar">result</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
 }
 
 function copyCode() {
