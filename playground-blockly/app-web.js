@@ -1,72 +1,10 @@
-// Initialize Pino logger
-import pino from 'pino';
+// Import centralized logger
+import log from './logger.js';
 
-const log = pino({
-    level: 'debug',
-    browser: {
-        serialize: true,
-        asObject: false,
-        transmit: {
-            send: function (level, logEvent) {
-                const msg = logEvent.messages.join(' ');
-                const levelStyles = {
-                    10: 'color: gray', // trace
-                    20: 'color: cyan', // debug
-                    30: 'color: green', // info
-                    40: 'color: orange', // warn
-                    50: 'color: red', // error
-                    60: 'color: magenta' // fatal
-                };
-                const levelNames = {
-                    10: 'TRACE',
-                    20: 'DEBUG',
-                    30: 'INFO',
-                    40: 'WARN',
-                    50: 'ERROR',
-                    60: 'FATAL'
-                };
-                const style = levelStyles[logEvent.level] || '';
-                const timestamp = new Date().toISOString();
-                console.log(`%c[${timestamp}] ${levelNames[logEvent.level]}%c ${msg}`, style + '; font-weight: bold', 'color: inherit');
-            }
-        }
-    }
-});
+log.info('app-web.js initializing');
 
-log.info('app-web.js', 'initializing');
-
-// Create a logger for custom-blocks.js (which can't import modules)
-window.customBlocksLogger = pino({
-    level: 'debug',
-    browser: {
-        serialize: true,
-        asObject: false,
-        transmit: {
-            send: function (level, logEvent) {
-                const msg = logEvent.messages.join(' ');
-                const levelStyles = {
-                    10: 'color: gray', // trace
-                    20: 'color: cyan', // debug
-                    30: 'color: green', // info
-                    40: 'color: orange', // warn
-                    50: 'color: red', // error
-                    60: 'color: magenta' // fatal
-                };
-                const levelNames = {
-                    10: 'TRACE',
-                    20: 'DEBUG',
-                    30: 'INFO',
-                    40: 'WARN',
-                    50: 'ERROR',
-                    60: 'FATAL'
-                };
-                const style = levelStyles[logEvent.level] || '';
-                const timestamp = new Date().toISOString();
-                console.log(`%c[${timestamp}] ${levelNames[logEvent.level]} [custom-blocks]%c ${msg}`, style + '; font-weight: bold', 'color: inherit');
-            }
-        }
-    }
-});
+// Expose logger for custom-blocks.js (which can't import modules)
+window.customBlocksLogger = log;
 
 // Initialize Blockly for web execution
 let workspace;

@@ -1,13 +1,12 @@
 // Custom block definitions for Universal Intelligence components
 
-// Since this is loaded as a non-module script, we need to access Pino from the global scope
-// The app-web.js module should expose it globally
-const blockLog = window.customBlocksLogger || {
-    debug: (...args) => console.log('%c[DEBUG]%c custom-blocks.js:', 'color: cyan; font-weight: bold', 'color: inherit', ...args),
-    info: (...args) => console.log('%c[INFO]%c custom-blocks.js:', 'color: green; font-weight: bold', 'color: inherit', ...args),
-    warn: (...args) => console.log('%c[WARN]%c custom-blocks.js:', 'color: orange; font-weight: bold', 'color: inherit', ...args),
-    error: (...args) => console.log('%c[ERROR]%c custom-blocks.js:', 'color: red; font-weight: bold', 'color: inherit', ...args)
-};
+// Use the global logger or create a fallback
+const blockLog = window.customBlocksLogger || (window.createFallbackLogger ? window.createFallbackLogger('[custom-blocks]') : {
+    debug: (...args) => console.debug('[custom-blocks]', ...args),
+    info: (...args) => console.info('[custom-blocks]', ...args),
+    warn: (...args) => console.warn('[custom-blocks]', ...args),
+    error: (...args) => console.error('[custom-blocks]', ...args)
+});
 
 blockLog.info('initializing custom blocks');
 
