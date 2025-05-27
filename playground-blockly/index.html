@@ -12,15 +12,13 @@
     
     <!-- Import Universal Intelligence Web -->
     <script type="module">
-        // Import UIN as default export per README_WEB.md
-        import universalintelligence from 'universalintelligence';
+        // Import UIN with named exports per the actual module structure
+        import universalintelligence, { Model, Agent, Tool, RemoteModel } from 'universalintelligence';
         
-        // Destructure the classes from the default export
-        const { Model, Agent, Tool } = universalintelligence;
+        console.log('universalintelligence default:', universalintelligence);
+        console.log('Model:', Model, 'Agent:', Agent, 'Tool:', Tool, 'RemoteModel:', RemoteModel);
         
         // For now, we'll use the basic Tool for different purposes
-        // Note: RemoteModel might be a specific model configuration
-        const RemoteModel = Model; // Will use credentials in constructor
         const SimplePrinterTool = Tool;
         const APITool = Tool;
         const MCPTool = Tool;

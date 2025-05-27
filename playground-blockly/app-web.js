@@ -332,7 +332,7 @@ function addDefaultBlocks() {
             }
         });
 
-        // Create a simple example - note we're using remote model for web
+        // Create a simple example using local model
         const xmlText = `
         <xml xmlns="https://developers.google.com/blockly/xml">
             <variables>
@@ -344,13 +344,9 @@ function addDefaultBlocks() {
             <block type="variables_set" x="20" y="20">
                 <field name="VAR" id="modelVar">model</field>
                 <value name="VALUE">
-                    <block type="uin_model_remote">
-                        <field name="PROVIDER">OPENROUTER</field>
-                        <value name="CREDENTIALS">
-                            <block type="text">
-                                <field name="TEXT">your-api-key-here</field>
-                            </block>
-                        </value>
+                    <block type="uin_model_local">
+                        <field name="ENGINE">AUTO</field>
+                        <field name="QUANTIZATION">AUTO</field>
                     </block>
                 </value>
                 <next>

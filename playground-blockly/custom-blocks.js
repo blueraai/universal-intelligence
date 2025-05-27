@@ -226,10 +226,14 @@ function initializeGenerators() {
       var engine = block.getFieldValue('ENGINE');
       var quantization = block.getFieldValue('QUANTIZATION');
       
-      var engineValue = engine === 'AUTO' ? 'None' : `"${engine.toLowerCase()}"`;
-      var quantValue = quantization === 'AUTO' ? 'None' : `"${quantization}"`;
-      
-      var code = `Model(engine=${engineValue}, quantization=${quantValue})`;
+      // If both are AUTO, use Model() with no args for default
+      if (engine === 'AUTO' && quantization === 'AUTO') {
+        var code = `Model()`;
+      } else {
+        var engineValue = engine === 'AUTO' ? 'None' : `"${engine.toLowerCase()}"`;
+        var quantValue = quantization === 'AUTO' ? 'None' : `"${quantization}"`;
+        var code = `Model(engine=${engineValue}, quantization=${quantValue})`;
+      }
       return [code, Blockly.Python.ORDER_ATOMIC];
     };
 
@@ -342,8 +346,8 @@ function initializeGenerators() {
       var credentials = Blockly.JavaScript.valueToCode(block, 'CREDENTIALS', Blockly.JavaScript.ORDER_ATOMIC) || '""';
       var provider = block.getFieldValue('PROVIDER');
       
-      // RemoteModel might just be Model with credentials
-      var code = `new Model({ credentials: ${credentials}, provider: "${provider.toLowerCase()}" })`;
+      // Use RemoteModel for cloud-based models
+      var code = `new RemoteModel({ credentials: ${credentials}, provider: "${provider.toLowerCase()}" })`;
       return [code, Blockly.JavaScript.ORDER_ATOMIC];
     };
     blockLog.info('initializeGenerators()', 'uin_model_remote generator registered');
