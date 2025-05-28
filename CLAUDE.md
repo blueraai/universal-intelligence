@@ -46,6 +46,16 @@ npm install && npm run build && python3 playground/web/server.py
 # Then open: http://localhost:8000/playground/web
 ```
 
+### Blockly Playground Development
+```bash
+# From repository root
+cd playground-blockly
+npm install
+npm run dev  # Development server with HMR
+npm run build  # Production build
+npm run preview  # Preview production build
+```
+
 ### Running Tests
 ```bash
 # Python tests - run specific test files directly
@@ -106,3 +116,73 @@ Pre-built implementations are organized under `universal_intelligence/community/
 3. **Type Safety**: Python uses type hints; TypeScript uses strict mode
 4. **Logging**: Use the Logger utility from `universal_intelligence.community.__utils__.logger`
 5. **Model Support**: When adding models, include a `sources.yaml` for download URLs
+
+## Blockly Playground Implementation
+
+### Overview
+The Blockly playground (`playground-blockly/`) provides a visual programming interface for Universal Intelligence using Google Blockly. It enables drag-and-drop composition of AI applications.
+
+### Key Files
+- `index.html`: Main interface with Blockly workspace and ES module imports
+- `custom-blocks.js`: Block definitions and code generators for UIN components
+- `app-web.js`: Application logic, workspace management, and code execution
+- `logger.js`: Centralized Pino-based logging with browser compatibility
+- `styles.css`: UI styling including modal and console output
+
+### Important Implementation Details
+
+#### 1. Tuple Return Handling
+All UIN methods return `[result, logs]` tuples. Generated code must extract the result:
+```javascript
+result = (await model.process(input))[0];  // Extract result from tuple
+```
+
+#### 2. Browser Execution Pattern
+Code runs in an async IIFE with global UIN components:
+```javascript
+(async function() {
+  const Model = window.Model;
+  const Agent = window.Agent;
+  const Tool = window.Tool;
+  // Generated code here
+})()
+```
+
+#### 3. Tool Method Definition
+Tools are created with method definitions on the instance:
+```javascript
+const tool = new Tool();
+tool.methodName = async function(params) {
+  // Implementation
+  return [result, metadata];  // Must return tuple
+};
+```
+
+#### 4. Agent Tool Usage
+Agents need explicit instructions about available tools and how to use them:
+```javascript
+prompt = `You have access to:
+- fetchData({url: "..."}) - Fetches URLs
+- printText({text: "..."}) - Displays text
+YOUR TASK: [specific instructions]`;
+```
+
+#### 5. Logger Configuration
+The logger uses Pino with CSS-styled browser output:
+- Located in `logger.js`
+- Supports multiple arguments: `log.debug('func', 'arg:', value)`
+- Color-coded levels: DEBUG (blue), INFO (green), WARN (orange), ERROR (red)
+
+### Common Issues and Solutions
+
+1. **Agent Not Using Tools**: Ensure the prompt explicitly instructs tool usage with method names and parameter formats
+2. **Console Output Lost**: Check that outputConsole is properly capturing during execution
+3. **Model Initialization Fails**: Add try-catch blocks and log the model object for debugging
+4. **Generated Code Errors**: Use browser console to see full error stack traces
+
+### Development Workflow
+1. Make changes to blocks in `custom-blocks.js`
+2. Test code generation in browser console
+3. Update examples in `app-web.js` if needed
+4. Ensure logger shows proper debug output
+5. Update README.md with any new patterns
