@@ -156,6 +156,10 @@ Open in Chrome: `http://localhost:8000/playground/web`
 
 ## Documentation
 
+> Would you rather [**chat with our docs**](https://wiki.bluera.ai)? 💬
+> 
+> *Note: AI responses may include mistakes. Refer to the documentation below for sample code.*
+
 <details>
 <summary><strong style="display: inline; cursor: pointer; margin: 0; padding: 0;">Protocol Specifications</strong></summary>
 
