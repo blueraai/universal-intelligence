@@ -107,7 +107,7 @@ huggingface-cli login
 #### 🧠 Simple model
 
 ```python
-from universal_intelligence import Model # (or in the cloud) RemoteModel
+from universal_intelligence import Model # (or in the cloud) RemoteModel [free], PaidRemoteModel [paid, higher perf]
 
 model = Model() # (or in the cloud) RemoteModel(credentials='openrouter-api-key')
 result, logs = model.process("Hello, how are you?")
@@ -671,7 +671,7 @@ output, logs = model.process("How are you doing today?")
 #### Remote Models
 
 ```python
-from universal_intelligence.community.models.remote.default import UniversalModel as Model
+from universal_intelligence.community.models.remote.default import UniversalModel as Model # (or) .default__free
 
 model = Model(credentials='your-openrouter-api-key-here')
 output, logs = model.process("How are you doing today?")
@@ -753,6 +753,7 @@ result, logs = agent.process("Please print 'Hello World' to the console", extra_
 
 | I/O | Name | Import | Description | Provider |
 |------|------|------|-------------|-----------|
+| Text/Text | *deepseek/deepseek-r1:free* | `default__free` | DeepSeek R1 is here: Performance on par with [OpenAI o1](/openai/o1), but open-sourced and with fully open reasoning tokens. It's 671B parameters in size, with 37B active in an inference pass. Fully open-source model & [technical report](https://api-docs.deepseek.com/news/news250120). MIT licensed: Distill & commercialize freely! |  `openrouter` |
 | Text/Text | *openrouter/auto* | `default` (default) | Your prompt will be processed by a meta-model and routed to one of dozens of models (see below), optimizing for the best possible output. To see which model was used, visit [Activity](/activity), or read the `model` attribute of the response. Your response will be priced at the same rate as the routed model. The meta-model is powered by [Not Diamond](https://docs.notdiamond.ai/docs/how-not-diamond-works). Learn more in our [docs](/docs/model-routing). Requests will be routed to the following models:- [openai/gpt-4o-2024-08-06](/openai/gpt-4o-2024-08-06)- [openai/gpt-4o-2024-05-13](/openai/gpt-4o-2024-05-13)- [openai/gpt-4o-mini-2024-07-18](/openai/gpt-4o-mini-2024-07-18)- [openai/chatgpt-4o-latest](/openai/chatgpt-4o-latest)- [openai/o1-preview-2024-09-12](/openai/o1-preview-2024-09-12)- [openai/o1-mini-2024-09-12](/openai/o1-mini-2024-09-12)- [anthropic/claude-3.5-sonnet](/anthropic/claude-3.5-sonnet)- [anthropic/claude-3.5-haiku](/anthropic/claude-3.5-haiku)- [anthropic/claude-3-opus](/anthropic/claude-3-opus)- [anthropic/claude-2.1](/anthropic/claude-2.1)- [google/gemini-pro-1.5](/google/gemini-pro-1.5)- [google/gemini-flash-1.5](/google/gemini-flash-1.5)- [mistralai/mistral-large-2407](/mistralai/mistral-large-2407)- [mistralai/mistral-nemo](/mistralai/mistral-nemo)- [deepseek/deepseek-r1](/deepseek/deepseek-r1)- [meta-llama/llama-3.1-70b-instruct](/meta-llama/llama-3.1-70b-instruct)- [meta-llama/llama-3.1-405b-instruct](/meta-llama/llama-3.1-405b-instruct)- [mistralai/mixtral-8x22b-instruct](/mistralai/mixtral-8x22b-instruct)- [cohere/command-r-plus](/cohere/command-r-plus)- [cohere/command-r](/cohere/command-r) |  `openrouter` |
 | Text/Text | *01-ai/yi-large* | `yi_large` | The Yi Large model was designed by 01.AI with the following usecases in mind: knowledge search, data classification, human-like chat bots, and customer service. It stands out for its multilingual proficiency, particularly in Spanish, Chinese, Japanese, German, and French. Check out the [launch announcement](https://01-ai.github.io/blog/01.ai-yi-large-llm-launch) to learn more. |  `openrouter` |
 | Text/Text | *aetherwiing/mn-starcannon-12b* | `mn_starcannon_12b` | Starcannon 12B v2 is a creative roleplay and story writing model, based on Mistral Nemo, using [nothingiisreal/mn-celeste-12b](/nothingiisreal/mn-celeste-12b) as a base, with [intervitens/mini-magnum-12b-v1.1](https://huggingface.co/intervitens/mini-magnum-12b-v1.1) merged in using the [TIES](https://arxiv.org/abs/2306.01708) method. Although more similar to Magnum overall, the model remains very creative, with a pleasant writing style. It is recommended for people wanting more variety than Magnum, and yet more verbose prose than Celeste. |  `openrouter` |

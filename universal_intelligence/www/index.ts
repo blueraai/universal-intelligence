@@ -7,7 +7,8 @@ const UniversalIntelligence = {
 }
 
 export const Model = community.models.local.Model
-export const RemoteModel = community.models.remote.Model
+export const RemoteModel = community.models.remote.ModelFree
+export const PaidRemoteModel = community.models.remote.Model
 export const Tool = community.tools.Tool
 export const OtherTool = community.tools.Tool
 export const Agent = community.agents.Agent

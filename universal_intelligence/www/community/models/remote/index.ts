@@ -304,6 +304,7 @@ import { UniversalModel as Yi_large } from "./yi_large/model"
 
 const models = {
   Model: Auto, // Default
+  ModelFree: Deepseek_chat__free, // Default free
   Aion_1_0,
   Aion_1_0_mini,
   Aion_rp_llama_3_1_8b,
