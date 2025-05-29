@@ -82,19 +82,4 @@ export interface SourcesConfig{
   quantizations: Record<string, QuantizationInfo>;
 }
 
-// WebGPU type declarations
-
-declare global {
-  interface Navigator {
-    gpu?: {
-      requestAdapter: () => GPUAdapter | null;
-    };
-  }
-}
-
-interface GPUAdapter {
-  limits: {
-    maxBufferSize: number;
-    maxStorageBufferBindingSize: number;
-  };
-}
+// WebGPU types are now provided by @webgpu/types package

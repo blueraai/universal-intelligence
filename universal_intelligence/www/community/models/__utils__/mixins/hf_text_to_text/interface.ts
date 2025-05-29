@@ -1,3 +1,4 @@
+
 import { MLCEngine } from "@mlc-ai/web-llm"
 
 import { Logger, LogLevel } from '../../../../../community/__utils__/logger'
@@ -28,10 +29,52 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     if (deviceType === 'webgpu') {
       try {
         // Get WebGPU adapter and device
-        const adapter = await navigator.gpu?.requestAdapter()
+        // Request high-performance GPU to ensure we get the discrete GPU on multi-GPU systems
+        // See: https://developer.mozilla.org/en-US/docs/Web/API/GPU/requestAdapter
+        let adapter: GPUAdapter | null = null
+        
+        try {
+          // Try to request high-performance adapter
+          // This helps select discrete GPUs over integrated ones on multi-GPU systems
+          if (navigator.gpu) {
+            adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' })
+          }
+        } catch (e) {
+          this._logger.warn('[GPU Selection] Error requesting high-performance adapter:', e)
+        }
+        
+        // Fallback to default adapter if high-performance request fails
+        if (!adapter && navigator.gpu) {
+          this._logger.warn('[GPU Selection] High-performance adapter not available, trying default adapter')
+          adapter = await navigator.gpu.requestAdapter()
+        }
+        
         if (!adapter) {
           this._logger.error('[Unsupported Browser] WebGPU is not supported in this browser, please try a different browser (e.g. Chrome).')
           return 0
+        }
+
+        // Log adapter info to help debug GPU selection
+        // Note: requestAdapterInfo might not be available in all implementations
+        try {
+          if ('requestAdapterInfo' in adapter && typeof (adapter as any).requestAdapterInfo === 'function') {
+            const adapterInfo = await (adapter as any).requestAdapterInfo()
+            this._logger.log(`[GPU Selection] Using adapter: ${adapterInfo.vendor} ${adapterInfo.architecture || ''} (${adapterInfo.description || 'No description'})`)
+            
+            // Also log the device ID if available to help debug multi-GPU issues
+            if (adapterInfo.device) {
+              this._logger.log(`[GPU Selection] Device ID: ${adapterInfo.device}`)
+            }
+          } else {
+            this._logger.log('[GPU Selection] Adapter info not available in this browser')
+          }
+          
+          // Log all available adapters if possible to debug multi-GPU selection
+          if (navigator.gpu && 'getPreferredCanvasFormat' in navigator.gpu) {
+            this._logger.debug('[GPU Selection] Note: Unable to enumerate all adapters - WebGPU API limitation')
+          }
+        } catch (e) {
+          this._logger.debug('[GPU Selection] Could not get adapter info:', e)
         }
 
         // Get adapter limits
@@ -40,10 +83,23 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
           this._logger.error('[Memory] WebGPU adapter limits are not available')
           return 0
         }
+        
+        // Log the actual limits for debugging
+        // Note: WebGPU spec defines a baseline maxBufferSize of 256MB with higher tier limits
+        // See: https://github.com/gpuweb/gpuweb/issues/1371 (initial discussion)
+        // See: https://github.com/gpuweb/gpuweb/pull/1802 (final limits: 256MB/1GB/2GB tiers)
+        // This conservative limit ensures compatibility across all target platforms including mobile
+        // See: https://github.com/gpuweb/gpuweb/issues/1069 (platform requirements)
+        // Applications can request higher limits via requestDevice() but web-llm doesn't expose this
+        // The 2GB limit you're seeing is likely a browser-specific implementation choice
+        this._logger.log(`[GPU Limits] maxBufferSize: ${limits.maxBufferSize} (${(limits.maxBufferSize / (1024 * 1024 * 1024)).toFixed(2)}GB)`)
+        this._logger.log(`[GPU Limits] maxStorageBufferBindingSize: ${limits.maxStorageBufferBindingSize} (${(limits.maxStorageBufferBindingSize / (1024 * 1024 * 1024)).toFixed(2)}GB)`)
 
         // For WebGPU, we'll use a combination of:
-        // 1. The maximum buffer size limits
+        // 1. The maximum buffer size limits (capped at 2GB by default in WebGPU spec)
         // 2. A conservative estimate based on system memory
+        // TODO: To use models larger than 2GB, web-llm would need to request higher limits
+        // via adapter.requestDevice({ requiredLimits: { maxBufferSize: desiredSize } })
         const maxBufferSize = limits.maxBufferSize || 0
         const maxStorageBufferBindingSize = limits.maxStorageBufferBindingSize || 0
         

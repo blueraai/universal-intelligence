@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["universal_intelligence/www/*"]
-    }
+    },
+    "types": ["@webgpu/types"]
   },
   "include": ["universal_intelligence/www/**/*.ts", "vite.config.ts"],
   "exclude": ["node_modules"]
