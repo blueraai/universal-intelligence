@@ -1,0 +1,17 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+.github/ISSUE_TEMPLATE/
+.github/FUNDING.yml
+.vscode
+package-lock.json
+*repomix*
+universal_intelligence/community/models/local/
+universal_intelligence/community/models/remote/
+universal_intelligence/www/community/models/local/
+universal_intelligence/www/community/models/remote/
+CODE_OF_CONDUCT.md
+SECURITY.md
+LICENSE.md
+universal-intelligence-repo-summary.*
