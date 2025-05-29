@@ -87,7 +87,7 @@ export interface SourcesConfig{
 declare global {
   interface Navigator {
     gpu?: {
-      requestAdapter: () => GPUAdapter | null;
+      requestAdapter: (options?: { powerPreference?: 'high-performance' }) => GPUAdapter | null;
     };
   }
 }

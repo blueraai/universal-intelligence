@@ -28,7 +28,13 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
     if (deviceType === 'webgpu') {
       try {
         // Get WebGPU adapter and device
-        const adapter = await navigator.gpu?.requestAdapter()
+        let adapter = await navigator.gpu?.requestAdapter({ powerPreference: 'high-performance' })
+
+        if (!adapter) {
+          this._logger.error('[Memory] Could not request high-performance WebGPU adapter, falling back to default adapter..')
+          adapter = await navigator.gpu?.requestAdapter()
+        }
+
         if (!adapter) {
           this._logger.error('[Unsupported Browser] WebGPU is not supported in this browser, please try a different browser (e.g. Chrome).')
           return 0
@@ -233,7 +239,14 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
         }
 
         if (!this._quantization) {
-          throw new Error(`No quantization with minimum 4-bit precision found that fits within ${this._usableMemory * 100}% of the available memory (${availableMemory.toFixed(2)}GB)`)
+          if (!this._config?.disableMemorySafety) {
+            throw new Error(`No quantization with minimum 4-bit precision found that fits within ${this._usableMemory * 100}% of the available memory (${availableMemory.toFixed(2)}GB)`)
+          } else {
+            this._logger.warn(`[Assessment] No quantization with minimum 4-bit precision found that fits within ${this._usableMemory * 100}% of the available memory (${availableMemory.toFixed(2)}GB)`)
+            const [quant, source] = quantizations[0]
+            this._quantization = quant
+            this._logger.log(`[Decision] Disabling memory safety check and falling back to attemtping to use quantization '${quant}' with ${source.precision}-bit precision (requiring ${source.memory}GB) through split-allocation`)
+          }
         }
       }
     } else if (typeof quantization === 'string') {
@@ -245,7 +258,12 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       const requiredMemory = deviceSources[quantization].memory
       const availableMemory = await this._getAvailableMemory(deviceType) * this._usableMemory
       if (requiredMemory > availableMemory) {
-        throw new Error(`Specified quantization '${quantization}' requires ${requiredMemory}GB but only ${availableMemory.toFixed(2)}GB is available`)
+        if (!this._config?.disableMemorySafety) {
+          throw new Error(`Specified quantization '${quantization}' requires ${requiredMemory}GB but only ${availableMemory.toFixed(2)}GB is available`)
+        } else {
+          this._logger.warn(`[Assessment] Specified quantization '${quantization}' requires ${requiredMemory}GB but only ${availableMemory.toFixed(2)}GB is available`)
+          this._logger.log(`[Decision] Disabling memory safety check and falling back to attemtping to use quantization '${quantization}' with ${deviceSources[quantization].precision}-bit precision (requiring ${deviceSources[quantization].memory}GB) through split-allocation`)
+        }
       }
       this._quantization = quantization
       this._logger.log(`[Memory Check] Quantization '${quantization}' fits within available memory (requires ${requiredMemory}GB, available ${availableMemory.toFixed(2)}GB)`)
@@ -265,7 +283,21 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
         }
       }
       if (!this._quantization) {
-        throw new Error(`No quantization from the provided list ${quantization} fits within available memory (${availableMemory.toFixed(2)}GB) for ${deviceType}`)
+        if (!this._config?.disableMemorySafety) {
+          throw new Error(`No quantization from the provided list ${quantization} fits within available memory (${availableMemory.toFixed(2)}GB) for ${deviceType}`)
+        } else {
+          this._logger.warn(`[Assessment] No quantization from the provided list ${quantization} fits within available memory (${availableMemory.toFixed(2)}GB) for ${deviceType}`)
+          for (const quant of quantization) {
+            if (quant in deviceSources) {
+              this._quantization = quant
+              this._logger.log(`[Decision] Disabling memory safety check and falling back to attemtping to use quantization '${quant}' from provided list through split-allocation`)
+              break
+            }
+          }
+          if (!this._quantization) {
+            throw new Error(`No compatible quantization found int the provided list ${quantization}`)
+          }
+        }
       }
     } else {
       this._logger.log("[Quantization Selection] Using QuantizationSettings configuration")
@@ -318,7 +350,21 @@ export abstract class UniversalModelMixin extends AbstractUniversalModel {
       }
 
       if (!this._quantization) {
-        throw new Error(`No quantization found with precision between ${minPrecision} and ${maxPrecision} bits that fits within ${this._usableMemory * 100}% of the available memory (${availableMemory.toFixed(2)}GB)`)
+        if (!this._config?.disableMemorySafety) {
+          throw new Error(`No quantization found with precision between ${minPrecision} and ${maxPrecision} bits that fits within ${this._usableMemory * 100}% of the available memory (${availableMemory.toFixed(2)}GB)`)
+        } else {
+          this._logger.warn(`[Assessment] No quantization found with precision between ${minPrecision} and ${maxPrecision} bits that fits within ${this._usableMemory * 100}% of the available memory (${availableMemory.toFixed(2)}GB)`)
+          for (const [quant, source] of quantizations) {
+            if (minPrecision <= source.precision && source.precision <= maxPrecision) {
+              this._quantization = quant
+              this._logger.log(`[Decision] Disabling memory safety check and falling back to attemtping to use quantization '${quant}' from provided configuration through split-allocation`)
+              break
+            }
+          }
+          if (!this._quantization) {
+            throw new Error(`No compatible quantization found int the provided configuration`)
+          }
+        }
       }
     }
 

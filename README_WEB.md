@@ -249,7 +249,8 @@ const model = new Model({
     //     torch_dtype="auto"
     //     device_map="auto"
     //     ...
-    // }
+    // },
+    // "disableMemorySafety": false
   },
   verbose: true // (or) string describing the log level
 })
@@ -1124,7 +1125,7 @@ This software is open source, free for everyone, and lives on thanks to the comm
 If you'd like to support to `universal-intelligence` here are a few ways to do so:
 
 - ⭐ Consider leaving a star on this repository to support our team & help with visibility
-- 👽 Tell your friends and collegues
+- 👽 Tell your friends and colleagues
 - 📰 Support this project on social medias (e.g. LinkedIn, Youtube, Medium, Reddit)
 - ✅ Adopt the `⚪ Universal Intelligence` specification
 - 💪 Use the [Community Components](https://www.npmjs.com/package/universalintelligence)
