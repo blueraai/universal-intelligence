@@ -55,7 +55,7 @@ UIN is a protocol aiming to standardize, simplify and modularize these fundament
 
 It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
 
-UIN also provides a set of **ready-made components and [playgrounds](https://colab.research.google.com/drive/1pZePgqRJq2hb29OzNfYo0diAIlpEuGeb?usp=sharing)** for you to get familiar with the protocol and start building in seconds.
+UIN also provides a set of **ready-made components and [playgrounds](https://colab.research.google.com/drive/19RasWzFIZkbHeWDLGk9s2Tq8_Ws2G4O_?usp=sharing)** for you to get familiar with the protocol and start building in seconds.
 
 ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` can be used across **all platforms** (cloud, desktop, web, mobile).
 
@@ -93,7 +93,7 @@ For example, UIN models are designed to automatically detect the current hardwar
 
 ## Get Started
 
-> An online [**Google Colab Playground**](https://colab.research.google.com/drive/1pZePgqRJq2hb29OzNfYo0diAIlpEuGeb?usp=sharing) is now available to help introduce you to making AI applications using **Universal Intelligence**! ⚡
+> An online [**Google Colab Playground**](https://colab.research.google.com/drive/19RasWzFIZkbHeWDLGk9s2Tq8_Ws2G4O_?usp=sharing) is now available to help introduce you to making AI applications using **Universal Intelligence**! ⚡
 
 Get familiar with the composable building blocks, using the default **community components**.
 
@@ -163,7 +163,7 @@ Preview:
 
 #### Online
 
-An online [**Google Colab Playground**](https://colab.research.google.com/drive/1pZePgqRJq2hb29OzNfYo0diAIlpEuGeb?usp=sharing) is now available!
+An online [**Google Colab Playground**](https://colab.research.google.com/drive/19RasWzFIZkbHeWDLGk9s2Tq8_Ws2G4O_?usp=sharing) is now available!
 
 #### Local
 
