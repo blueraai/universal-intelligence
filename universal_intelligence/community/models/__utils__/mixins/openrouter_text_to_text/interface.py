@@ -145,7 +145,7 @@ class UniversalModelMixin(AbstractUniversalModel):
 
         return result
 
-    def process(self, input: str | list[Message], context: list[Any] | None = None, configuration: dict | None = None, remember: bool = False) -> tuple[Any, dict]:
+    def process(self, input: str | list[Message], context: list[Any] | None = None, configuration: dict | None = None, remember: bool = False, keep_alive: bool = False, stream: bool = False) -> tuple[Any, dict]:
         """Process input through the model."""
         with Logger(self._log_level) as logger:
             logger.print(message=f"* Invoking remote model.. ({self.name}) *\n", color=Color.WHITE)
