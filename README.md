@@ -663,6 +663,8 @@ You can get familiar with the library using our ready-made playground
 python -m playground.example 
 ```
 
+or online using our [**Google Colab Playground**](https://colab.research.google.com/drive/19RasWzFIZkbHeWDLGk9s2Tq8_Ws2G4O_?usp=sharing)!
+
 ### Usage
 
 #### Local Models
