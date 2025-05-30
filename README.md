@@ -93,7 +93,7 @@ For example, UIN models are designed to automatically detect the current hardwar
 
 ## Get Started
 
-> An online [**Google Colab Playground**](https://colab.research.google.com/drive/1pZePgqRJq2hb29OzNfYo0diAIlpEuGeb?usp=sharing) is now available to help introduce you to making AI applications using **◉ Universal Intelligence**! ⚡
+> An online [**Google Colab Playground**](https://colab.research.google.com/drive/1pZePgqRJq2hb29OzNfYo0diAIlpEuGeb?usp=sharing) is now available to help introduce you to making AI applications using **Universal Intelligence**! ⚡
 
 Get familiar with the composable building blocks, using the default **community components**.
 
