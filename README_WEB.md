@@ -134,9 +134,9 @@ import { Model, Tool, Agent, OtherAgent } from "universalintelligence"
 
 const agent = new Agent(
   // {
-  //    model: Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
-  //    expandTools: [Tool()],          // expand 🔧 set
-  //    expandTeam: [OtherAgent()]      // expand 🤖 team
+  //    model: new Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    expandTools: [new Tool()],          // expand 🔧 set
+  //    expandTeam: [new OtherAgent()]      // expand 🤖 team
   // }
 )
 const [result, logs] = await agent.process("Please print 'Hello World' to the console", { extraTools: [Tool()] })
@@ -289,7 +289,7 @@ const [result, logs] = await model.process(
 
 ```js
 import Model from "<provider>"
-const model = Model()
+const model = new Model()
 
 // Optional 
 await model.load() // loads the model in memory (otherwise automatically loaded/unloaded on execution of `.process()`)
@@ -308,7 +308,7 @@ Model.compatibility()  // Compatibility
 ```js
 import Tool from "<provider>"
 
-const tool = Tool(
+const tool = new Tool(
   // { "any": "configuration" }
 )
 const [result, logs] = tool.exampleTask(data) // (or async)
@@ -331,9 +331,9 @@ import Agent from "<provider>"
 
 const agent = new Agent(
   // {
-  //    model: Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
-  //    expandTools: [Tool()],          // expand 🔧 set
-  //    expandTeam: [OtherAgent()]      // expand 🤖 team
+  //    model: new Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    expandTools: [new Tool()],          // expand 🔧 set
+  //    expandTeam: [new OtherAgent()]      // expand 🤖 team
   // }
 )
 const [result, logs] = await agent.process('What happened on Friday?') // > (tool call) > 'Friday was your birthday!'
@@ -365,9 +365,9 @@ import Tool from "<provider>"
 // and scaling at virtually no cost.
 const agent = new Agent({
   credentials: '<token>', // (or) object containing credentials eg. { id: 'example', passkey: 'example' }
-  model: Model(), // see Universal Model API for customizations
-  expandTools: [Tool()], // see Universal Tool API for customizations
-  expandTeam:[OtherAgent()],  // see Universal Agent API for customizations
+  model: new Model(), // see Universal Model API for customizations
+  expandTools: [new Tool()], // see Universal Tool API for customizations
+  expandTeam:[new OtherAgent()],  // see Universal Agent API for customizations
   configuration: {
     // agent configuration (eg. guardrails, behavior, tracing)
   },
@@ -398,8 +398,8 @@ const [result, logs] = await agent.process(
     },
     remember: true, // remember this interaction
     stream: false, // stream output asynchronously
-    extraTools: [Tool()], // extra tools available for this inference; call `agent.connect()` link during initiation to persist them
-    extraTeam: [OtherAgent()],  // extra agents available for this inference; call `agent.connect()` link during initiation to persist them
+    extraTools: [new Tool()], // extra tools available for this inference; call `agent.connect()` link during initiation to persist them
+    extraTeam: [new OtherAgent()],  // extra agents available for this inference; call `agent.connect()` link during initiation to persist them
     keepAlive: true // keep model loaded after processing the request
   }
 ) 
@@ -417,9 +417,9 @@ import Agent from "<provider>"
 import OtherAgent from "<other_provider>"
 import Model from "<provider>"
 import Tool from "<provider>" // e.g. API, database
-const agent = Agent()
-const otherAgent = OtherAgent()
-const tool = Tool()
+const agent = new Agent()
+const otherAgent = new OtherAgent()
+const tool = new Tool()
 
 // Optional 
 await agent.load() // loads the agent's model in memory (otherwise automatically loaded/unloaded on execution of `.process()`)
@@ -682,9 +682,9 @@ const Agent = universalintelligence.community.agents.Agent
 
 const agent = new Agent(
   // {
-  //    model: Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
-  //    expandTools: [Tool()],          // expand 🔧 set
-  //    expandTeam: [OtherAgent()]      // expand 🤖 team
+  //    model: new Model(),                 // customize or share 🧠 across [🤖,🤖,🤖,..]
+  //    expandTools: [new Tool()],          // expand 🔧 set
+  //    expandTeam: [new OtherAgent()]      // expand 🤖 team
   // }
 )
 const [result, logs] = await agent.process("Please print 'Hello World' to the console", { extraTools: [Tool()] })
