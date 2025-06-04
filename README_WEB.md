@@ -57,7 +57,7 @@ UIN is a protocol aiming to standardize, simplify and modularize these fundament
 
 It provides three specifications: `Universal Model`, `Universal Tool`, and `Universal Agent`.
 
-UIN also provides a set of **ready-made components and playgrounds** for you to get familiar with the protocol and start building in seconds.
+UIN also provides a set of **ready-made components and [playgrounds](https://codepen.io/bluera/pen/dPoNNEz)** for you to get familiar with the protocol and start building in seconds.
 
 ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` can be used across **all platforms** (cloud, desktop, web, mobile).
 
@@ -94,6 +94,7 @@ For example, UIN models are designed to automatically detect the current hardwar
 
 ## Get Started 
 
+> An online [**CodePen Playground**](https://codepen.io/bluera/pen/dPoNNEz) is now available to help introduce you to making AI applications using **Universal Intelligence**! ⚡
 
 Get familiar with the composable building blocks, using the default **community components**.
 
@@ -143,6 +144,12 @@ const [result, logs] = await agent.process("Please print 'Hello World' to the co
 ```
 
 ### Playground
+
+#### Online
+
+An online [**CodePen Playground**](https://codepen.io/bluera/pen/dPoNNEz) is now available!
+
+#### Local
 
 A ready-made playground is available to help familiarize yourself with the protocols and components.
 
@@ -1045,7 +1052,7 @@ const [result, logs] = await agent.process("Please print 'Hello World' to the co
 |------|------|-------------|-----------|
 | *Simple Printer* | `SimplePrinter` | Prints a given text to the console | `prefix?: string`: Optional prefix for log messages |
 | *Simple Error Generator* | `SimpleErrorGenerator` | Raises an error with optional custom message | `prefix?: string`: Optional prefix for error messages |
-| *API Caller* | `ApiCaller` | Makes HTTP requests to configured API endpoints | `url: string`: URL for the API<br>`method?: string`: HTTP method (GET, POST, PUT, DELETE, PATCH)<br>`body?: object`: Request body for POST/PUT/PATCH requests<br>`params?: object`: Query parameters<br>`headers?: object`: Additional headers to include<br>`timeout?: number`: Request timeout in seconds |
+| *API Caller* | `APICaller` | Makes HTTP requests to configured API endpoints | `url: string`: URL for the API<br>`method?: string`: HTTP method (GET, POST, PUT, DELETE, PATCH)<br>`body?: object`: Request body for POST/PUT/PATCH requests<br>`params?: object`: Query parameters<br>`headers?: object`: Additional headers to include<br>`timeout?: number`: Request timeout in seconds |
 
 #### Agents
 

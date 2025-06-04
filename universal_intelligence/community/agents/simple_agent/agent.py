@@ -355,6 +355,11 @@ When tools ARE needed:
 DO NOT invent or use tools that are not listed in the capabilities below.
 DO NOT answer the query.
 DO NOT explain your reasoning.
+DO NOT use any other tools than the ones listed in the capabilities below.
+DO NOT use any other agents than the ones listed in the capabilities below.
+DO NOT include any other text than the YAML list of tools to use in order along with their arguments.
+DO NOT include specify that the output is in YAML format, just return the YAML list with no starting / ending indicators or delimiters.
+DO NOT include backticks or indicator that the output is in YAML format.
 ONLY return the list of tools to use in order along with their arguments, in a YAML format.
 Make sure to prefix the dependency_type with `-` to indicate it's a list item.
 
