@@ -59,6 +59,8 @@ UIN also provides a set of **ready-made components and [playgrounds](https://col
 
 ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` can be used across **all platforms** (cloud, desktop, web, mobile).
 
+> *See next*: [How to make a simple AI application](https://medium.com/@victor_bluera/how-to-make-a-simple-ai-application-faec90499359) 📖
+
 </details>
 
 <details>
@@ -93,6 +95,7 @@ For example, UIN models are designed to automatically detect the current hardwar
 
 ## Get Started
 
+> [!TIP]
 > An online [**Google Colab Playground**](https://colab.research.google.com/drive/19RasWzFIZkbHeWDLGk9s2Tq8_Ws2G4O_?usp=sharing) is now available to help introduce you to making AI applications using **Universal Intelligence**! ⚡
 
 Get familiar with the composable building blocks, using the default **community components**.
@@ -115,6 +118,7 @@ model = Model() # (or in the cloud) RemoteModel(credentials='openrouter-api-key'
 result, logs = model.process("Hello, how are you?")
 ```
 
+> [!NOTE]
 > Models may run locally or in the cloud.
 > 
 > See *Documentation>Community Components>Remote Models* for details.
@@ -175,6 +179,7 @@ python -m playground.example
 
 ## Documentation
 
+> [!TIP]
 > Would you rather [**chat with our docs**](https://wiki.bluera.ai)? 💬
 > 
 > *Note: AI responses may include mistakes. Refer to the documentation below for sample code.*

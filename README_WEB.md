@@ -25,9 +25,6 @@ Learn more by clicking the most appropriate option for you:
 
 <br>
 
-> [!TIP]
-> We made an introduction guide for you! See [How to make a simple AI application](https://medium.com/@victor_bluera/how-to-make-a-simple-ai-application-faec90499359) 📖
-
 Welcome! Before jumping into what this project is, let's start with the basics.
 
 #### What is an agentic app?
@@ -63,6 +60,8 @@ It provides three specifications: `Universal Model`, `Universal Tool`, and `Univ
 UIN also provides a set of **ready-made components and [playgrounds](https://codepen.io/bluera/pen/dPoNNEz)** for you to get familiar with the protocol and start building in seconds.
 
 ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-python-16.png) ![lng_icon](https://fasplnlepuuumfjocrsu.supabase.co/storage/v1/object/public/web-assets//icons8-javascript-16.png) `Universal Intelligence` can be used across **all platforms** (cloud, desktop, web, mobile).
+
+> *See next*: [How to make a simple AI application](https://medium.com/@victor_bluera/how-to-make-a-simple-ai-application-faec90499359) 📖
 
 </details>
 
@@ -120,7 +119,7 @@ const [result, logs] = await model.process("Hello, how are you?")
 ```
 
 > [!NOTE]
-> Models may run locally or in the cloud.
+> Models may run locally or in the cloud (recommended on the web).
 > 
 > See *Documentation>Community Components>Remote Models* for details.
 
