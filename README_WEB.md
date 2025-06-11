@@ -25,7 +25,7 @@ Learn more by clicking the most appropriate option for you:
 
 <br>
 
-> [!IMPORTANT]
+> [!TIP]
 > We made an introduction guide for you! See [How to make a simple AI application](https://medium.com/@victor_bluera/how-to-make-a-simple-ai-application-faec90499359) 📖
 
 Welcome! Before jumping into what this project is, let's start with the basics.
