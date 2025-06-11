@@ -25,6 +25,9 @@ Learn more by clicking the most appropriate option for you:
 
 <br>
 
+> [!IMPORTANT]
+> We made an introduction guide for you! See [How to make a simple AI application](https://medium.com/@victor_bluera/how-to-make-a-simple-ai-application-faec90499359) 📖
+
 Welcome! Before jumping into what this project is, let's start with the basics.
 
 #### What is an agentic app?
@@ -92,8 +95,9 @@ For example, UIN models are designed to automatically detect the current hardwar
 
 </details>
 
-## Get Started 
+## Get Started
 
+> [!TIP]
 > An online [**CodePen Playground**](https://codepen.io/bluera/pen/dPoNNEz) is now available to help introduce you to making AI applications using **Universal Intelligence**! ⚡
 
 Get familiar with the composable building blocks, using the default **community components**.
@@ -115,6 +119,7 @@ const model = new Model() // (or in the cloud) new RemoteModel({ credentials: 'o
 const [result, logs] = await model.process("Hello, how are you?")
 ```
 
+> [!NOTE]
 > Models may run locally or in the cloud.
 > 
 > See *Documentation>Community Components>Remote Models* for details.
@@ -163,6 +168,7 @@ Open in Chrome: `http://localhost:8000/playground/web`
 
 ## Documentation
 
+> [!TIP]
 > Would you rather [**chat with our docs**](https://wiki.bluera.ai)? 💬
 > 
 > *Note: AI responses may include mistakes. Refer to the documentation below for sample code.*
